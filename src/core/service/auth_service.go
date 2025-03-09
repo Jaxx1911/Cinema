@@ -5,7 +5,6 @@ import (
 	"TTCS/src/common/configs"
 	"TTCS/src/common/jwt"
 	"TTCS/src/core/domain"
-	"TTCS/src/infra/repo"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
 	"context"
@@ -14,9 +13,17 @@ import (
 )
 
 type AuthService struct {
-	authRepo     *repo.AuthRepo
-	userRepo     *repo.UserRepo
+	authRepo     domain.AuthRepo
+	userRepo     domain.UserRepo
 	hashProvider jwt.HashProvider
+}
+
+func NewAuthService(authRepo domain.AuthRepo, userRepo domain.UserRepo, hashProvider jwt.HashProvider) *AuthService {
+	return &AuthService{
+		authRepo:     authRepo,
+		userRepo:     userRepo,
+		hashProvider: hashProvider,
+	}
 }
 
 func (s *AuthService) Login(ctx context.Context, req request.LoginRequest) (*response.Token, *domain.User, *common.Error) {
@@ -35,14 +42,6 @@ func (s *AuthService) Login(ctx context.Context, req request.LoginRequest) (*res
 		return nil, nil, common.ErrBadRequest(ctx).SetDetail(fmt.Sprintf("[%v] failed to gen token", caller))
 	}
 	return jwtToken, user, nil
-}
-
-func NewAuthService(authRepo *repo.AuthRepo, userRepo *repo.UserRepo, hashProvider jwt.HashProvider) *AuthService {
-	return &AuthService{
-		authRepo:     authRepo,
-		userRepo:     userRepo,
-		hashProvider: hashProvider,
-	}
 }
 
 func (s *AuthService) generateToken(ctx context.Context, user *domain.User) (*response.Token, error) {

@@ -12,7 +12,7 @@ type RedisCache struct {
 	c *redis.Client
 }
 
-func NewRedisClient() *redis.Client {
+func NewRedisClient() *RedisCache {
 	redisConfigs := configs.GetConfig().Redis
 	client := redis.NewClient(&redis.Options{
 		Addr:     redisConfigs.Address,
@@ -23,7 +23,9 @@ func NewRedisClient() *redis.Client {
 	if err != nil {
 		log.Fatal("ping redis error, err:[%s]", err.Error())
 	}
-	return client
+	return &RedisCache{
+		c: client,
+	}
 }
 
 func (r *RedisCache) Set(key string, value interface{}, expiration time.Duration) error {

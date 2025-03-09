@@ -13,7 +13,7 @@ type IRouter struct {
 	fx.In
 	Engine *gin.Engine
 	//controller
-	AuthController controller.AuthController
+	AuthController *controller.AuthController
 }
 
 func RegisterHandler(engine *gin.Engine) {
