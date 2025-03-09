@@ -1,0 +1,21 @@
+mode: dev
+
+server:
+  name: HN_Cinema_Backend
+  address: :8000
+  prefix: api
+
+postgres:
+  host: localhost
+  port: 5432
+  user: root
+  password: root
+  db: cinema
+  ssl_mode: disable
+  auto_migrate: false
+  max_life_time: 300
+
+redis:
+  address: localhost:6379
+  password:
+  db: 0
