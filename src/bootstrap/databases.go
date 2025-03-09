@@ -4,6 +4,7 @@ import (
 	"TTCS/src/common/configs"
 	"TTCS/src/common/log"
 	"TTCS/src/infra/cache"
+	"TTCS/src/infra/repo"
 	"context"
 	"fmt"
 	"go.uber.org/fx"
@@ -16,6 +17,9 @@ func BuildDatabasesModule() fx.Option {
 	return fx.Options(
 		fx.Provide(NewPostgresDB),
 		fx.Provide(cache.NewRedisClient),
+		fx.Provide(repo.NewBaseRepo),
+		fx.Provide(repo.NewAuthRepo),
+		fx.Provide(repo.NewUserRepo),
 	)
 }
 

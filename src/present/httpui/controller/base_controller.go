@@ -30,6 +30,10 @@ func (b *BaseController) Error(c *gin.Context, err *common.Error) {
 	c.JSON(err.GetHttpStatus(), err)
 }
 
+func (b *BaseController) Redirect(c *gin.Context, url string) {
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
 func (b *BaseController) BindAndValidateRequest(c *gin.Context, req interface{}) *common.Error {
 	if err := c.BindUri(req); err != nil {
 		log.Warn(c, "bind request err, err:[%s]", err)

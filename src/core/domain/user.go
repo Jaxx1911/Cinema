@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"TTCS/src/common"
+	"context"
+	"time"
+)
 
 type User struct {
 	ID        uint      `gorm:"primaryKey"`
@@ -15,7 +19,11 @@ type User struct {
 	Orders []Order `gorm:"foreignKey:UserID"`
 }
 
-type UserRepository interface {
+type UserRepo interface {
+	Create(ctx context.Context, user *User) *common.Error
+	GetList(ctx context.Context) ([]*User, *common.Error)
+	GetById(ctx context.Context, id uint) (*User, *common.Error)
+	GetByEmail(ctx context.Context, email string) (*User, *common.Error)
 }
 
 func (*User) TableName() string {

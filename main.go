@@ -35,8 +35,11 @@ func init() {
 func main() {
 	log.Debug(context.Background(), "App %s is running", configs.GetConfig().Mode)
 	app := fx.New(
+		bootstrap.BuildCrypto(),
 		bootstrap.BuildDatabasesModule(),
 		bootstrap.BuildHTTPServerModule(),
+		bootstrap.BuildServices(),
+		bootstrap.BuildControllers(),
 	)
 	startContext, cancel := context.WithTimeout(context.Background(), defaultGracefulTimeout)
 	defer cancel()

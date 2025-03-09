@@ -10,6 +10,12 @@ type Config struct {
 		Address string `mapstructure:"address"`
 		Prefix  string `mapstructure:"prefix"`
 	} `mapstructure:"server"`
+	Jwt struct {
+		AccessSecret  string `mapstructure:"access_secret"`
+		ExpireAccess  int64  `mapstructure:"expire_access"`
+		RefreshSecret string `mapstructure:"refresh_secret"`
+		ExpireRefresh int64  `mapstructure:"expire_refresh"`
+	} `mapstructure:"jwt"`
 	Postgres struct {
 		Host        string `mapstructure:"host"`
 		Port        string `mapstructure:"port"`
