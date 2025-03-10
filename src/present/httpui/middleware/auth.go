@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"TTCS/src/common"
+	"TTCS/src/common/fault"
 	"TTCS/src/common/log"
 	"TTCS/src/present/httpui/controller"
 	"fmt"
@@ -18,7 +18,7 @@ func NewAuthMiddleware(baseController *controller.BaseController) *AuthMiddlewar
 	}
 }
 
-func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
+func (a *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		caller := "AuthMiddleware.RequireAuth"
@@ -27,7 +27,7 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		if token == "" {
 			err := fmt.Errorf("[%v] token is empty", caller)
 			log.Error(ctx, err.Error())
-			m.Error(c, common.ErrUnauthorized(c))
+			a.ServeErrResponse(c, fault.Wrapf(err, "[%v] token is empty", caller))
 		}
 	}
 }

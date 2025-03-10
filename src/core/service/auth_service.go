@@ -1,45 +1,41 @@
 package service
 
 import (
-	"TTCS/src/common"
 	"TTCS/src/common/configs"
-	"TTCS/src/common/jwt"
+	"TTCS/src/common/crypto"
+	"TTCS/src/common/fault"
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
 	"context"
-	"fmt"
-	"strconv"
 )
 
 type AuthService struct {
-	authRepo     domain.AuthRepo
 	userRepo     domain.UserRepo
-	hashProvider jwt.HashProvider
+	hashProvider crypto.HashProvider
 }
 
-func NewAuthService(authRepo domain.AuthRepo, userRepo domain.UserRepo, hashProvider jwt.HashProvider) *AuthService {
+func NewAuthService(userRepo domain.UserRepo, hashProvider crypto.HashProvider) *AuthService {
 	return &AuthService{
-		authRepo:     authRepo,
 		userRepo:     userRepo,
 		hashProvider: hashProvider,
 	}
 }
 
-func (s *AuthService) Login(ctx context.Context, req request.LoginRequest) (*response.Token, *domain.User, *common.Error) {
+func (s *AuthService) Login(ctx context.Context, req request.LoginRequest) (*response.Token, *domain.User, error) {
 	caller := "AuthService.Login"
 
 	user, err := s.userRepo.GetByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, nil, err
 	}
-	ierr := s.hashProvider.ComparePassword(req.Password, user.Auth.PasswordHash)
-	if ierr != nil {
-		return nil, nil, common.ErrBadRequest(ctx).SetDetail(fmt.Sprintf("[%v] wrong password", caller))
+	err = s.hashProvider.ComparePassword(req.Password, user.PasswordHash)
+	if err != nil {
+		return nil, nil, fault.Wrapf(err, "[%v] wrong password", caller).SetTag(fault.TagUnAuthorize)
 	}
-	jwtToken, ierr := s.generateToken(ctx, user)
-	if ierr != nil {
-		return nil, nil, common.ErrBadRequest(ctx).SetDetail(fmt.Sprintf("[%v] failed to gen token", caller))
+	jwtToken, err := s.generateToken(ctx, user)
+	if err != nil {
+		return nil, nil, fault.Wrapf(err, "[%v] failed to generate token", caller).SetTag(fault.TagBadRequest)
 	}
 	return jwtToken, user, nil
 }
@@ -47,18 +43,18 @@ func (s *AuthService) Login(ctx context.Context, req request.LoginRequest) (*res
 func (s *AuthService) generateToken(ctx context.Context, user *domain.User) (*response.Token, error) {
 	caller := "AuthService.generateToken"
 
-	payload := jwt.Payload{
-		Id:       strconv.FormatUint(uint64(user.ID), 10),
+	payload := crypto.Payload{
+		Id:       user.ID.String(),
 		Username: user.Email,
 	}
 
-	accessToken, err := jwt.Generate(configs.GetConfig().Jwt.AccessSecret, payload, configs.GetConfig().Jwt.ExpireAccess)
+	accessToken, err := crypto.Generate(configs.GetConfig().Jwt.AccessSecret, payload, configs.GetConfig().Jwt.ExpireAccess)
 	if err != nil {
-		return nil, common.ErrBadRequest(ctx).SetDetail(fmt.Sprintf("[%v] failed to gen token", caller))
+		return nil, fault.Wrapf(err, "[%v] failed to gen token", caller)
 	}
-	refreshToken, err := jwt.Generate(configs.GetConfig().Jwt.RefreshSecret, payload, configs.GetConfig().Jwt.ExpireRefresh)
+	refreshToken, err := crypto.Generate(configs.GetConfig().Jwt.RefreshSecret, payload, configs.GetConfig().Jwt.ExpireRefresh)
 	if err != nil {
-		return nil, common.ErrBadRequest(ctx).SetDetail(fmt.Sprintf("[%v] failed to gen token", caller))
+		return nil, fault.Wrapf(err, "[%v] failed to gen token", caller)
 	}
 
 	return &response.Token{

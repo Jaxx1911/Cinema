@@ -1,19 +1,21 @@
 package domain
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Order struct {
-	ID         uint      `gorm:"primaryKey"`
-	UserID     uint      `gorm:"not null"`
-	DiscountID *uint     `gorm:"default:null"`
-	Status     string    `gorm:"type:varchar(20);not null;default:'pending'"`
-	TotalPrice float64   `gorm:"not null"`
-	CreatedAt  time.Time `gorm:"autoCreateTime"`
-	UpdatedAt  time.Time `gorm:"autoUpdateTime"`
+	ID         uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	UserID     uuid.UUID  `gorm:"type:uuid;not null"`
+	DiscountID *uuid.UUID `gorm:"type:uuid"`
+	Status     string     `gorm:"type:varchar(20);not null;default:'pending'"`
+	TotalPrice float64    `gorm:"not null"`
+	CreatedAt  time.Time  `gorm:"autoCreateTime"`
+	UpdatedAt  time.Time  `gorm:"autoUpdateTime"`
 
-	Tickets     []Ticket     `gorm:"foreignKey:OrderID"`
-	OrderCombos []OrderCombo `gorm:"foreignKey:OrderID"`
-	Discount    *Discount    `gorm:"foreignKey:DiscountID"`
+	User     User      `gorm:"foreignKey:UserID"`
+	Discount *Discount `gorm:"foreignKey:DiscountID"`
 }
 
 type OrderRepository interface{}
@@ -23,11 +25,14 @@ func (*Order) TableName() string {
 }
 
 type OrderCombo struct {
-	ID         uint    `gorm:"primaryKey"`
-	OrderID    uint    `gorm:"not null"`
-	ComboID    uint    `gorm:"not null"`
-	Quantity   int     `gorm:"not null"`
-	TotalPrice float64 `gorm:"not null"`
+	ID         uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	OrderID    uuid.UUID `gorm:"type:uuid;not null"`
+	ComboID    uuid.UUID `gorm:"type:uuid;not null"`
+	Quantity   int       `gorm:"not null"`
+	TotalPrice float64   `gorm:"not null"`
+
+	Order Order `gorm:"foreignKey:OrderID"`
+	Combo Combo `gorm:"foreignKey:ComboID"`
 }
 
 func (*OrderCombo) TableName() string {

@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"TTCS/src/common"
+	"TTCS/src/common/fault"
 	"TTCS/src/infra/cache"
 	"context"
 	"errors"
@@ -20,9 +20,9 @@ func NewBaseRepo(db *gorm.DB, cache *cache.RedisCache) *BaseRepo {
 	}
 }
 
-func (b *BaseRepo) returnError(ctx context.Context, err error) *common.Error {
+func (b *BaseRepo) returnError(ctx context.Context, err error) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return common.ErrNotFound(ctx)
+		return fault.Wrapf(err, "[%v] record not found", "DB").SetTag(fault.TagNotFound)
 	}
-	return common.ErrInternal(ctx, err.Error())
+	return fault.Wrapf(err, "internal")
 }

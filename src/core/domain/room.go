@@ -1,20 +1,23 @@
 package domain
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Room struct {
-	ID          uint      `gorm:"primaryKey"`
-	CinemaID    uint      `gorm:"not null"`
+	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	CinemaID    uuid.UUID `gorm:"type:uuid;not null"`
 	Name        string    `gorm:"type:varchar(100);not null"`
 	Capacity    int       `gorm:"not null"`
 	Type        string    `gorm:"type:varchar(50);not null"` // 2D, 3D, IMAX, 4DX
-	RowCount    int       `gorm:"not null"`                  // Số hàng ghế
-	ColumnCount int       `gorm:"not null"`                  // Số cột ghế
+	RowCount    int       `gorm:"not null"`
+	ColumnCount int       `gorm:"not null"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 
-	Seats     []Seat     `gorm:"foreignKey:RoomID"`
 	Showtimes []Showtime `gorm:"foreignKey:RoomID"`
+	Seats     []Seat     `gorm:"foreignKey:RoomID;constraint:OnDelete:CASCADE"`
 }
 
 func (*Room) TableName() string {
@@ -22,11 +25,11 @@ func (*Room) TableName() string {
 }
 
 type Seat struct {
-	ID         uint   `gorm:"primaryKey"`
-	RoomID     uint   `gorm:"not null"`
-	RowNumber  string `gorm:"type:char(1);not null"` // A, B, C...
-	SeatNumber int    `gorm:"not null"`
-	Type       string `gorm:"type:varchar(50);not null"` // Standard, VIP, Couple
+	ID         uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	RoomID     uuid.UUID `gorm:"type:uuid;not null"`
+	RowNumber  string    `gorm:"type:varchar(5);not null"` // Hàng: A, B, C...
+	SeatNumber int       `gorm:"not null"`                 // Số ghế trong hàng
+	Type       string    `gorm:"type:varchar(50);not null;check:type IN ('standard', 'VIP', 'couple', 'disabled')"`
 }
 
 func (*Seat) TableName() string {

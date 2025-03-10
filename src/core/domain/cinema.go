@@ -1,9 +1,12 @@
 package domain
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Cinema struct {
-	ID        uint      `gorm:"primaryKey"`
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name      string    `gorm:"type:varchar(255);not null"`
 	Address   string    `gorm:"type:text;not null"`
 	Phone     string    `gorm:"type:varchar(20)"`

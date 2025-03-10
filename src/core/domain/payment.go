@@ -1,15 +1,18 @@
 package domain
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Payment struct {
-	ID          uint      `gorm:"primaryKey"`
-	OrderID     uint      `gorm:"not null;uniqueIndex"`      // Một đơn hàng có một thanh toán
-	Amount      float64   `gorm:"not null"`                  // Tổng số tiền thanh toán
-	Status      string    `gorm:"type:varchar(20);not null"` // pending, completed, failed
-	PaymentTime time.Time `gorm:"autoCreateTime"`            // Thời gian thanh toán
+	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	OrderID     uuid.UUID `gorm:"type:uuid;not null;uniqueIndex"`
+	Amount      float64   `gorm:"not null"`
+	Status      string    `gorm:"type:varchar(20);not null"`
+	PaymentTime time.Time `gorm:"autoCreateTime"`
 
-	Order Order `gorm:"foreignKey:OrderID;constraint:OnDelete:CASCADE"`
+	Order Order `gorm:"foreignKey:OrderID"`
 }
 
 func (*Payment) TableName() string {

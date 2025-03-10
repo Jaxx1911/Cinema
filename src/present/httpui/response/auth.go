@@ -2,6 +2,7 @@ package response
 
 import (
 	"TTCS/src/core/domain"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type Token struct {
 }
 
 type User struct {
-	ID        uint      `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Phone     string    `json:"phone"`

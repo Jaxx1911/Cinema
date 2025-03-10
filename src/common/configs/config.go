@@ -31,6 +31,9 @@ type Config struct {
 		Password string `mapstructure:"password"`
 		DB       int    `mapstructure:"db"`
 	} `mapstructure:"redis"`
+	OTP struct {
+		SecretKey string `mapstructure:"secret_key"`
+	}
 }
 
 var common *Config

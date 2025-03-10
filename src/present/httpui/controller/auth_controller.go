@@ -22,25 +22,25 @@ func NewAuthController(baseController *BaseController, authService *service.Auth
 	}
 }
 
-func (c *AuthController) Login(ctx *gin.Context) {
+func (a *AuthController) Login(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "AuthController.Login"
 
 	var req request.LoginRequest
-	if err := c.BindAndValidateRequest(ctx, req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
-		c.Error(ctx, err)
+		a.ServeErrResponse(ctx, err)
 		return
 	}
 
-	jwtToken, user, err := c.authService.Login(ctxReq, req)
+	jwtToken, user, err := a.authService.Login(ctxReq, req)
 
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to create token", caller)
-		c.Error(ctx, err)
+		a.ServeErrResponse(ctx, err)
 		return
 	}
-	c.Success(ctx, response.LoginResp{
+	a.ServeSuccessResponse(ctx, response.LoginResp{
 		Token: jwtToken,
 		User:  response.UserFromDomain(user),
 	})
