@@ -22,6 +22,50 @@ func NewAuthController(baseController *BaseController, authService *service.Auth
 	}
 }
 
+func (a *AuthController) GetOTP(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "AuthController.GetOTP"
+
+	email := ctx.Param("email")
+
+	otp, err := a.authService.GenOTP(ctxReq, email)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to GenOTP: %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+	a.ServeSuccessResponse(ctx, response.Otp{Otp: otp})
+}
+
+func (a *AuthController) SignUp(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "AuthController.SignUp"
+
+	var req request.SignUpRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+
+	jwtToken, user, err := a.authService.SignUp(ctxReq, req)
+
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to register %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+	a.ServeSuccessResponse(ctx, response.LoginResp{
+		Token: &response.Token{
+			AccessToken:      jwtToken.AccessToken.Token,
+			AccessExpiredAt:  jwtToken.AccessToken.Expire,
+			RefreshToken:     jwtToken.RefreshToken.Token,
+			RefreshExpiredAt: jwtToken.RefreshToken.Expire,
+		},
+		User: response.UserFromDomain(user),
+	})
+}
+
 func (a *AuthController) Login(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "AuthController.Login"
@@ -41,8 +85,13 @@ func (a *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 	a.ServeSuccessResponse(ctx, response.LoginResp{
-		Token: jwtToken,
-		User:  response.UserFromDomain(user),
+		Token: &response.Token{
+			AccessToken:      jwtToken.AccessToken.Token,
+			AccessExpiredAt:  jwtToken.AccessToken.Expire,
+			RefreshToken:     jwtToken.RefreshToken.Token,
+			RefreshExpiredAt: jwtToken.RefreshToken.Expire,
+		},
+		User: response.UserFromDomain(user),
 	})
 
 }

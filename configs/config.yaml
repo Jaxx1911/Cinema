@@ -3,7 +3,7 @@ mode: dev
 server:
   name: HN_Cinema_Backend
   address: :8000
-  prefix: api
+  prefix: /api
 
 jwt:
   access_secret: abc

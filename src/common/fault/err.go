@@ -32,8 +32,14 @@ func (e *Error) Unwrap() error {
 	return e.Err
 }
 
-func Wrapf(err error, format string, args ...interface{}) *Error {
+func Wrap(err error) *Error {
+	return &Error{
+		Message: err.Error(),
+		Err:     err,
+	}
+}
 
+func Wrapf(err error, format string, args ...interface{}) *Error {
 	message := fmt.Sprintf(format, args...)
 
 	return &Error{

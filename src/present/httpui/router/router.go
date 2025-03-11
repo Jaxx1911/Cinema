@@ -33,9 +33,10 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerAuthRouters(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
-	authRouter := root.Group("auth")
+	authRouter := root.Group("/auth")
 	{
-		//authRouter.POST("/signup", in.AuthController.SignUp)
+		authRouter.GET("/otp/:email", in.AuthController.GetOTP)
+		authRouter.POST("/signup", in.AuthController.SignUp)
 		authRouter.POST("/login", in.AuthController.Login)
 		//authRouter.GET("/login-google", in.AuthController.LoginGoogle)
 		//authRouter.GET("/callback-by-google", in.AuthController.CallbackGoogle)

@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+type Otp struct {
+	Otp string `json:"otp"`
+}
+
 type LoginResp struct {
 	Token *Token `json:"token"`
 	User  *User  `json:"user"`

@@ -8,5 +8,6 @@ import (
 func BuildCrypto() fx.Option {
 	return fx.Options(
 		fx.Provide(crypto.NewHashProvider),
+		fx.Provide(crypto.NewOTPProvider),
 	)
 }

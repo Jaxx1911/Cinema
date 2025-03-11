@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"TTCS/src/common/configs"
 	"TTCS/src/common/log"
+	"TTCS/src/core/domain"
 	"TTCS/src/infra/cache"
 	"TTCS/src/infra/repo"
 	"context"
@@ -18,6 +19,7 @@ func BuildDatabasesModule() fx.Option {
 		fx.Provide(NewPostgresDB),
 		fx.Provide(cache.NewRedisClient),
 		fx.Provide(repo.NewBaseRepo),
+		fx.Provide(repo.NewOtpRepo),
 		fx.Provide(repo.NewUserRepo),
 	)
 }
@@ -36,15 +38,15 @@ func NewPostgresDB(lc fx.Lifecycle) *gorm.DB {
 	}
 	log.Info(context.Background(), "Successfully connected to Postgres")
 
-	//err = db.AutoMigrate(
-	//	&domain.Cinema{}, &domain.Discount{}, &domain.Movie{}, &domain.Genre{}, &domain.Room{}, &domain.Seat{},
-	//	&domain.User{}, &domain.Order{}, &domain.Combo{}, &domain.OrderCombo{}, &domain.Ticket{},
-	//	&domain.Showtime{}, &domain.Payment{},
-	//)
-	//if err != nil {
-	//	log.Fatal("Failed to migrate Postgres")
-	//	return nil
-	//}
+	err = db.AutoMigrate(
+		&domain.Cinema{}, &domain.Discount{}, &domain.Movie{}, &domain.Genre{}, &domain.Room{}, &domain.Seat{},
+		&domain.User{}, &domain.Order{}, &domain.Combo{}, &domain.OrderCombo{}, &domain.Ticket{},
+		&domain.Showtime{}, &domain.Payment{}, &domain.Otp{},
+	)
+	if err != nil {
+		log.Fatal("Failed to migrate Postgres")
+		return nil
+	}
 
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
