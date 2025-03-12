@@ -10,6 +10,7 @@ func BuildControllers() fx.Option {
 	return fx.Options(
 		fx.Provide(controller.NewBaseController),
 		fx.Provide(controller.NewAuthController),
+		fx.Provide(controller.NewUserController),
 	)
 }
 

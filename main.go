@@ -36,6 +36,7 @@ func main() {
 	log.Debug(context.Background(), "App %s is running", configs.GetConfig().Mode)
 	app := fx.New(
 		bootstrap.BuildCrypto(),
+		bootstrap.BuildMailService(),
 		bootstrap.BuildDatabasesModule(),
 		bootstrap.BuildHTTPServerModule(),
 		bootstrap.BuildServices(),

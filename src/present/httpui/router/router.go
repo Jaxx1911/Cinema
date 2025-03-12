@@ -14,6 +14,7 @@ type IRouter struct {
 	Engine *gin.Engine
 	//controller
 	AuthController *controller.AuthController
+	UserController *controller.UserController
 }
 
 func RegisterHandler(engine *gin.Engine) {
@@ -31,6 +32,7 @@ func RegisterGinRouters(in IRouter) {
 
 func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerAuthRouters(r, in)
+	registerUsersRouters(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -40,5 +42,11 @@ func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 		authRouter.POST("/login", in.AuthController.Login)
 		//authRouter.GET("/login-google", in.AuthController.LoginGoogle)
 		//authRouter.GET("/callback-by-google", in.AuthController.CallbackGoogle)
+	}
+}
+func registerUsersRouters(root *gin.RouterGroup, in IRouter) {
+	userRouter := root.Group("/user")
+	{
+		userRouter.PUT("", in.UserController.UpdateInfo)
 	}
 }

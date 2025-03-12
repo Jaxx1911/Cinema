@@ -11,14 +11,12 @@ import (
 type AuthController struct {
 	*BaseController
 	authService *service.AuthService
-	userService *service.UserService
 }
 
-func NewAuthController(baseController *BaseController, authService *service.AuthService, userService *service.UserService) *AuthController {
+func NewAuthController(baseController *BaseController, authService *service.AuthService) *AuthController {
 	return &AuthController{
 		BaseController: baseController,
 		authService:    authService,
-		userService:    userService,
 	}
 }
 
@@ -35,6 +33,7 @@ func (a *AuthController) GetOTP(ctx *gin.Context) {
 		return
 	}
 	a.ServeSuccessResponse(ctx, response.Otp{Otp: otp})
+	return
 }
 
 func (a *AuthController) SignUp(ctx *gin.Context) {
@@ -64,6 +63,7 @@ func (a *AuthController) SignUp(ctx *gin.Context) {
 		},
 		User: response.UserFromDomain(user),
 	})
+	return
 }
 
 func (a *AuthController) Login(ctx *gin.Context) {
@@ -93,5 +93,5 @@ func (a *AuthController) Login(ctx *gin.Context) {
 		},
 		User: response.UserFromDomain(user),
 	})
-
+	return
 }

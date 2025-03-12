@@ -31,9 +31,12 @@ type Config struct {
 		Password string `mapstructure:"password"`
 		DB       int    `mapstructure:"db"`
 	} `mapstructure:"redis"`
-	OTP struct {
-		SecretKey string `mapstructure:"secret_key"`
-	}
+	Mail struct {
+		ClientId     string `mapstructure:"client_id"`
+		ClientSecret string `mapstructure:"client_secret"`
+		RefreshToken string `mapstructure:"refresh_token"`
+		AccessToken  string `mapstructure:"access_token"`
+	} `mapstructure:"mail"`
 }
 
 var common *Config

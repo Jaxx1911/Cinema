@@ -5,6 +5,7 @@ import (
 	"TTCS/src/common/constant"
 	"TTCS/src/common/crypto"
 	"TTCS/src/common/fault"
+	"TTCS/src/common/mail"
 	"TTCS/src/core/domain"
 	"TTCS/src/core/dto"
 	"TTCS/src/present/httpui/request"
@@ -17,24 +18,34 @@ type AuthService struct {
 	otpRepo      domain.OtpRepo
 	hashProvider crypto.HashProvider
 	otpProvider  crypto.OTPProvider
+	mailService  *mail.GmailService
 }
 
-func NewAuthService(userRepo domain.UserRepo, otpRepo domain.OtpRepo, hashProvider crypto.HashProvider, otpProvider crypto.OTPProvider) *AuthService {
+func NewAuthService(userRepo domain.UserRepo, otpRepo domain.OtpRepo, hashProvider crypto.HashProvider, otpProvider crypto.OTPProvider, mailService *mail.GmailService) *AuthService {
 	return &AuthService{
 		userRepo:     userRepo,
 		otpRepo:      otpRepo,
 		hashProvider: hashProvider,
 		otpProvider:  otpProvider,
+		mailService:  mailService,
 	}
 }
 
 func (s *AuthService) GenOTP(ctx context.Context, email string) (string, error) {
 	_ = "AuthService.GenOTP"
+	_ = s.otpRepo.DeleteByEmail(ctx, email)
 	otp := s.otpProvider.GenerateCode()
 	if err := s.otpRepo.Create(ctx, &domain.Otp{
 		Email: email,
 		Otp:   otp,
 	}); err != nil {
+		return "", err
+	}
+	if err := s.mailService.SendEmaiOAuth2("Xác thực OTP", email, domain.Otp{
+		Email: email,
+		Otp:   otp,
+	}, "otp.txt"); err != nil {
+		_ = s.otpRepo.DeleteByEmail(ctx, email)
 		return "", err
 	}
 	return otp, nil

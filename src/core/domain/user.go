@@ -22,8 +22,9 @@ type User struct {
 type UserRepo interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	GetList(ctx context.Context) ([]*User, error)
-	GetById(ctx context.Context, id uint) (*User, error)
+	GetById(ctx context.Context, id string) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
+	Update(ctx context.Context, user *User) (*User, error)
 }
 
 func (User) TableName() string {
@@ -38,6 +39,7 @@ type Otp struct {
 type OtpRepo interface {
 	Create(ctx context.Context, otp *Otp) error
 	GetByEmail(ctx context.Context, email string) (*Otp, error)
+	DeleteByEmail(ctx context.Context, email string) error
 }
 
 func (Otp) TableName() string {

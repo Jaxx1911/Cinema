@@ -1,0 +1,4 @@
+Chào mừng {{.Email}},
+Cảm ơn bạn đã đăng ký tài khoản HeraCinema, đây là mã xác thực của bạn {{.Otp}} để xác thực tài khoản. Mã sẽ hết hạn sau 10 phút.
+
+Xin cảm ơn.

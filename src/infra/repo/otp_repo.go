@@ -32,3 +32,10 @@ func (r *OtpRepo) GetByEmail(ctx context.Context, email string) (*domain.Otp, er
 	}
 	return &otp, nil
 }
+
+func (r *OtpRepo) DeleteByEmail(ctx context.Context, email string) error {
+	if err := r.db.Where("email =?", email).Delete(&domain.Otp{}).Error; err != nil {
+		return r.returnError(ctx, err)
+	}
+	return nil
+}
