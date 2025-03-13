@@ -6,6 +6,7 @@ import (
 	"TTCS/src/core/service"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
+	"errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -125,10 +126,12 @@ func (u *UserController) GetOrders(ctx *gin.Context) {
 
 	user, ok := ctx.Get("user")
 	if !ok {
-		log.Error(ctxReq, "failed get user from context")
+		err := errors.New("user not found in context")
+		log.Error(ctxReq, "[%v] failed get user from context %+v", caller, err)
+		u.ServeErrResponse(ctx, err)
 	}
 
-	orders, err := u.userService.GetOrders(ctx, user.(domain.User).ID)
+	orders, err := u.userService.GetOrders(ctx, user.(*domain.User).ID)
 
 	if err != nil {
 		log.Error(ctxReq, "[%v] get user payments error %+v", caller, err)
@@ -136,4 +139,31 @@ func (u *UserController) GetOrders(ctx *gin.Context) {
 		return
 	}
 	u.ServeSuccessResponse(ctx, orders)
+}
+
+func (u *UserController) ChangeAvatar(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "UserController.ChangeAvatar"
+
+	user, ok := ctx.Get("user")
+	if !ok {
+		err := errors.New("user not found in context")
+		log.Error(ctxReq, "[%v] failed get user from context %+v", caller, err)
+		u.ServeErrResponse(ctx, err)
+	}
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed get file from form param %+v", caller, err)
+		u.ServeErrResponse(ctx, err)
+		return
+	}
+
+	nUser, err := u.userService.ChangeAvatar(ctx, file, user.(*domain.User))
+	if err != nil {
+		log.Error(ctxReq, "[%v] change user avatar error %+v", caller, err)
+		u.ServeErrResponse(ctx, err)
+		return
+	}
+	u.ServeSuccessResponse(ctx, nUser)
 }

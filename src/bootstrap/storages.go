@@ -6,8 +6,11 @@ import (
 	"TTCS/src/core/domain"
 	"TTCS/src/infra/cache"
 	"TTCS/src/infra/repo"
+	"TTCS/src/infra/upload"
 	"context"
 	"fmt"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"go.uber.org/fx"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,6 +20,8 @@ import (
 func BuildDatabasesModule() fx.Option {
 	return fx.Options(
 		fx.Provide(NewPostgresDB),
+		fx.Provide(NewMinioClient),
+		fx.Provide(upload.NewUploadService),
 		fx.Provide(cache.NewRedisClient),
 		fx.Provide(repo.NewBaseRepo),
 		fx.Provide(repo.NewOtpRepo),
@@ -59,4 +64,30 @@ func NewPostgresDB(lc fx.Lifecycle) *gorm.DB {
 		},
 	})
 	return db
+}
+
+func NewMinioClient() *minio.Client {
+	ctx := context.Background()
+
+	minioClient, err := minio.New(configs.GetConfig().Minio.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(configs.GetConfig().Minio.AccessKey, configs.GetConfig().Minio.SecretKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		log.Fatal("Failed to create minio client")
+		return nil
+	}
+
+	err = minioClient.MakeBucket(ctx, configs.GetConfig().Minio.Bucket, minio.MakeBucketOptions{})
+	if err != nil {
+		exists, errBucketExists := minioClient.BucketExists(ctx, configs.GetConfig().Minio.Bucket)
+		if errBucketExists == nil && exists {
+			log.Info(ctx, "Bucket already exists")
+		} else {
+			log.Fatal("Failed to create minio bucket")
+		}
+	} else {
+		log.Info(ctx, fmt.Sprintf("Successfully created minio bucket %s", configs.GetConfig().Minio.Bucket))
+	}
+	return minioClient
 }

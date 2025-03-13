@@ -14,6 +14,7 @@ type User struct {
 	Email        string         `gorm:"type:varchar(255);uniqueIndex;not null"`
 	Phone        string         `gorm:"type:varchar(20);uniqueIndex"`
 	PasswordHash string         `gorm:"type:text;not null"`
+	AvatarUrl    string         `gorm:"type:varchar(255);uniqueIndex"`
 	Role         string         `gorm:"type:varchar(50);default:customer;not null"`
 	CreatedAt    time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time      `gorm:"autoUpdateTime"`

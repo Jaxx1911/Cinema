@@ -3,6 +3,7 @@ package fault
 import (
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 // Danh sách tag lỗi có sẵn
@@ -89,9 +90,9 @@ var (
 		Err:     errors.New("UnAuthorized"),
 		Tag:     TagUnAuthorize,
 	}
-	ErrNotFound = Error{
+	ErrDBNotFound = Error{
 		Message: "Not Found",
-		Err:     errors.New("not found"),
+		Err:     gorm.ErrRecordNotFound,
 		Tag:     TagNotFound,
 	}
 	ErrInternalServer = Error{

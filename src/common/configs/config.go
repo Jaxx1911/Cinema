@@ -37,6 +37,14 @@ type Config struct {
 		RefreshToken string `mapstructure:"refresh_token"`
 		AccessToken  string `mapstructure:"access_token"`
 	} `mapstructure:"mail"`
+	Minio struct {
+		User      string `mapstructure:"user"`
+		Password  string `mapstructure:"password"`
+		Bucket    string `mapstructure:"bucket"`
+		Endpoint  string `mapstructure:"endpoint"`
+		AccessKey string `mapstructure:"access_key"`
+		SecretKey string `mapstructure:"secret_key"`
+	}
 }
 
 var common *Config

@@ -57,5 +57,6 @@ func registerUsersRouters(root *gin.RouterGroup, in IRouter) {
 		userRouter.GET("/:id", in.UserController.GetDetail)
 		userRouter.GET("/payments", in.UserController.GetPayments)
 		userRouter.GET("/orders", in.UserController.GetOrders)
+		userRouter.PUT("/avatar", in.UserController.ChangeAvatar)
 	}
 }

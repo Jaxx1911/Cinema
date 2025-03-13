@@ -12,6 +12,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -38,7 +39,7 @@ func NewAuthService(userRepo domain.UserRepo, otpRepo domain.OtpRepo, hashProvid
 func (s *AuthService) GenOTP(ctx context.Context, email string) (string, error) {
 	caller := "AuthService.GenOTP"
 	user, err := s.userRepo.GetByEmail(ctx, email)
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return "", err
 	}
 	if user != nil {
@@ -46,7 +47,7 @@ func (s *AuthService) GenOTP(ctx context.Context, email string) (string, error) 
 		return "", fault.Wrapf(err, "[%v] failed to create OTP", caller)
 	}
 	otpDb, err := s.otpRepo.GetByEmail(ctx, email)
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return "", err
 	}
 	if otpDb != nil {
@@ -93,6 +94,7 @@ func (s *AuthService) SignUp(ctx context.Context, req request.SignUpRequest) (*d
 		Email:        req.Email,
 		Phone:        "",
 		PasswordHash: hasedPw,
+		AvatarUrl:    constant.DefaultAvatarUrl,
 		Role:         constant.DefaultRole,
 	})
 	if err != nil {
