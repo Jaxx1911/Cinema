@@ -30,6 +30,8 @@ type Seat struct {
 	RowNumber  string    `gorm:"type:varchar(5);not null"` // Hàng: A, B, C...
 	SeatNumber int       `gorm:"not null"`                 // Số ghế trong hàng
 	Type       string    `gorm:"type:varchar(50);not null;check:type IN ('standard', 'VIP', 'couple', 'disabled')"`
+
+	Room Room `gorm:"foreignKey:RoomID"`
 }
 
 func (*Seat) TableName() string {

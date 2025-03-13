@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"TTCS/src/present/httpui/request"
 	"context"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -17,14 +18,19 @@ type User struct {
 	CreatedAt    time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
+
+	Orders   []Order   `gorm:"foreignKey:UserID"`
+	Payments []Payment `gorm:"foreignKey:UserID"`
 }
 
 type UserRepo interface {
 	Create(ctx context.Context, user *User) (*User, error)
-	GetList(ctx context.Context) ([]*User, error)
+	GetList(ctx context.Context, page request.Page) ([]*User, error)
 	GetById(ctx context.Context, id string) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
+	GetPaymentsById(ctx context.Context, id uuid.UUID) ([]Payment, error)
+	GetOrdersById(ctx context.Context, id uuid.UUID) ([]Order, error)
 }
 
 func (User) TableName() string {
@@ -32,8 +38,9 @@ func (User) TableName() string {
 }
 
 type Otp struct {
-	Email string `gorm:"primaryKey"`
-	Otp   string
+	Email     string `gorm:"primaryKey"`
+	Otp       string
+	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
 
 type OtpRepo interface {

@@ -3,6 +3,7 @@ package repo
 import (
 	"TTCS/src/common/fault"
 	"TTCS/src/infra/cache"
+	"TTCS/src/present/httpui/request"
 	"context"
 	"errors"
 	"gorm.io/gorm"
@@ -25,4 +26,9 @@ func (b *BaseRepo) returnError(ctx context.Context, err error) error {
 		return fault.Wrapf(err, "[%v] record not found", "DB").SetTag(fault.TagNotFound)
 	}
 	return fault.Wrapf(err, "internal")
+}
+
+func (b *BaseRepo) toLimitOffset(ctx context.Context, page request.Page) (int, int) {
+	offset := page.Limit * (page.Page - 1)
+	return page.Limit, offset
 }

@@ -43,3 +43,11 @@ func UserFromDomain(d *domain.User) *User {
 		UpdatedAt: d.UpdatedAt,
 	}
 }
+
+func UsersFromDomain(d []*domain.User) []*User {
+	res := make([]*User, 0)
+	for _, u := range d {
+		res = append(res, UserFromDomain(u))
+	}
+	return res
+}

@@ -95,3 +95,24 @@ func (a *AuthController) Login(ctx *gin.Context) {
 	})
 	return
 }
+
+func (a *AuthController) ChangePassword(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "AuthController.ChangePassword"
+
+	var req request.ChangePasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+
+	if err := a.authService.ChangePassword(ctxReq, req); err != nil {
+		log.Error(ctxReq, "[%v] failed to change password: %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+	a.ServeSuccessResponse(ctx, true)
+	return
+
+}

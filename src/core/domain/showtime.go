@@ -13,6 +13,10 @@ type Showtime struct {
 	Price     float64   `gorm:"not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+
+	Movie  Movie    `gorm:"foreignKey:MovieID"`
+	Room   Room     `gorm:"foreignKey:RoomID"`
+	Ticket []Ticket `gorm:"foreignKey:ShowtimeID"`
 }
 
 func (*Showtime) TableName() string {

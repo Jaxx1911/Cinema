@@ -7,6 +7,17 @@ import (
 	"time"
 )
 
+type JwtProvider interface {
+	Generate(secret string, payload Payload, expire int64) (*Token, error)
+	Verify(secret string, token string) (*Payload, error)
+}
+
+type jwtProvider struct{}
+
+func NewJwtProvider() JwtProvider {
+	return &jwtProvider{}
+}
+
 type Token struct {
 	Token  string `json:"token"`
 	Expire int64  `json:"expire"`
@@ -23,7 +34,7 @@ type myClaims struct {
 	jwt.RegisteredClaims
 }
 
-func Generate(secret string, payload Payload, expire int64) (*Token, error) {
+func (j *jwtProvider) Generate(secret string, payload Payload, expire int64) (*Token, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, &myClaims{
 		payload.Id,
 		payload.Username,
@@ -41,7 +52,7 @@ func Generate(secret string, payload Payload, expire int64) (*Token, error) {
 
 var ErrTokenExpired = errors.New("Token is expired")
 
-func Verify(secret string, token string) (*Payload, error) {
+func (j *jwtProvider) Verify(secret string, token string) (*Payload, error) {
 	res, err := jwt.ParseWithClaims(token, &myClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})

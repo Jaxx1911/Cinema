@@ -41,6 +41,7 @@ func main() {
 		bootstrap.BuildHTTPServerModule(),
 		bootstrap.BuildServices(),
 		bootstrap.BuildValidators(),
+		bootstrap.BuildMiddlewares(),
 		bootstrap.BuildControllers(),
 	)
 	startContext, cancel := context.WithTimeout(context.Background(), defaultGracefulTimeout)

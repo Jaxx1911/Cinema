@@ -16,9 +16,12 @@ type Order struct {
 
 	User     User      `gorm:"foreignKey:UserID"`
 	Discount *Discount `gorm:"foreignKey:DiscountID"`
+	Tickets  []Ticket  `gorm:"foreignKey:OrderID"`
 }
 
-type OrderRepository interface{}
+type OrderRepository interface {
+	GetDetail(id uuid.UUID) (*Order, *Movie, *Showtime, error)
+}
 
 func (*Order) TableName() string {
 	return "orders"
