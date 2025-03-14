@@ -11,10 +11,11 @@ import (
 
 type IRouter struct {
 	fx.In
-	Engine         *gin.Engine
-	AuthHolder     *middleware.AuthMiddleware
-	AuthController *controller.AuthController
-	UserController *controller.UserController
+	Engine          *gin.Engine
+	AuthHolder      *middleware.AuthMiddleware
+	AuthController  *controller.AuthController
+	UserController  *controller.UserController
+	MovieController *controller.MovieController
 }
 
 func RegisterHandler(engine *gin.Engine) {
@@ -33,6 +34,7 @@ func RegisterGinRouters(in IRouter) {
 func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerAuthRouters(r, in)
 	registerUsersRouters(r, in)
+	registerMovieRouters(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -58,5 +60,17 @@ func registerUsersRouters(root *gin.RouterGroup, in IRouter) {
 		userRouter.GET("/payments", in.UserController.GetPayments)
 		userRouter.GET("/orders", in.UserController.GetOrders)
 		userRouter.PUT("/avatar", in.UserController.ChangeAvatar)
+	}
+}
+
+func registerMovieRouters(root *gin.RouterGroup, in IRouter) {
+	movieRouter := root.Group("/movie")
+	{
+		movieRouter.GET("", in.MovieController.GetList)
+		movieRouter.GET("/:id", in.MovieController.GetDetail)
+		movieRouter.Use(in.AuthHolder.RequireAuth())
+		movieRouter.POST("", in.MovieController.Create)
+		movieRouter.PUT("/:id", in.MovieController.Update)
+		movieRouter.PUT("/:id/poster", in.MovieController.UpdatePoster)
 	}
 }

@@ -26,6 +26,8 @@ func BuildDatabasesModule() fx.Option {
 		fx.Provide(repo.NewBaseRepo),
 		fx.Provide(repo.NewOtpRepo),
 		fx.Provide(repo.NewUserRepo),
+		fx.Provide(repo.NewGenreRepo),
+		fx.Provide(repo.NewMovieRepo),
 	)
 }
 

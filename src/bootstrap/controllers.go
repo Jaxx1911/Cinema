@@ -12,6 +12,7 @@ func BuildControllers() fx.Option {
 		fx.Provide(controller.NewBaseController),
 		fx.Provide(controller.NewAuthController),
 		fx.Provide(controller.NewUserController),
+		fx.Provide(controller.NewMovieController),
 	)
 }
 

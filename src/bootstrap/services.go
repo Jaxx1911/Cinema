@@ -9,5 +9,6 @@ func BuildServices() fx.Option {
 	return fx.Options(
 		fx.Provide(service.NewAuthService),
 		fx.Provide(service.NewUserService),
+		fx.Provide(service.NewMovieService),
 	)
 }

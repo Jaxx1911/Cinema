@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"TTCS/src/present/httpui/request"
+	"context"
 	"github.com/google/uuid"
 	"time"
 )
@@ -14,14 +16,14 @@ type Movie struct {
 	Caster      string    `gorm:"type:text"`
 	Description string    `gorm:"type:text"`
 	ReleaseDate time.Time `gorm:"not null"`
-	Rating      string    `gorm:"type:varchar(10);not null"`
+	TrailerURL  string    `gorm:"type:text"`
+	Status      string    `gorm:"not null;default:showing"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 
 	Showtimes []Showtime `gorm:"foreignKey:MovieID;constraint:OnDelete:CASCADE"`
 	Genres    []Genre    `gorm:"many2many:movie_genre"`
 }
-
 type Genre struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name      string    `gorm:"type:varchar(255);unique;not null"`
@@ -37,4 +39,19 @@ func (*Movie) TableName() string {
 
 func (*Genre) TableName() string {
 	return "genre"
+}
+
+type MovieRepo interface {
+	GetList(ctx context.Context, page request.Page, showingStatus string) ([]*Movie, error)
+	GetById(ctx context.Context, id string) (*Movie, error)
+	GetDetail(ctx context.Context, id string) (*Movie, error)
+	Create(ctx context.Context, movie *Movie) (*Movie, error)
+	Update(ctx context.Context, movie *Movie) (*Movie, error)
+}
+
+type GenreRepo interface {
+	GetList(ctx context.Context) ([]*Genre, error)
+	GetByID(ctx context.Context, id string) (*Genre, error)
+	GetByIDs(ctx context.Context, ids []string) ([]Genre, error)
+	Create(ctx context.Context, genre *Genre) (*Genre, error)
 }

@@ -39,11 +39,11 @@ func (u *UserService) Update(ctx context.Context, id string, req *request.UserIn
 	return user, nil
 }
 
-func (u *UserService) Create(ctx context.Context, r *request.UserInfo) (*domain.User, error) {
+func (u *UserService) Create(ctx context.Context, req *request.UserInfo) (*domain.User, error) {
 	caller := "UserService.Create"
-	user := u.buildModelUser(r, &domain.User{})
+	user := u.buildModelUser(req, &domain.User{})
 
-	hashedPw, err := u.hashProvider.Hash(strings.TrimSuffix(r.Email, "@gmail.com"))
+	hashedPw, err := u.hashProvider.Hash(strings.TrimSuffix(req.Email, "@gmail.com"))
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to hash email", caller)
 	}
