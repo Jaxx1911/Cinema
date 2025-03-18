@@ -12,7 +12,6 @@ type Otp struct {
 
 type LoginResp struct {
 	Token *Token `json:"token"`
-	User  *User  `json:"user"`
 }
 
 type Token struct {

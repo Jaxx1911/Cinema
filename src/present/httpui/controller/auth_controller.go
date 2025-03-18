@@ -26,13 +26,13 @@ func (a *AuthController) GetOTP(ctx *gin.Context) {
 
 	email := ctx.Param("email")
 
-	otp, err := a.authService.GenOTP(ctxReq, email)
+	_, err := a.authService.GenOTP(ctxReq, email)
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to GenOTP: %+v", caller, err)
 		a.ServeErrResponse(ctx, err)
 		return
 	}
-	a.ServeSuccessResponse(ctx, response.Otp{Otp: otp})
+	a.ServeSuccessResponse(ctx, true)
 	return
 }
 
@@ -47,7 +47,7 @@ func (a *AuthController) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	jwtToken, user, err := a.authService.SignUp(ctxReq, req)
+	jwtToken, _, err := a.authService.SignUp(ctxReq, req)
 
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to register %+v", caller, err)
@@ -61,7 +61,6 @@ func (a *AuthController) SignUp(ctx *gin.Context) {
 			RefreshToken:     jwtToken.RefreshToken.Token,
 			RefreshExpiredAt: jwtToken.RefreshToken.Expire,
 		},
-		User: response.UserFromDomain(user),
 	})
 	return
 }
@@ -77,7 +76,7 @@ func (a *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	jwtToken, user, err := a.authService.Login(ctxReq, req)
+	jwtToken, _, err := a.authService.Login(ctxReq, req)
 
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to create token", caller)
@@ -91,7 +90,6 @@ func (a *AuthController) Login(ctx *gin.Context) {
 			RefreshToken:     jwtToken.RefreshToken.Token,
 			RefreshExpiredAt: jwtToken.RefreshToken.Expire,
 		},
-		User: response.UserFromDomain(user),
 	})
 	return
 }

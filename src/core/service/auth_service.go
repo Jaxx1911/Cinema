@@ -44,7 +44,7 @@ func (s *AuthService) GenOTP(ctx context.Context, email string) (string, error) 
 	}
 	if user != nil {
 		err := errors.New("user already exists")
-		return "", fault.Wrapf(err, "[%v] failed to create OTP", caller)
+		return "", fault.Wrapf(err, "[%v] user already exists", caller).SetTag(fault.TagBadRequest)
 	}
 	otpDb, err := s.otpRepo.GetByEmail(ctx, email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -53,7 +53,7 @@ func (s *AuthService) GenOTP(ctx context.Context, email string) (string, error) 
 	if otpDb != nil {
 		if otpDb.CreatedAt.After(time.Now().Add(-5 * time.Minute)) {
 			err := errors.New("otp already exists")
-			return "", fault.Wrapf(err, "[%v] failed to create OTP", caller)
+			return "", fault.Wrapf(err, "[%v] otp already exists", caller).SetTag(fault.TagBadRequest)
 		}
 		_ = s.otpRepo.DeleteByEmail(ctx, email)
 	}
@@ -90,7 +90,7 @@ func (s *AuthService) SignUp(ctx context.Context, req request.SignUpRequest) (*d
 		return nil, nil, fault.Wrapf(err, "[%v] failed to hash password", caller).SetTag(fault.TagInternalServer)
 	}
 	user, err := s.userRepo.Create(ctx, &domain.User{
-		Name:         constant.DefaultUserName,
+		Name:         req.Name,
 		Email:        req.Email,
 		Phone:        "",
 		PasswordHash: hasedPw,

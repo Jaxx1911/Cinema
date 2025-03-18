@@ -12,9 +12,9 @@ type User struct {
 	ID           uuid.UUID      `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name         string         `gorm:"type:varchar(255)"`
 	Email        string         `gorm:"type:varchar(255);uniqueIndex;not null"`
-	Phone        string         `gorm:"type:varchar(20);uniqueIndex"`
+	Phone        string         `gorm:"type:varchar(20)"`
 	PasswordHash string         `gorm:"type:text;not null"`
-	AvatarUrl    string         `gorm:"type:varchar(255);uniqueIndex"`
+	AvatarUrl    string         `gorm:"type:varchar(255)"`
 	Role         string         `gorm:"type:varchar(50);default:customer;not null"`
 	CreatedAt    time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time      `gorm:"autoUpdateTime"`
