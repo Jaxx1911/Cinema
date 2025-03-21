@@ -42,19 +42,19 @@ func (r *UserRepo) GetById(ctx context.Context, id string) (*domain.User, error)
 	if err != nil {
 		return nil, r.returnError(ctx, err)
 	}
-	var user domain.User
-	if err := r.db.WithContext(ctx).First(&user, userId).Error; err != nil {
+	user := &domain.User{}
+	if err := r.db.WithContext(ctx).First(user, userId).Error; err != nil {
 		return nil, r.returnError(ctx, err)
 	}
-	return &user, nil
+	return user, nil
 }
 
 func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	var user domain.User
-	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {
+	user := &domain.User{}
+	if err := r.db.WithContext(ctx).Where("email = ?", email).First(user).Error; err != nil {
 		return nil, r.returnError(ctx, err)
 	}
-	return &user, nil
+	return user, nil
 }
 func (r *UserRepo) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
 	if err := r.db.WithContext(ctx).Save(user).Error; err != nil {
@@ -64,16 +64,16 @@ func (r *UserRepo) Update(ctx context.Context, user *domain.User) (*domain.User,
 }
 
 func (r *UserRepo) GetPaymentsById(ctx context.Context, id uuid.UUID) ([]domain.Payment, error) {
-	var user domain.User
-	if err := r.db.WithContext(ctx).Preload("Payments").Where("id = ?", id).First(&user).Error; err != nil {
+	user := &domain.User{}
+	if err := r.db.WithContext(ctx).Preload("Payments").Where("id = ?", id).First(user).Error; err != nil {
 		return nil, r.returnError(ctx, err)
 	}
 	return user.Payments, nil
 }
 
 func (r *UserRepo) GetOrdersById(ctx context.Context, id uuid.UUID) ([]domain.Order, error) {
-	var user domain.User
-	if err := r.db.WithContext(ctx).Preload("Orders").Where("id = ?", id).First(&user).Error; err != nil {
+	user := &domain.User{}
+	if err := r.db.WithContext(ctx).Preload("Orders").Where("id = ?", id).First(user).Error; err != nil {
 		return nil, r.returnError(ctx, err)
 	}
 	return user.Orders, nil

@@ -14,11 +14,11 @@ type GenreRepo struct {
 }
 
 func (g GenreRepo) GetList(ctx context.Context) ([]*domain.Genre, error) {
-	var list []*domain.Genre
-	if err := g.db.WithContext(ctx).Find(&list).Error; err != nil {
+	var genres []*domain.Genre
+	if err := g.db.WithContext(ctx).Find(&genres).Error; err != nil {
 		return nil, g.returnError(ctx, err)
 	}
-	return list, nil
+	return genres, nil
 }
 
 func (g GenreRepo) GetByID(ctx context.Context, id string) (*domain.Genre, error) {
@@ -26,7 +26,7 @@ func (g GenreRepo) GetByID(ctx context.Context, id string) (*domain.Genre, error
 	if err != nil {
 		return nil, err
 	}
-	var genre *domain.Genre
+	genre := &domain.Genre{}
 	if err := g.db.WithContext(ctx).Where("id = ?", parse).First(&genre).Error; err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (g GenreRepo) GetByIDs(ctx context.Context, ids []string) ([]domain.Genre, 
 	}
 
 	var genres []domain.Genre
-	if err := g.db.WithContext(ctx).Where("id in (?)", uuids).Find(genres).Error; err != nil {
+	if err := g.db.WithContext(ctx).Where("id in (?)", uuids).Find(&genres).Error; err != nil {
 		return nil, g.returnError(ctx, err)
 	}
 	return genres, nil

@@ -8,18 +8,19 @@ import (
 )
 
 type Movie struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Title       string    `gorm:"type:varchar(255);not null"`
-	Duration    int       `gorm:"not null"`
-	PosterURL   string    `gorm:"type:text"`
-	Director    string    `gorm:"type:varchar(255)"`
-	Caster      string    `gorm:"type:text"`
-	Description string    `gorm:"type:text"`
-	ReleaseDate time.Time `gorm:"not null"`
-	TrailerURL  string    `gorm:"type:text"`
-	Status      string    `gorm:"not null;default:showing"`
-	CreatedAt   time.Time `gorm:"autoCreateTime"`
-	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
+	ID             uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Title          string    `gorm:"type:varchar(255);not null"`
+	Duration       int       `gorm:"not null"`
+	PosterURL      string    `gorm:"type:text"`
+	LargePosterURL string    `gorm:"type:text"`
+	Director       string    `gorm:"type:varchar(255)"`
+	Caster         string    `gorm:"type:text"`
+	Description    string    `gorm:"type:text"`
+	ReleaseDate    time.Time `gorm:"not null"`
+	TrailerURL     string    `gorm:"type:text"`
+	Status         string    `gorm:"not null;default:new"`
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 
 	Showtimes []Showtime `gorm:"foreignKey:MovieID;constraint:OnDelete:CASCADE"`
 	Genres    []Genre    `gorm:"many2many:movie_genre"`

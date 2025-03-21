@@ -45,15 +45,20 @@ func (m *MovieService) GetDetail(ctx context.Context, id string) (*domain.Movie,
 func (m *MovieService) Create(ctx context.Context, req request.CreateMovieRequest) (*domain.Movie, error) {
 	caller := "MovieService.Create"
 
-	url, err := m.upload.UploadFile(ctx, req.PosterImage)
+	pUrl, err := m.upload.UploadFile(ctx, req.PosterImage)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to upload movie poster", caller)
+	}
+
+	lUrl, err := m.upload.UploadFile(ctx, req.LargePosterImage)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to upload movie large poster", caller)
 	}
 
 	releaseDate, err := time.Parse("02-01-2006", req.ReleaseDate)
 
 	if err != nil {
-		return nil, fault.Wrapf(err, "[%v] failed to parse release date", caller).SetTag(fault.TagBadRequest)
+		return nil, fault.Wrapf(err, "[%v] failed to parse release date", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyMovie)
 	}
 
 	listGenre, err := m.genreRepo.GetByIDs(ctx, req.Genres)
@@ -62,15 +67,16 @@ func (m *MovieService) Create(ctx context.Context, req request.CreateMovieReques
 	}
 
 	movie, err := m.movieRepo.Create(ctx, &domain.Movie{
-		Title:       req.Title,
-		Duration:    req.Duration,
-		PosterURL:   url,
-		Director:    req.Director,
-		Caster:      req.Caster,
-		Description: req.Description,
-		ReleaseDate: releaseDate,
-		TrailerURL:  req.TrailerURL,
-		Genres:      listGenre,
+		Title:          req.Title,
+		Duration:       req.Duration,
+		PosterURL:      pUrl,
+		LargePosterURL: lUrl,
+		Director:       req.Director,
+		Caster:         req.Caster,
+		Description:    req.Description,
+		ReleaseDate:    releaseDate,
+		TrailerURL:     req.TrailerURL,
+		Genres:         listGenre,
 	})
 	if err != nil {
 		return nil, err
@@ -89,7 +95,7 @@ func (m *MovieService) Update(ctx context.Context, req request.UpdateMovieReques
 	releaseDate, err := time.Parse("02-01-2006", req.ReleaseDate)
 
 	if err != nil {
-		return nil, fault.Wrapf(err, "[%v] failed to parse release date", caller).SetTag(fault.TagBadRequest)
+		return nil, fault.Wrapf(err, "[%v] failed to parse release date", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyMovie)
 	}
 
 	listGenre, err := m.genreRepo.GetByIDs(ctx, req.Genres)

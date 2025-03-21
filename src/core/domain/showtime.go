@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"time"
 )
@@ -10,6 +11,7 @@ type Showtime struct {
 	MovieID   uuid.UUID `gorm:"type:uuid;not null"`
 	RoomID    uuid.UUID `gorm:"type:uuid;not null"`
 	StartTime time.Time `gorm:"not null"`
+	EndTime   time.Time `gorm:"not null"`
 	Price     float64   `gorm:"not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
@@ -21,4 +23,9 @@ type Showtime struct {
 
 func (*Showtime) TableName() string {
 	return "showtime"
+}
+
+type ShowtimeRepo interface {
+	Create(ctx context.Context, showtime *Showtime) (*Showtime, error)
+	FindConflictByRoomId(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time) ([]Showtime, error)
 }

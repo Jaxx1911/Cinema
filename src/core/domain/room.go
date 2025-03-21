@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"time"
 )
@@ -10,7 +11,7 @@ type Room struct {
 	CinemaID    uuid.UUID `gorm:"type:uuid;not null"`
 	Name        string    `gorm:"type:varchar(100);not null"`
 	Capacity    int       `gorm:"not null"`
-	Type        string    `gorm:"type:varchar(50);not null"` // 2D, 3D, IMAX, 4DX
+	Type        string    `gorm:"type:varchar(50);not null"` // 2D, 3D, IMAX
 	RowCount    int       `gorm:"not null"`
 	ColumnCount int       `gorm:"not null"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
@@ -22,6 +23,11 @@ type Room struct {
 
 func (*Room) TableName() string {
 	return "room"
+}
+
+type RoomRepo interface {
+	Create(ctx context.Context, room *Room) error
+	GetById(ctx context.Context, roomID string) (*Room, error)
 }
 
 type Seat struct {

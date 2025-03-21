@@ -23,9 +23,9 @@ func NewBaseRepo(db *gorm.DB, cache *cache.RedisCache) *BaseRepo {
 
 func (b *BaseRepo) returnError(ctx context.Context, err error) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return fault.Wrapf(err, "[%v] record not found", "DB").SetTag(fault.TagNotFound)
+		return fault.Wrapf(err, "[%v] record not found", "DB").SetTag(fault.TagNotFound).SetKey(fault.KeyDb)
 	}
-	return fault.Wrapf(err, "internal")
+	return fault.Wrapf(err, "internal").SetKey(fault.KeyDb)
 }
 
 func (b *BaseRepo) toLimitOffset(ctx context.Context, page request.Page) (int, int) {

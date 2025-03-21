@@ -45,7 +45,7 @@ func (u *UserService) Create(ctx context.Context, req *request.UserInfo) (*domai
 
 	hashedPw, err := u.hashProvider.Hash(strings.TrimSuffix(req.Email, "@gmail.com"))
 	if err != nil {
-		return nil, fault.Wrapf(err, "[%v] failed to hash email", caller)
+		return nil, fault.Wrapf(err, "[%v] failed to hash email", caller).SetKey(fault.KeyUser)
 	}
 	user.PasswordHash = hashedPw
 	user, err = u.userRepo.Create(ctx, user)

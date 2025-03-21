@@ -51,7 +51,7 @@ func NewGmailService() *GmailService {
 	return &GmailService{srv}
 }
 
-func (g *GmailService) SendEmaiOAuth2(title, to string, data interface{}, template string) error {
+func (g *GmailService) SendEmailOAuth2(title, to string, data interface{}, template string) error {
 	emailBody, err := g.parseTemplate(template, data)
 	if err != nil {
 		return errors.New("unable to parse email template")

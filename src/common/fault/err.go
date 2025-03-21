@@ -6,25 +6,40 @@ import (
 	"gorm.io/gorm"
 )
 
-// Danh sách tag lỗi có sẵn
 const (
 	TagBadRequest     = "BAD_REQUEST" // 400
 	TagUnAuthorize    = "UnAuthorize" // 401
 	TagNotFound       = "NOT_FOUND"
 	TagInternalServer = "INTERNAL_SERVER" // 500
+	TagDuplicate      = "DUPLICATE"
 )
 
-// Error FaultError chứa thông tin lỗi, caller, tag
+const (
+	KeyAuth     = "auth"
+	KeyUser     = "user"
+	KeyMovie    = "movie"
+	KeyShowtime = "showtime"
+	KeyOtp      = "otp"
+	KeyRoom     = "room"
+	KeyOrder    = "order"
+	KeyPayment  = "payment"
+	KeyCombo    = "combo"
+	KeyCinema   = "cinema"
+	KeyTicket   = "ticket"
+	KeyDb       = "DB"
+)
+
 type Error struct {
 	Message string
 	Err     error
 	Tag     string
+	Key     string
 }
 
 // Implement error interface
 func (e *Error) Error() string {
 	if e.Err != nil {
-		return fmt.Sprintf("%s -> %v", e.Message, e.Err)
+		return fmt.Sprintf("error: %v, key: %s", e.Err, e.Key)
 	}
 	return fmt.Sprintf("%s", e.Message)
 }
@@ -54,6 +69,11 @@ func (e *Error) SetTag(tag string) *Error {
 	return e
 }
 
+func (e *Error) SetKey(key string) *Error {
+	e.Key = key
+	return e
+}
+
 var TagMap = map[string]int{
 	TagBadRequest:     400,
 	TagUnAuthorize:    401,
@@ -77,6 +97,14 @@ func GetMessage(err error) string {
 		return fault.Message
 	}
 	return err.Error()
+}
+
+func GetKey(err error) string {
+	var fault *Error
+	if errors.As(err, &fault) {
+		return fault.Key
+	}
+	return ""
 }
 
 var (

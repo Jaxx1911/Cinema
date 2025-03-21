@@ -11,8 +11,10 @@ import (
 const SuccessCode = 0
 
 type Response struct {
+	Key     string      `json:"key"`
 	Body    interface{} `json:"body"`
 	Message string      `json:"message"`
+	Error   string      `json:"error"`
 }
 
 type BaseController struct {
@@ -54,7 +56,9 @@ func (*BaseController) ServeErrResponse(c *gin.Context, err error, statusCodes .
 	}
 
 	errRes := Response{
+		Key:     fault.GetKey(err),
 		Message: fault.GetMessage(err),
+		Error:   err.Error(),
 		Body:    nil,
 	}
 

@@ -11,11 +11,12 @@ import (
 
 type IRouter struct {
 	fx.In
-	Engine          *gin.Engine
-	AuthHolder      *middleware.AuthMiddleware
-	AuthController  *controller.AuthController
-	UserController  *controller.UserController
-	MovieController *controller.MovieController
+	Engine             *gin.Engine
+	AuthHolder         *middleware.AuthMiddleware
+	AuthController     *controller.AuthController
+	UserController     *controller.UserController
+	MovieController    *controller.MovieController
+	ShowtimeController *controller.ShowtimeController
 }
 
 func RegisterHandler(engine *gin.Engine) {
@@ -35,13 +36,16 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerAuthRouters(r, in)
 	registerUsersRouters(r, in)
 	registerMovieRouters(r, in)
+	registerShowtimeRouter(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
 	{
-		authRouter.GET("/otp/:email", in.AuthController.GetOTP)
+		authRouter.GET("/otp/:email", in.AuthController.SignUpOTP)
 		authRouter.POST("/signup", in.AuthController.SignUp)
 		authRouter.POST("/login", in.AuthController.Login)
+		authRouter.GET("/reset-otp/:email", in.AuthController.ResetOTP)
+		authRouter.POST("/reset-password", in.AuthController.ResetPassword)
 		authRouter.Use(in.AuthHolder.RequireAuth())
 		authRouter.POST("/change-password", in.AuthController.ChangePassword)
 		//authRouter.GET("/login-google", in.AuthController.LoginGoogle)
@@ -72,5 +76,12 @@ func registerMovieRouters(root *gin.RouterGroup, in IRouter) {
 		movieRouter.POST("", in.MovieController.Create)
 		movieRouter.PUT("/:id", in.MovieController.Update)
 		movieRouter.PUT("/:id/poster", in.MovieController.UpdatePoster)
+	}
+}
+
+func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
+	showtimeRouter := root.Group("/showtime")
+	{
+		showtimeRouter.POST("", in.ShowtimeController.Create)
 	}
 }

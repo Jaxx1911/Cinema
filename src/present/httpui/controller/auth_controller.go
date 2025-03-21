@@ -20,20 +20,56 @@ func NewAuthController(baseController *BaseController, authService *service.Auth
 	}
 }
 
-func (a *AuthController) GetOTP(ctx *gin.Context) {
+func (a *AuthController) SignUpOTP(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "AuthController.GetOTP"
 
 	email := ctx.Param("email")
 
-	_, err := a.authService.GenOTP(ctxReq, email)
+	_, err := a.authService.SignUpOTP(ctxReq, email)
 	if err != nil {
-		log.Error(ctxReq, "[%v] failed to GenOTP: %+v", caller, err)
+		log.Error(ctxReq, "[%v] failed to SignUpOTP: %+v", caller, err)
 		a.ServeErrResponse(ctx, err)
 		return
 	}
 	a.ServeSuccessResponse(ctx, true)
 	return
+}
+
+func (a *AuthController) ResetOTP(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "AuthController.GetOTP"
+
+	email := ctx.Param("email")
+
+	_, err := a.authService.ResetOTP(ctxReq, email)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to SignUpOTP: %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+	a.ServeSuccessResponse(ctx, true)
+	return
+}
+
+func (a *AuthController) ResetPassword(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "AuthController.ResetPassword"
+
+	var req request.ResetPasswordRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		log.Error(ctxReq, "[%v] failed to Bind: %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+
+	err := a.authService.ResetPassword(ctx, &req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to ResetPassword: %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+	a.ServeSuccessResponse(ctx, true)
 }
 
 func (a *AuthController) SignUp(ctx *gin.Context) {

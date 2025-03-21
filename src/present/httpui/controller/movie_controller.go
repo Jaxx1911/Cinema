@@ -4,6 +4,7 @@ import (
 	"TTCS/src/common/log"
 	"TTCS/src/core/service"
 	"TTCS/src/present/httpui/request"
+	"TTCS/src/present/httpui/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +27,7 @@ func (m *MovieController) GetList(ctx *gin.Context) {
 	status := ctx.Query("status")
 
 	var page request.Page
-	if err := ctx.ShouldBindJSON(&page); err != nil {
+	if err := ctx.ShouldBindQuery(&page); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
 		m.ServeErrResponse(ctx, err)
 		return
@@ -40,7 +41,7 @@ func (m *MovieController) GetList(ctx *gin.Context) {
 		m.ServeErrResponse(ctx, err)
 		return
 	}
-	m.ServeSuccessResponse(ctx, movies)
+	m.ServeSuccessResponse(ctx, response.ToListMoviesResponse(movies))
 }
 
 func (m *MovieController) GetDetail(ctx *gin.Context) {
@@ -61,7 +62,7 @@ func (m *MovieController) Create(ctx *gin.Context) {
 	caller := "UserController.Create"
 
 	var req request.CreateMovieRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBind(&req); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
 		m.ServeErrResponse(ctx, err)
 		return
