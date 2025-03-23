@@ -7,9 +7,8 @@ type CreateShowtime struct {
 	Price     float64 `json:"price"`
 }
 
-type GetShowtimesByFilter struct {
-	CinemaId string `json:"cinema_id,omitempty"`
-	MovieId  string `json:"movie_id,omitempty"`
-	RoomId   string `json:"room_id,omitempty"`
-	Date     string `json:"date,omitempty"`
+type GetShowtimesByUserFilter struct {
+	CinemaId string `json:"cinema_id" binding:"required" form:"cinema_id"`
+	MovieId  string `json:"movie_id" binding:"required" form:"movie_id"`
+	Day      string `json:"day" binding:"required" form:"day"`
 }

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type MovieResponse struct {
+type MovieDetailResponse struct {
 	ID             uuid.UUID `json:"id"`
 	Title          string    `json:"title"`
 	Duration       int       `json:"duration"`
@@ -19,9 +19,22 @@ type MovieResponse struct {
 	TrailerURL     string    `json:"trailer_url"`
 	Status         string    `json:"status"`
 	Genres         []string  `json:"genres"`
+	Tag            string    `json:"tag"`
 }
 
-func ToMovieResponse(movie *domain.Movie) *MovieResponse {
+type MovieOfListResponse struct {
+	ID             uuid.UUID `json:"id"`
+	Title          string    `json:"title"`
+	Duration       int       `json:"duration"`
+	PosterURL      string    `json:"poster_url"`
+	LargePosterURL string    `json:"large_poster_url"`
+	Description    string    `json:"description"`
+	TrailerURL     string    `json:"trailer_url"`
+	Genres         []string  `json:"genres"`
+	Tag            string    `json:"tag"`
+}
+
+func ToMovieDetailResponse(movie *domain.Movie) *MovieDetailResponse {
 	var status string
 	if movie.ReleaseDate.After(time.Now()) {
 		status = "incoming"
@@ -32,7 +45,7 @@ func ToMovieResponse(movie *domain.Movie) *MovieResponse {
 	for _, genre := range movie.Genres {
 		genres = append(genres, genre.Name)
 	}
-	return &MovieResponse{
+	return &MovieDetailResponse{
 		ID:             movie.ID,
 		Title:          movie.Title,
 		Duration:       movie.Duration,
@@ -45,18 +58,30 @@ func ToMovieResponse(movie *domain.Movie) *MovieResponse {
 		TrailerURL:     movie.TrailerURL,
 		Status:         status,
 		Genres:         genres,
+		Tag:            movie.Tag,
 	}
 }
 
-func ToListMoviesResponse(movies []*domain.Movie) []*MovieResponse {
-	var movieResponses []*MovieResponse
+func ToListMoviesResponse(movies []*domain.Movie) []*MovieOfListResponse {
+	var movieResponses []*MovieOfListResponse
+
 	for _, movie := range movies {
-		var movieResponse = ToMovieResponse(movie)
+		genres := make([]string, 0)
+		for _, genre := range movie.Genres {
+			genres = append(genres, genre.Name)
+		}
+		var movieResponse = &MovieOfListResponse{
+			ID:             movie.ID,
+			Title:          movie.Title,
+			Duration:       movie.Duration,
+			PosterURL:      movie.PosterURL,
+			LargePosterURL: movie.LargePosterURL,
+			Description:    movie.Description,
+			TrailerURL:     movie.TrailerURL,
+			Genres:         genres,
+			Tag:            movie.Tag,
+		}
 		movieResponses = append(movieResponses, movieResponse)
 	}
 	return movieResponses
-}
-
-type MovieDetailResponse struct {
-	MovieResponse
 }

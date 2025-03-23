@@ -77,6 +77,7 @@ func (m *MovieService) Create(ctx context.Context, req request.CreateMovieReques
 		ReleaseDate:    releaseDate,
 		TrailerURL:     req.TrailerURL,
 		Genres:         listGenre,
+		Tag:            req.Tag,
 	})
 	if err != nil {
 		return nil, err

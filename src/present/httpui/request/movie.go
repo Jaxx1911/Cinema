@@ -16,6 +16,7 @@ type CreateMovieRequest struct {
 	TrailerURL       string                `form:"trailer_url" binding:"required"`
 	Status           string                `form:"status" binding:"required"`
 	Genres           []string              `form:"genres" binding:"required"`
+	Tag              string                `form:"tag" binding:"required"`
 }
 
 type UpdateMovieRequest struct {

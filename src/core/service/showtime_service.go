@@ -37,7 +37,7 @@ func (s *ShowtimeService) Create(ctx context.Context, req request.CreateShowtime
 		return nil, err
 	}
 
-	startTime, err := time.Parse("02-01-2006 15:04", req.StartTime)
+	startTime, err := time.ParseInLocation("02-01-2006 15:04", req.StartTime, time.FixedZone("UTC+7", 7*60*60))
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to parse start time", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
 	}
@@ -87,4 +87,18 @@ func (s *ShowtimeService) roundToNextHour(t time.Time) time.Time {
 		roundedTime = t.Add(time.Hour - time.Duration(t.Minute())*time.Minute)
 	}
 	return roundedTime.Add(30 * time.Minute)
+}
+
+func (s *ShowtimeService) GetByUserFilter(ctx context.Context, filter request.GetShowtimesByUserFilter) ([]*domain.Showtime, error) {
+	caller := "ShowtimeService.GetByUserFilter"
+	day, err := time.ParseInLocation("02-01-2006", filter.Day, time.FixedZone("UTC+7", 7*60*60))
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to parse day", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+
+	showtimes, err := s.ShowtimeRepo.GetListByFilter(ctx, filter.MovieId, filter.CinemaId, day)
+	if err != nil {
+		return nil, err
+	}
+	return showtimes, nil
 }

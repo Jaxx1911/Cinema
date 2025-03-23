@@ -19,6 +19,7 @@ type Movie struct {
 	ReleaseDate    time.Time `gorm:"not null"`
 	TrailerURL     string    `gorm:"type:text"`
 	Status         string    `gorm:"not null;default:new"`
+	Tag            string    `gorm:"type:varchar(255)"`
 	CreatedAt      time.Time `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 

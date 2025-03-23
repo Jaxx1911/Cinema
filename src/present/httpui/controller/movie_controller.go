@@ -54,7 +54,7 @@ func (m *MovieController) GetDetail(ctx *gin.Context) {
 		m.ServeErrResponse(ctx, err)
 		return
 	}
-	m.ServeSuccessResponse(ctx, movie)
+	m.ServeSuccessResponse(ctx, response.ToMovieDetailResponse(movie))
 }
 
 func (m *MovieController) Create(ctx *gin.Context) {

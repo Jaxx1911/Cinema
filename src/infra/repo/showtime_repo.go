@@ -27,15 +27,27 @@ func (s *ShowtimeRepo) Create(ctx context.Context, showtime *domain.Showtime) (*
 	return showtime, nil
 }
 
-func (s *ShowtimeRepo) GetListByMovieId(ctx context.Context, movieId string) ([]*domain.Showtime, error) {
-	//uuid, err := uuid.Parse(movieId)
-	//if err != nil {
-	//	return nil, s.returnError(ctx, err)
-	//}
-	//var showtimes []*domain.Showtime
-	//if err := s.db.WithContext(ctx).Where("movie_id = ?", uuid).Find(&showtimes).Error; err != nil {
-	//}
-	return nil, nil
+func (s *ShowtimeRepo) GetListByFilter(ctx context.Context, movieId string, cinemaId string, day time.Time) ([]*domain.Showtime, error) {
+	movieUID, err := uuid.Parse(movieId)
+	if err != nil {
+		return nil, s.returnError(ctx, err)
+	}
+	cinemaUID, err := uuid.Parse(cinemaId)
+	if err != nil {
+		return nil, s.returnError(ctx, err)
+	}
+
+	var showtimes []*domain.Showtime
+
+	if err := s.db.WithContext(ctx).
+		Preload("Room").
+		Joins("JOIN room ON room.id = showtime.room_id").
+		Where("showtime.movie_id = ? AND room.cinema_id = ? AND DATE(showtime.start_time) >= ? AND DATE(showtime.start_time) < ?", movieUID, cinemaUID, day, day.Add(24*time.Hour)).
+		Order("start_time asc").
+		Find(&showtimes).Error; err != nil {
+		return nil, s.returnError(ctx, err)
+	}
+	return showtimes, nil
 }
 
 func (s *ShowtimeRepo) FindConflictByRoomId(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time) ([]domain.Showtime, error) {

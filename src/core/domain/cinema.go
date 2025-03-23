@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"time"
 )
@@ -16,7 +17,10 @@ type Cinema struct {
 	Rooms []Room `gorm:"foreignKey:CinemaID"`
 }
 
-type CinemaRepository interface {
+type CinemaRepo interface {
+	Create(ctx context.Context, cinema *Cinema) (*Cinema, error)
+	GetList(ctx context.Context) ([]*Cinema, error)
+	GetListByCity(ctx context.Context, city string) ([]*Cinema, error)
 }
 
 func (*Cinema) TableName() string {

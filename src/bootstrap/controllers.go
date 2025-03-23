@@ -14,6 +14,7 @@ func BuildControllers() fx.Option {
 		fx.Provide(controller.NewUserController),
 		fx.Provide(controller.NewMovieController),
 		fx.Provide(controller.NewShowtimeController),
+		fx.Provide(controller.NewCinemaController),
 	)
 }
 

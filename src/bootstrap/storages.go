@@ -31,6 +31,7 @@ func BuildDatabasesModule() fx.Option {
 		fx.Provide(repo.NewShowtimeRepo),
 		fx.Provide(repo.NewRoomRepo),
 		fx.Provide(repo.NewTicketRepo),
+		fx.Provide(repo.NewCinemaRepo),
 	)
 }
 

@@ -39,3 +39,23 @@ func (s *ShowtimeController) Create(ctx *gin.Context) {
 	}
 	s.ServeSuccessResponse(ctx, response.ToShowtimeResponse(*showtime))
 }
+
+func (s *ShowtimeController) GetByUserFilter(ctx *gin.Context) {
+	caller := "ShowtimeController.GetByMovieId"
+	ctxReq := ctx.Request.Context()
+
+	var req request.GetShowtimesByUserFilter
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid query %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	showtimes, err := s.ShowtimeService.GetByUserFilter(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+	s.ServeSuccessResponse(ctx, response.ToListShowtimeWithRoom(showtimes))
+}

@@ -17,6 +17,7 @@ type IRouter struct {
 	UserController     *controller.UserController
 	MovieController    *controller.MovieController
 	ShowtimeController *controller.ShowtimeController
+	CinemaController   *controller.CinemaController
 }
 
 func RegisterHandler(engine *gin.Engine) {
@@ -37,6 +38,7 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerUsersRouters(r, in)
 	registerMovieRouters(r, in)
 	registerShowtimeRouter(r, in)
+	registerCinemaRouter(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -83,5 +85,13 @@ func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
 	showtimeRouter := root.Group("/showtime")
 	{
 		showtimeRouter.POST("", in.ShowtimeController.Create)
+		showtimeRouter.GET("", in.ShowtimeController.GetByUserFilter)
+	}
+}
+
+func registerCinemaRouter(root *gin.RouterGroup, in IRouter) {
+	showtimeRouter := root.Group("/cinema")
+	{
+		showtimeRouter.GET("", in.CinemaController.GetList)
 	}
 }
