@@ -26,3 +26,11 @@ func ToRoomResponse(room *domain.Room) Room {
 		ColumnCount: room.ColumnCount,
 	}
 }
+
+func ToListRoomResponse(rooms []domain.Room) []Room {
+	var list []Room
+	for _, room := range rooms {
+		list = append(list, ToRoomResponse(&room))
+	}
+	return list
+}

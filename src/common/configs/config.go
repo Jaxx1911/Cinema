@@ -1,6 +1,9 @@
 package configs
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	Mode string `mapstructure:"mode"`
@@ -62,6 +65,7 @@ func InitConfig(path string) error {
 		return err
 	}
 	err = viper.Unmarshal(&common)
-
+	x := common
+	fmt.Println(x)
 	return err
 }

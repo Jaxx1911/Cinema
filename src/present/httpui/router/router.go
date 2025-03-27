@@ -86,12 +86,15 @@ func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
 	{
 		showtimeRouter.POST("", in.ShowtimeController.Create)
 		showtimeRouter.GET("", in.ShowtimeController.GetByUserFilter)
+		showtimeRouter.GET("/cinema", in.ShowtimeController.GetByCinemaId)
 	}
 }
 
 func registerCinemaRouter(root *gin.RouterGroup, in IRouter) {
-	showtimeRouter := root.Group("/cinema")
+	cinemaRouter := root.Group("/cinema")
 	{
-		showtimeRouter.GET("", in.CinemaController.GetList)
+		cinemaRouter.GET("", in.CinemaController.GetList)
+		cinemaRouter.GET("/facilities", in.CinemaController.GetFacilities)
+		cinemaRouter.GET("/:id", in.CinemaController.GetCinemaDetail)
 	}
 }

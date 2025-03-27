@@ -34,3 +34,19 @@ func (c *CinemaService) GetListByCity(ctx context.Context, city string) ([]*doma
 	}
 	return cinemas, nil
 }
+
+func (c *CinemaService) GetWithRoomsByCity(ctx context.Context, city string) ([]*domain.Cinema, error) {
+	cinemas, err := c.cinemaRepo.GetWithRoomsByCity(ctx, city)
+	if err != nil {
+		return nil, err
+	}
+	return cinemas, nil
+}
+
+func (c *CinemaService) GetDetail(ctx context.Context, id string) (*domain.Cinema, error) {
+	cinema, err := c.cinemaRepo.GetDetail(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return cinema, nil
+}

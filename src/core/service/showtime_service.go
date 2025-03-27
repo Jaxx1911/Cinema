@@ -6,6 +6,7 @@ import (
 	"TTCS/src/present/httpui/request"
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -96,7 +97,35 @@ func (s *ShowtimeService) GetByUserFilter(ctx context.Context, filter request.Ge
 		return nil, fault.Wrapf(err, "[%v] failed to parse day", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
 	}
 
-	showtimes, err := s.ShowtimeRepo.GetListByFilter(ctx, filter.MovieId, filter.CinemaId, day)
+	movieId, err := uuid.Parse(filter.MovieId)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] invalid uuid", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyMovie)
+	}
+	cinemaId, err := uuid.Parse(filter.CinemaId)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] invalid uuid", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyCinema)
+	}
+
+	showtimes, err := s.ShowtimeRepo.GetListByFilter(ctx, movieId, cinemaId, day)
+	if err != nil {
+		return nil, err
+	}
+	return showtimes, nil
+}
+
+func (s *ShowtimeService) GetByCinemaFilter(ctx context.Context, filter request.GetShowtimesByCinemaIdFilter) ([]*domain.Showtime, error) {
+	caller := "ShowtimeService.GetByCinemaFilter"
+	day, err := time.ParseInLocation("02-01-2006", filter.Day, time.FixedZone("UTC+7", 7*60*60))
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to parse day", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+
+	cinemaId, err := uuid.Parse(filter.CinemaId)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] invalid uuid", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyCinema)
+	}
+
+	showtimes, err := s.ShowtimeRepo.GetListByCinemaFilter(ctx, cinemaId, day)
 	if err != nil {
 		return nil, err
 	}

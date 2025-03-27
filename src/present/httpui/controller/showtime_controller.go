@@ -33,7 +33,7 @@ func (s *ShowtimeController) Create(ctx *gin.Context) {
 
 	showtime, err := s.ShowtimeService.Create(ctxReq, req)
 	if err != nil {
-		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		log.Error(ctxReq, "[%v] failed to create showtimes %+v", caller, err)
 		s.ServeErrResponse(ctx, err)
 		return
 	}
@@ -53,7 +53,27 @@ func (s *ShowtimeController) GetByUserFilter(ctx *gin.Context) {
 
 	showtimes, err := s.ShowtimeService.GetByUserFilter(ctxReq, req)
 	if err != nil {
-		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		log.Error(ctxReq, "[%v] failed to get showtimes %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+	s.ServeSuccessResponse(ctx, response.ToListShowtimeWithRoom(showtimes))
+}
+
+func (s *ShowtimeController) GetByCinemaId(ctx *gin.Context) {
+	caller := "ShowtimeController.GetByCinemaId"
+	ctxReq := ctx.Request.Context()
+
+	var req request.GetShowtimesByCinemaIdFilter
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid query %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	showtimes, err := s.ShowtimeService.GetByCinemaFilter(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to get showtimes %+v", caller, err)
 		s.ServeErrResponse(ctx, err)
 		return
 	}

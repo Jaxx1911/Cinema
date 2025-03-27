@@ -7,12 +7,13 @@ import (
 )
 
 type Cinema struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Name      string    `gorm:"type:varchar(255);not null"`
-	Address   string    `gorm:"type:text;not null"`
-	Phone     string    `gorm:"type:varchar(20)"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name         string    `gorm:"type:varchar(255);not null"`
+	Address      string    `gorm:"type:text;not null"`
+	Phone        string    `gorm:"type:varchar(20)"`
+	OpeningHours string    `gorm:"type:text"`
+	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 
 	Rooms []Room `gorm:"foreignKey:CinemaID"`
 }
@@ -21,6 +22,8 @@ type CinemaRepo interface {
 	Create(ctx context.Context, cinema *Cinema) (*Cinema, error)
 	GetList(ctx context.Context) ([]*Cinema, error)
 	GetListByCity(ctx context.Context, city string) ([]*Cinema, error)
+	GetWithRoomsByCity(ctx context.Context, city string) ([]*Cinema, error)
+	GetDetail(ctx context.Context, id string) (*Cinema, error)
 }
 
 func (*Cinema) TableName() string {

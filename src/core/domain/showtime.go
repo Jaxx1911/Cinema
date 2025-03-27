@@ -28,5 +28,6 @@ func (*Showtime) TableName() string {
 type ShowtimeRepo interface {
 	Create(ctx context.Context, showtime *Showtime) (*Showtime, error)
 	FindConflictByRoomId(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time) ([]Showtime, error)
-	GetListByFilter(ctx context.Context, movieId string, cinemaId string, day time.Time) ([]*Showtime, error)
+	GetListByFilter(ctx context.Context, movieId uuid.UUID, cinemaId uuid.UUID, day time.Time) ([]*Showtime, error)
+	GetListByCinemaFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
 }
