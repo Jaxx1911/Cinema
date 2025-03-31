@@ -27,6 +27,7 @@ type User struct {
 	Email     string    `json:"email"`
 	Phone     string    `json:"phone"`
 	Role      string    `json:"role"`
+	AvatarURL string    `json:"avatar_url"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -38,6 +39,7 @@ func UserFromDomain(d *domain.User) *User {
 		Email:     d.Email,
 		Phone:     d.Phone,
 		Role:      d.Role,
+		AvatarURL: d.AvatarUrl,
 		CreatedAt: d.CreatedAt,
 		UpdatedAt: d.UpdatedAt,
 	}

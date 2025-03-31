@@ -138,3 +138,13 @@ func (m *MovieService) UpdatePoster(ctx context.Context, id string, posterImage 
 	}
 	return movie, nil
 }
+
+func (m *MovieService) GetListInDateRange(ctx context.Context) ([]*domain.Movie, error) {
+	dayStart := time.Now()
+	dayEnd := time.Now().AddDate(0, 0, 5)
+	movies, err := m.movieRepo.GetListInDateRange(ctx, dayStart, dayEnd)
+	if err != nil {
+		return nil, err
+	}
+	return movies, nil
+}

@@ -32,7 +32,7 @@ func (a *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 			log.Error(ctx, err.Error())
 			a.ServeErrResponse(c, fault.Wrapf(err, "[%v] token is empty", caller))
 		}
-		user, err := a.authService.VerifyToken(ctx, token)
+		user, err := a.authService.VerifyToken(ctx, token[7:])
 		if err != nil {
 			log.Error(ctx, "[%v] failed to verify token :%+v", caller, err)
 			a.ServeErrResponse(c, err)

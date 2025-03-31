@@ -120,3 +120,25 @@ func (m *MovieController) UpdatePoster(ctx *gin.Context) {
 	}
 	m.ServeSuccessResponse(ctx, movie)
 }
+
+func (m *MovieController) GetListInDateRange(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "UserController.GetListInDateRange"
+
+	var page request.Page
+	if err := ctx.ShouldBindQuery(&page); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		m.ServeErrResponse(ctx, err)
+		return
+	}
+
+	page.SetDefaults()
+
+	movies, err := m.movieService.GetListInDateRange(ctxReq)
+	if err != nil {
+		log.Error(ctxReq, "[%v] get movie list failed", caller, err)
+		m.ServeErrResponse(ctx, err)
+		return
+	}
+	m.ServeSuccessResponse(ctx, response.ToListMoviesResponse(movies))
+}

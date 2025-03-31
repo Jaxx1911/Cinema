@@ -90,15 +90,15 @@ func (u *UserController) GetDetail(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "UserController.GetDetail"
 
-	id := ctx.Param("id")
-
-	user, err := u.userService.GetById(ctx, id)
-	if err != nil {
+	user, ok := ctx.Get("user")
+	if !ok {
+		err := errors.New("user not found")
 		log.Error(ctxReq, "[%v] get user info error %+v", caller, err)
 		u.ServeErrResponse(ctx, err)
 		return
 	}
-	u.ServeSuccessResponse(ctx, response.UserFromDomain(user))
+
+	u.ServeSuccessResponse(ctx, response.UserFromDomain(user.(*domain.User)))
 }
 
 func (u *UserController) GetPayments(ctx *gin.Context) {

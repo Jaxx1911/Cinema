@@ -62,7 +62,7 @@ func registerUsersRouters(root *gin.RouterGroup, in IRouter) {
 		userRouter.PUT("", in.UserController.UpdateInfo)
 		userRouter.POST("", in.UserController.Create)
 		userRouter.GET("", in.UserController.GetList)
-		userRouter.GET("/:id", in.UserController.GetDetail)
+		userRouter.GET("/detail", in.UserController.GetDetail)
 		userRouter.GET("/payments", in.UserController.GetPayments)
 		userRouter.GET("/orders", in.UserController.GetOrders)
 		userRouter.PUT("/avatar", in.UserController.ChangeAvatar)
@@ -73,6 +73,7 @@ func registerMovieRouters(root *gin.RouterGroup, in IRouter) {
 	movieRouter := root.Group("/movie")
 	{
 		movieRouter.GET("", in.MovieController.GetList)
+		movieRouter.GET("/range", in.MovieController.GetListInDateRange)
 		movieRouter.GET("/:id", in.MovieController.GetDetail)
 		movieRouter.Use(in.AuthHolder.RequireAuth())
 		movieRouter.POST("", in.MovieController.Create)

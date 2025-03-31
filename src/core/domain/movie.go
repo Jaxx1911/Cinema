@@ -49,6 +49,7 @@ type MovieRepo interface {
 	GetDetail(ctx context.Context, id string) (*Movie, error)
 	Create(ctx context.Context, movie *Movie) (*Movie, error)
 	Update(ctx context.Context, movie *Movie) (*Movie, error)
+	GetListInDateRange(ctx context.Context, startDate time.Time, endDate time.Time) ([]*Movie, error)
 }
 
 type GenreRepo interface {

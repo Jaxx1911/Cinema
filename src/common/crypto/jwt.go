@@ -63,7 +63,7 @@ func (j *jwtProvider) Verify(secret string, token string) (*Payload, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.Valid {
+	if !res.Valid {
 		return nil, fmt.Errorf("invalid token %s", token)
 	}
 	claims, ok := res.Claims.(*myClaims)
