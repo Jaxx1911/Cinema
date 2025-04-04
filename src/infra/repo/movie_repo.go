@@ -3,25 +3,19 @@ package repo
 import (
 	"TTCS/src/common/fault"
 	"TTCS/src/core/domain"
-	"TTCS/src/infra/cache"
 	"TTCS/src/present/httpui/request"
 	"context"
 	uuid2 "github.com/google/uuid"
-	"gorm.io/gorm"
 	"time"
 )
 
 type MovieRepo struct {
 	*BaseRepo
-	db    *gorm.DB
-	redis *cache.RedisCache
 }
 
-func NewMovieRepo(baseRepo *BaseRepo, db *gorm.DB, redis *cache.RedisCache) domain.MovieRepo {
+func NewMovieRepo(baseRepo *BaseRepo) domain.MovieRepo {
 	return &MovieRepo{
 		BaseRepo: baseRepo,
-		db:       db,
-		redis:    redis,
 	}
 }
 

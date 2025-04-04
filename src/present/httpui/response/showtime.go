@@ -2,6 +2,7 @@ package response
 
 import (
 	"TTCS/src/core/domain"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -36,6 +37,19 @@ type ShowtimeWithRoom struct {
 	Room Room `json:"room"`
 }
 
+type ShowtimeDetail struct {
+	ShowtimeWithRoom
+	Tickets []Ticket `json:"tickets"`
+}
+
+type Ticket struct {
+	ID         uuid.UUID  `json:"id"`
+	OrderID    *uuid.UUID `json:"order_id"`
+	ShowtimeID uuid.UUID  `json:"showtime_id"`
+	SeatID     uuid.UUID  `json:"seat_id"`
+	Status     string     `json:"status"`
+}
+
 func ToShowtimeWithRoom(showtime *domain.Showtime) ShowtimeWithRoom {
 	return ShowtimeWithRoom{
 		Id:        showtime.ID.String(),
@@ -53,6 +67,31 @@ func ToListShowtimeWithRoom(showtimes []*domain.Showtime) []ShowtimeWithRoom {
 	var list []ShowtimeWithRoom
 	for _, v := range showtimes {
 		list = append(list, ToShowtimeWithRoom(v))
+	}
+	return list
+}
+
+func ToShowtimeDetailResponse(showtime *domain.Showtime) ShowtimeDetail {
+	return ShowtimeDetail{
+		ShowtimeWithRoom: ToShowtimeWithRoom(showtime),
+		Tickets:          ToListTicketResponse(showtime.Tickets),
+	}
+}
+
+func ToTicketResponse(ticket domain.Ticket) Ticket {
+	return Ticket{
+		ID:         ticket.ID,
+		OrderID:    ticket.OrderID,
+		ShowtimeID: ticket.ShowtimeID,
+		SeatID:     ticket.SeatID,
+		Status:     ticket.Status,
+	}
+}
+
+func ToListTicketResponse(tickets []domain.Ticket) []Ticket {
+	var list []Ticket
+	for _, v := range tickets {
+		list = append(list, ToTicketResponse(v))
 	}
 	return list
 }

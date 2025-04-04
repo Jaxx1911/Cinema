@@ -43,3 +43,9 @@ type Seat struct {
 func (*Seat) TableName() string {
 	return "seat"
 }
+
+type SeatRepo interface {
+	Create(ctx context.Context, seat *Seat) error
+	GetById(ctx context.Context, seatID uuid.UUID) (*Seat, error)
+	GetByRoomID(ctx context.Context, roomID uuid.UUID) ([]Seat, error)
+}

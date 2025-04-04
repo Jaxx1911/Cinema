@@ -3,12 +3,10 @@ package repo
 import (
 	"TTCS/src/core/domain"
 	"context"
-	"gorm.io/gorm"
 )
 
 type TicketRepo struct {
 	*BaseRepo
-	db *gorm.DB
 }
 
 func (t TicketRepo) Create(ctx context.Context, ticket []*domain.Ticket) ([]*domain.Ticket, error) {
@@ -25,9 +23,8 @@ func (t TicketRepo) Update(ctx context.Context, ticket *domain.Ticket) (*domain.
 	return ticket, nil
 }
 
-func NewTicketRepo(baseRepo *BaseRepo, db *gorm.DB) domain.TicketRepo {
+func NewTicketRepo(baseRepo *BaseRepo) domain.TicketRepo {
 	return &TicketRepo{
 		BaseRepo: baseRepo,
-		db:       db,
 	}
 }

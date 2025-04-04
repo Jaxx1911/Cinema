@@ -16,9 +16,9 @@ type Showtime struct {
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 
-	Movie  Movie    `gorm:"foreignKey:MovieID"`
-	Room   Room     `gorm:"foreignKey:RoomID"`
-	Ticket []Ticket `gorm:"foreignKey:ShowtimeID"`
+	Movie   Movie    `gorm:"foreignKey:MovieID"`
+	Room    Room     `gorm:"foreignKey:RoomID"`
+	Tickets []Ticket `gorm:"foreignKey:ShowtimeID"`
 }
 
 func (*Showtime) TableName() string {
@@ -30,4 +30,5 @@ type ShowtimeRepo interface {
 	FindConflictByRoomId(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time) ([]Showtime, error)
 	GetListByFilter(ctx context.Context, movieId uuid.UUID, cinemaId uuid.UUID, day time.Time) ([]*Showtime, error)
 	GetListByCinemaFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
+	GetById(ctx context.Context, id uuid.UUID) (*Showtime, error)
 }

@@ -3,18 +3,15 @@ package repo
 import (
 	"TTCS/src/core/domain"
 	"context"
-	"gorm.io/gorm"
 )
 
 type OtpRepo struct {
 	*BaseRepo
-	db *gorm.DB
 }
 
-func NewOtpRepo(baseRepo *BaseRepo, db *gorm.DB) domain.OtpRepo {
+func NewOtpRepo(baseRepo *BaseRepo) domain.OtpRepo {
 	return &OtpRepo{
 		BaseRepo: baseRepo,
-		db:       db,
 	}
 }
 

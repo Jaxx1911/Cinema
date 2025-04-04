@@ -79,3 +79,18 @@ func (s *ShowtimeController) GetByCinemaId(ctx *gin.Context) {
 	}
 	s.ServeSuccessResponse(ctx, response.ToListShowtimeWithRoom(showtimes))
 }
+
+func (s *ShowtimeController) GetById(ctx *gin.Context) {
+	caller := "ShowtimeController.GetById"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+
+	showtime, err := s.ShowtimeService.GetById(ctxReq, id)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to get showtimes %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+	s.ServeSuccessResponse(ctx, response.ToShowtimeDetailResponse(showtime))
+}

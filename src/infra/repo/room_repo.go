@@ -4,12 +4,10 @@ import (
 	"TTCS/src/core/domain"
 	"context"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type RoomRepo struct {
 	*BaseRepo
-	db *gorm.DB
 }
 
 func (r RoomRepo) Create(ctx context.Context, room *domain.Room) error {
@@ -43,6 +41,6 @@ func (r RoomRepo) GetListByCinemaId(ctx context.Context, cinemaId string) ([]*do
 	return rooms, nil
 }
 
-func NewRoomRepo(baseRepo *BaseRepo, db *gorm.DB) domain.RoomRepo {
-	return &RoomRepo{BaseRepo: baseRepo, db: db}
+func NewRoomRepo(baseRepo *BaseRepo) domain.RoomRepo {
+	return &RoomRepo{BaseRepo: baseRepo}
 }

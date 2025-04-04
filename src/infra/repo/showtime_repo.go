@@ -62,3 +62,11 @@ func (s *ShowtimeRepo) GetListByCinemaFilter(ctx context.Context, id uuid.UUID, 
 	}
 	return showtimes, nil
 }
+
+func (s *ShowtimeRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.Showtime, error) {
+	var showtime domain.Showtime
+	if err := s.db.WithContext(ctx).Preload("Tickets").Preload("Room").Where("id = ?", id).First(&showtime).Error; err != nil {
+		return nil, s.returnError(ctx, err)
+	}
+	return &showtime, nil
+}

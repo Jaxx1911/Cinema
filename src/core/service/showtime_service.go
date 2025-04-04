@@ -131,3 +131,16 @@ func (s *ShowtimeService) GetByCinemaFilter(ctx context.Context, filter request.
 	}
 	return showtimes, nil
 }
+
+func (s *ShowtimeService) GetById(ctx context.Context, id string) (*domain.Showtime, error) {
+	caller := "ShowtimeService.GetById"
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] invalid uuid", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+	showtime, err := s.ShowtimeRepo.GetById(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	return showtime, nil
+}

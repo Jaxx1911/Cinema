@@ -34,3 +34,27 @@ func ToListRoomResponse(rooms []domain.Room) []Room {
 	}
 	return list
 }
+
+type Seat struct {
+	ID         uuid.UUID `json:"id"`
+	RowNumber  string    `json:"row_number"`  // Hàng: A, B, C...
+	SeatNumber int       `json:"seat_number"` // Số ghế trong hàng
+	Type       string    `json:"type"`
+}
+
+func ToSeatResponse(seat *domain.Seat) Seat {
+	return Seat{
+		ID:         seat.ID,
+		RowNumber:  seat.RowNumber,
+		SeatNumber: seat.SeatNumber,
+		Type:       seat.Type,
+	}
+}
+
+func ToListSeatResponse(seats []domain.Seat) []Seat {
+	var list []Seat
+	for _, seat := range seats {
+		list = append(list, ToSeatResponse(&seat))
+	}
+	return list
+}

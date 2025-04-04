@@ -5,12 +5,10 @@ import (
 	"TTCS/src/core/domain"
 	"context"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type GenreRepo struct {
 	*BaseRepo
-	db *gorm.DB
 }
 
 func (g GenreRepo) GetList(ctx context.Context) ([]*domain.Genre, error) {
@@ -58,9 +56,8 @@ func (g GenreRepo) Create(ctx context.Context, genre *domain.Genre) (*domain.Gen
 	return genre, nil
 }
 
-func NewGenreRepo(baseRepo *BaseRepo, db *gorm.DB) domain.GenreRepo {
+func NewGenreRepo(baseRepo *BaseRepo) domain.GenreRepo {
 	return &GenreRepo{
 		BaseRepo: baseRepo,
-		db:       db,
 	}
 }

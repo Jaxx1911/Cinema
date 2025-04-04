@@ -5,18 +5,15 @@ import (
 	"TTCS/src/core/domain"
 	"context"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type CinemaRepo struct {
 	*BaseRepo
-	db *gorm.DB
 }
 
-func NewCinemaRepo(baseRepo *BaseRepo, db *gorm.DB) domain.CinemaRepo {
+func NewCinemaRepo(baseRepo *BaseRepo) domain.CinemaRepo {
 	return &CinemaRepo{
 		BaseRepo: baseRepo,
-		db:       db,
 	}
 }
 

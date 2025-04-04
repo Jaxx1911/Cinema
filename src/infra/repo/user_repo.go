@@ -5,18 +5,15 @@ import (
 	"TTCS/src/present/httpui/request"
 	"context"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type UserRepo struct {
 	*BaseRepo
-	db *gorm.DB
 }
 
-func NewUserRepo(baseRepo *BaseRepo, db *gorm.DB) domain.UserRepo {
+func NewUserRepo(baseRepo *BaseRepo) domain.UserRepo {
 	return &UserRepo{
 		BaseRepo: baseRepo,
-		db:       db,
 	}
 }
 
