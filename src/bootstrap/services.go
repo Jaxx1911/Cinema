@@ -13,5 +13,6 @@ func BuildServices() fx.Option {
 		fx.Provide(service.NewShowtimeService),
 		fx.Provide(service.NewCinemaService),
 		fx.Provide(service.NewSeatService),
+		fx.Provide(service.NewComboService),
 	)
 }

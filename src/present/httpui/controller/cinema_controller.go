@@ -35,7 +35,7 @@ func (c *CinemaController) GetList(ctx *gin.Context) {
 
 	cinemas, err := c.cinemaService.GetListByCity(ctxReq, req.City)
 	if err != nil {
-		log.Error(ctxReq, "[%v] get cinema failed", caller, err)
+		log.Error(ctxReq, "[%v] get cinema failed %+v", caller, err)
 		c.ServeErrResponse(ctx, err)
 		return
 	}
@@ -55,7 +55,7 @@ func (c *CinemaController) GetFacilities(ctx *gin.Context) {
 
 	cinemasWithFacilities, err := c.cinemaService.GetWithRoomsByCity(ctxReq, req.City)
 	if err != nil {
-		log.Error(ctxReq, "[%v] get cinema failed", caller, err)
+		log.Error(ctxReq, "[%v] get cinema failed %+v", caller, err)
 		c.ServeErrResponse(ctx, err)
 		return
 	}

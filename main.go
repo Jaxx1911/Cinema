@@ -3,6 +3,7 @@ package main
 import (
 	"TTCS/src/bootstrap"
 	"TTCS/src/common/configs"
+	"TTCS/src/common/genqr"
 	"TTCS/src/common/log"
 	"context"
 	"flag"
@@ -28,6 +29,7 @@ func init() {
 		panic(err)
 	}
 	log.NewLogger()
+	genqr.InitQrService()
 	//Json float to float (default float to string)
 	decimal.MarshalJSONWithoutQuotes = true
 }

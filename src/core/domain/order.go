@@ -14,9 +14,10 @@ type Order struct {
 	CreatedAt  time.Time  `gorm:"autoCreateTime"`
 	UpdatedAt  time.Time  `gorm:"autoUpdateTime"`
 
-	User     User      `gorm:"foreignKey:UserID"`
-	Discount *Discount `gorm:"foreignKey:DiscountID"`
-	Tickets  []Ticket  `gorm:"foreignKey:OrderID"`
+	User        User         `gorm:"foreignKey:UserID"`
+	Discount    *Discount    `gorm:"foreignKey:DiscountID"`
+	Tickets     []Ticket     `gorm:"foreignKey:OrderID"`
+	OrderCombos []OrderCombo `gorm:"foreignKey:OrderID"`
 }
 
 type OrderRepository interface {
