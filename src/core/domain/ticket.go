@@ -20,6 +20,9 @@ type Ticket struct {
 type TicketRepo interface {
 	Create(ctx context.Context, ticket []*Ticket) ([]*Ticket, error)
 	Update(ctx context.Context, ticket *Ticket) (*Ticket, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*Ticket, error)
+	FindByBatch(ctx context.Context, ids []uuid.UUID) ([]Ticket, error)
+	UpdateBatch(ctx context.Context, tickets []Ticket) ([]Ticket, error)
 }
 
 func (*Ticket) TableName() string {

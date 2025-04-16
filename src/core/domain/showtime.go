@@ -19,6 +19,7 @@ type Showtime struct {
 	Movie   Movie    `gorm:"foreignKey:MovieID"`
 	Room    Room     `gorm:"foreignKey:RoomID"`
 	Tickets []Ticket `gorm:"foreignKey:ShowtimeID"`
+	Order   []Order  `gorm:"foreignKey:ShowtimeID"`
 }
 
 func (*Showtime) TableName() string {

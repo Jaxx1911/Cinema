@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"time"
 )
@@ -8,6 +9,7 @@ import (
 type Order struct {
 	ID         uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID     uuid.UUID  `gorm:"type:uuid;not null"`
+	ShowtimeID uuid.UUID  `gorm:"type:uuid;not null"`
 	DiscountID *uuid.UUID `gorm:"type:uuid"`
 	Status     string     `gorm:"type:varchar(20);not null;default:'pending'"`
 	TotalPrice float64    `gorm:"not null"`
@@ -15,13 +17,14 @@ type Order struct {
 	UpdatedAt  time.Time  `gorm:"autoUpdateTime"`
 
 	User        User         `gorm:"foreignKey:UserID"`
+	Showtime    Showtime     `gorm:"foreignKey:ShowtimeID"`
 	Discount    *Discount    `gorm:"foreignKey:DiscountID"`
 	Tickets     []Ticket     `gorm:"foreignKey:OrderID"`
 	OrderCombos []OrderCombo `gorm:"foreignKey:OrderID"`
 }
 
-type OrderRepository interface {
-	GetDetail(id uuid.UUID) (*Order, *Movie, *Showtime, error)
+type OrderRepo interface {
+	Create(ctx context.Context, order *Order) (*Order, error)
 }
 
 func (*Order) TableName() string {
@@ -37,6 +40,11 @@ type OrderCombo struct {
 
 	Order Order `gorm:"foreignKey:OrderID"`
 	Combo Combo `gorm:"foreignKey:ComboID"`
+}
+
+type OrderComboRepository interface {
+	Create(ctx context.Context, orderCombo *OrderCombo) (*OrderCombo, error)
+	GetByOrderID(ctx context.Context, orderID uuid.UUID) ([]OrderCombo, error)
 }
 
 func (*OrderCombo) TableName() string {

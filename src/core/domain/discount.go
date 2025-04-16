@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"time"
 )
@@ -17,7 +18,13 @@ type Discount struct {
 	Orders []Order `gorm:"foreignKey:DiscountID"`
 }
 
-type DiscountRepository interface{}
+type DiscountRepository interface {
+	GetDiscount(ctx context.Context, id uuid.UUID) (*Discount, error)
+	GetListDiscount(ctx context.Context) ([]Discount, error)
+	GetDiscountByCode(ctx context.Context, code string) (*Discount, error)
+	CreateDiscount(ctx context.Context, discount Discount) (*Discount, error)
+	UpdateDiscount(ctx context.Context, discount Discount) (*Discount, error)
+}
 
 func (*Discount) TableName() string {
 	return "discount"

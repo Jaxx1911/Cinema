@@ -29,6 +29,7 @@ func (s SeatController) GetByRoomId(ctx *gin.Context) {
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to get seats %+v", caller, err)
 		s.ServeErrResponse(ctx, err)
+		return
 	}
 	s.ServeSuccessResponse(ctx, response.ToListSeatResponse(seats))
 }

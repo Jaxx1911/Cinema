@@ -20,6 +20,8 @@ type IRouter struct {
 	CinemaController   *controller.CinemaController
 	SeatController     *controller.SeatController
 	ComboController    *controller.ComboController
+	DiscountController *controller.DiscountController
+	OrderController    *controller.OrderController
 }
 
 func RegisterHandler(engine *gin.Engine) {
@@ -43,6 +45,8 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerCinemaRouter(r, in)
 	registerSeatRouter(r, in)
 	registerComboRouter(r, in)
+	registerDiscountRouter(r, in)
+	registerOrderRouter(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -116,5 +120,29 @@ func registerComboRouter(root *gin.RouterGroup, in IRouter) {
 	comboRouter := root.Group("/combo")
 	{
 		comboRouter.GET("", in.ComboController.GetList)
+	}
+}
+
+func registerOrderRouter(root *gin.RouterGroup, in IRouter) {
+	orderRouter := root.Group("/order")
+	{
+		orderRouter.Use(in.AuthHolder.RequireAuth())
+		orderRouter.POST("", in.OrderController.CreateOrder)
+	}
+}
+
+func registerPaymentRouter(root *gin.RouterGroup, in IRouter) {
+	paymentRouter := root.Group("/payment")
+	{
+		paymentRouter.POST("")
+		paymentRouter.GET("")
+	}
+
+}
+
+func registerDiscountRouter(root *gin.RouterGroup, in IRouter) {
+	discountRouter := root.Group("/discount")
+	{
+		discountRouter.GET("", in.DiscountController.GetDiscountByCode)
 	}
 }
