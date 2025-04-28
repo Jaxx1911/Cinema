@@ -27,6 +27,7 @@ func (c *ComboController) GetList(ctx *gin.Context) {
 	if err != nil {
 		log.Error(ctx, "[%v] get combos %+v", caller, err)
 		c.ServeErrResponse(ctx, err)
+		return
 	}
 	c.ServeSuccessResponse(ctx, response.ToListComboResponse(combos))
 }

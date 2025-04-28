@@ -37,6 +37,7 @@ func BuildDatabasesModule() fx.Option {
 		fx.Provide(repo.NewDiscountRepo),
 		fx.Provide(repo.NewOrderComboRepo),
 		fx.Provide(repo.NewOrderRepo),
+		fx.Provide(repo.NewPaymentRepo),
 	)
 }
 

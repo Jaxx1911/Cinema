@@ -50,6 +50,7 @@ func (c *CinemaController) GetFacilities(ctx *gin.Context) {
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
 		c.ServeErrResponse(ctx, err)
+		return
 	}
 	req.MappingCity()
 

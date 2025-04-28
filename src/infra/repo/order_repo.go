@@ -21,6 +21,14 @@ func (o OrderRepo) Create(ctx context.Context, order *domain.Order) (*domain.Ord
 	return order, nil
 }
 
+func (o OrderRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Order, error) {
+	var order domain.Order
+	if err := o.db.WithContext(ctx).Preload("Tickets.Seat").First(&order, id).Error; err != nil {
+		return nil, o.returnError(ctx, err)
+	}
+	return &order, nil
+}
+
 type OrderComboRepo struct {
 	*BaseRepo
 }
@@ -39,6 +47,13 @@ func (o OrderComboRepo) Create(ctx context.Context, orderCombo *domain.OrderComb
 func (o OrderComboRepo) GetByOrderID(ctx context.Context, orderID uuid.UUID) ([]domain.OrderCombo, error) {
 	var order []domain.OrderCombo
 	if err := o.db.WithContext(ctx).Find(&order, "order_id = ?", orderID).Error; err != nil {
+		return nil, o.returnError(ctx, err)
+	}
+	return order, nil
+}
+
+func (o OrderRepo) Update(ctx context.Context, order *domain.Order) (*domain.Order, error) {
+	if err := o.db.WithContext(ctx).Save(order).Error; err != nil {
 		return nil, o.returnError(ctx, err)
 	}
 	return order, nil

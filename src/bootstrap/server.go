@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"TTCS/src/common/configs"
 	"TTCS/src/common/log"
+	"TTCS/src/common/ws"
 	"TTCS/src/present/httpui/router"
 	"context"
 	"errors"
@@ -14,13 +15,24 @@ import (
 func BuildHTTPServerModule() fx.Option {
 	return fx.Options(
 		fx.Provide(gin.New),
+		fx.Provide(ws.NewHub),
 		fx.Invoke(router.RegisterHandler),
 		fx.Invoke(router.RegisterGinRouters),
-		fx.Invoke(NewHttpServer),
+		fx.Invoke(newWsHub),
+		fx.Invoke(newHttpServer),
 	)
 }
 
-func NewHttpServer(lc fx.Lifecycle, engine *gin.Engine) {
+func newWsHub(lc fx.Lifecycle, hub *ws.Hub) {
+	lc.Append(fx.Hook{
+		OnStart: func(context.Context) error {
+			go hub.Run()
+			return nil
+		},
+	})
+}
+
+func newHttpServer(lc fx.Lifecycle, engine *gin.Engine) {
 	server := &http.Server{
 		Addr:    configs.GetConfig().Server.Address,
 		Handler: engine,

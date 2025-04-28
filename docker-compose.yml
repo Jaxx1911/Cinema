@@ -1,0 +1,22 @@
+version: '3'
+volumes:
+  redis-data:
+    driver: local
+services:
+  app:
+    image: registry.gitlab.com/nhayhoc/payment-service
+    volumes:
+      - ./.docker/config/config.yml:/app/config/config.yml
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+    environment:
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CAPTCHA_API_BASE_URL=https://bank-captcha.payment.com.vn
+  redis:
+    image: redis:6.2-alpine
+    volumes:
+      - redis-data:/data

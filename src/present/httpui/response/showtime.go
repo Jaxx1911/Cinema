@@ -95,3 +95,33 @@ func ToListTicketResponse(tickets []domain.Ticket) []Ticket {
 	}
 	return list
 }
+
+type TicketWithSeat struct {
+	ID         uuid.UUID  `json:"id"`
+	OrderID    *uuid.UUID `json:"order_id"`
+	ShowtimeID uuid.UUID  `json:"showtime_id"`
+	SeatID     uuid.UUID  `json:"seat_id"`
+	Status     string     `json:"status"`
+
+	Seat Seat `json:"seat"`
+}
+
+func ToTicketWithSeat(ticket domain.Ticket) TicketWithSeat {
+	return TicketWithSeat{
+		ID:         ticket.ID,
+		OrderID:    ticket.OrderID,
+		ShowtimeID: ticket.ShowtimeID,
+		SeatID:     ticket.SeatID,
+		Status:     ticket.Status,
+
+		Seat: ToSeatResponse(&ticket.Seat),
+	}
+}
+
+func ToListTicketWithSeat(seats []domain.Ticket) []TicketWithSeat {
+	var list []TicketWithSeat
+	for _, v := range seats {
+		list = append(list, ToTicketWithSeat(v))
+	}
+	return list
+}

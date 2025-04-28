@@ -19,6 +19,8 @@ func BuildControllers() fx.Option {
 		fx.Provide(controller.NewComboController),
 		fx.Provide(controller.NewDiscountController),
 		fx.Provide(controller.NewOrderController),
+		fx.Provide(controller.NewPaymentController),
+		fx.Provide(controller.NewWebSocketController),
 	)
 }
 

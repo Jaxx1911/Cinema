@@ -1,6 +1,7 @@
 package service
 
 import (
+	"TTCS/src/common/log"
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"context"
@@ -60,5 +61,21 @@ func (s *OrderService) Create(ctx context.Context, userId uuid.UUID, req request
 	}
 	order.OrderCombos = orderCombos
 	order.Tickets = tickets
+	return order, nil
+}
+
+func (s *OrderService) GetById(ctx context.Context, orderId string) (*domain.Order, error) {
+	caller := "OrderService.GetById"
+
+	uid, err := uuid.Parse(orderId)
+	if err != nil {
+		log.Error(ctx, "[%v] failed to get order detail %+v", caller, err)
+		return nil, err
+	}
+
+	order, err := s.orderRepo.GetByID(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
 	return order, nil
 }

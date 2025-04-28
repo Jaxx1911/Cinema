@@ -1,6 +1,8 @@
 package genqr
 
 import (
+	"TTCS/src/common/log"
+	"context"
 	"github.com/ducnpdev/vietqr"
 	"strconv"
 )
@@ -13,11 +15,11 @@ func InitQrService() {
 	QrGenerator = &QrService{}
 }
 
-func (QrService *QrService) GenerateQrCode(text string, amount int, description string) string {
+func (QrService *QrService) GenerateQrCode(amount int, description string) string {
 	content := vietqr.GenerateViQR(vietqr.RequestGenerateViQR{
 		MerchantAccountInformation: vietqr.MerchantAccountInformation{
-			AcqID:     "686868",
-			AccountNo: "058914618",
+			AcqID:     "970423",
+			AccountNo: "10001259387",
 		},
 		TransactionAmount: strconv.Itoa(amount),
 
@@ -25,7 +27,9 @@ func (QrService *QrService) GenerateQrCode(text string, amount int, description 
 			Description: description,
 		},
 		Mcc:          "7832",
-		ReceiverName: "Trương Hoàng Nguyên",
+		ReceiverName: "Truong Hoang Nguyen",
 	})
+	log.Info(context.Background(), description)
+	log.Info(context.Background(), content)
 	return content
 }

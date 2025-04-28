@@ -5,23 +5,26 @@ import (
 	"TTCS/src/present/httpui/controller"
 	"TTCS/src/present/httpui/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	cors "github.com/rs/cors/wrapper/gin"
 	"go.uber.org/fx"
 )
 
 type IRouter struct {
 	fx.In
-	Engine             *gin.Engine
-	AuthHolder         *middleware.AuthMiddleware
-	AuthController     *controller.AuthController
-	UserController     *controller.UserController
-	MovieController    *controller.MovieController
-	ShowtimeController *controller.ShowtimeController
-	CinemaController   *controller.CinemaController
-	SeatController     *controller.SeatController
-	ComboController    *controller.ComboController
-	DiscountController *controller.DiscountController
-	OrderController    *controller.OrderController
+	Engine              *gin.Engine
+	AuthHolder          *middleware.AuthMiddleware
+	AuthController      *controller.AuthController
+	UserController      *controller.UserController
+	MovieController     *controller.MovieController
+	ShowtimeController  *controller.ShowtimeController
+	CinemaController    *controller.CinemaController
+	SeatController      *controller.SeatController
+	ComboController     *controller.ComboController
+	DiscountController  *controller.DiscountController
+	OrderController     *controller.OrderController
+	PaymentController   *controller.PaymentController
+	WebSocketController *controller.WebSocketController
 }
 
 func RegisterHandler(engine *gin.Engine) {
@@ -35,6 +38,8 @@ func RegisterGinRouters(in IRouter) {
 	group.GET("/ping")
 
 	registerRouters(group, in)
+
+	registerWebSocket(in.Engine, in)
 }
 
 func registerRouters(r *gin.RouterGroup, in IRouter) {
@@ -47,6 +52,7 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerComboRouter(r, in)
 	registerDiscountRouter(r, in)
 	registerOrderRouter(r, in)
+	registerPaymentRouter(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -128,14 +134,15 @@ func registerOrderRouter(root *gin.RouterGroup, in IRouter) {
 	{
 		orderRouter.Use(in.AuthHolder.RequireAuth())
 		orderRouter.POST("", in.OrderController.CreateOrder)
+		orderRouter.GET("/qr/:id", in.OrderController.GetOrderDetailsWithQr)
 	}
 }
 
 func registerPaymentRouter(root *gin.RouterGroup, in IRouter) {
 	paymentRouter := root.Group("/payment")
 	{
-		paymentRouter.POST("")
-		paymentRouter.GET("")
+		paymentRouter.POST("/callback", in.PaymentController.CallBack)
+		paymentRouter.GET("", in.PaymentController.GetListByUserId)
 	}
 
 }
@@ -145,4 +152,15 @@ func registerDiscountRouter(root *gin.RouterGroup, in IRouter) {
 	{
 		discountRouter.GET("", in.DiscountController.GetDiscountByCode)
 	}
+}
+
+func registerWebSocket(root *gin.Engine, in IRouter) {
+	websocketGroup := root.Group("/ws", func(c *gin.Context) {
+		if websocket.IsWebSocketUpgrade(c.Request) {
+			c.Set("allowed", true)
+			c.Next()
+		}
+		return
+	})
+	websocketGroup.GET("", in.WebSocketController.HandleWebSocket)
 }

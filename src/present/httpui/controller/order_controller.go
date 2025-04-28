@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"TTCS/src/common/genqr"
 	"TTCS/src/common/log"
 	"TTCS/src/core/domain"
 	"TTCS/src/core/service"
 	"TTCS/src/present/httpui/request"
+	"TTCS/src/present/httpui/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 )
@@ -44,5 +46,23 @@ func (o OrderController) CreateOrder(ctx *gin.Context) {
 		o.ServeErrResponse(ctx, err)
 		return
 	}
-	o.ServeSuccessResponse(ctx, order)
+	o.ServeSuccessResponse(ctx, response.ToOrderResponse(*order))
+}
+
+func (o OrderController) GetOrderDetailsWithQr(ctx *gin.Context) {
+	caller := "OrderController.GetOrderDetails"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+	order, err := o.orderService.GetById(ctxReq, id)
+	if err != nil {
+		log.Error(ctxReq, "[%v] get order details failed, %+v", caller, err)
+		o.ServeErrResponse(ctx, err)
+		return
+	}
+	qrText := genqr.QrGenerator.GenerateQrCode(int(order.TotalPrice), order.ID.String())
+	o.ServeSuccessResponse(ctx, response.OrderWithQrResponse{
+		Order:  response.ToOrderResponse(*order),
+		QrText: qrText,
+	})
 }
