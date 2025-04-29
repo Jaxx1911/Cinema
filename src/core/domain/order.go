@@ -26,6 +26,7 @@ type Order struct {
 type OrderRepo interface {
 	Create(ctx context.Context, order *Order) (*Order, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*Order, error)
+	GetDetailByID(ctx context.Context, id uuid.UUID) (*Order, error)
 	Update(ctx context.Context, order *Order) (*Order, error)
 }
 

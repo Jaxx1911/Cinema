@@ -26,6 +26,20 @@ func ToShowtimeResponse(showtime domain.Showtime) ShowtimeResponse {
 	}
 }
 
+type ShowtimeFullDetail struct {
+	Showtime ShowtimeResponse    `json:"showtime"`
+	Movie    MovieDetailResponse `json:"movie"`
+	Room     Room                `json:"room"`
+}
+
+func ToShowtimeWithMovieAndRoom(showtime domain.Showtime) ShowtimeFullDetail {
+	return ShowtimeFullDetail{
+		Showtime: ToShowtimeResponse(showtime),
+		Movie:    *ToMovieDetailResponse(&showtime.Movie),
+		Room:     ToRoomResponse(&showtime.Room),
+	}
+}
+
 type ShowtimeWithRoom struct {
 	Id        string    `json:"id"`
 	MovieId   string    `json:"movie_id"`

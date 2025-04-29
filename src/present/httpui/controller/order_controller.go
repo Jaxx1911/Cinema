@@ -66,3 +66,17 @@ func (o OrderController) GetOrderDetailsWithQr(ctx *gin.Context) {
 		QrText: qrText,
 	})
 }
+
+func (o OrderController) GetOrderDetails(ctx *gin.Context) {
+	caller := "OrderController.GetOrderDetails"
+	ctxReq := ctx.Request.Context()
+	order, err := o.orderService.GetDetailById(ctxReq, ctx.Param("id"))
+
+	if err != nil {
+		log.Error(ctxReq, "[%v] get order details failed, %+v", caller, err)
+		o.ServeErrResponse(ctx, err)
+		return
+	}
+	o.ServeSuccessResponse(ctx, response.ToOrderDetailResponse(*order))
+	return
+}

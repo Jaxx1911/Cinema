@@ -13,6 +13,11 @@ type Combo struct {
 	Price       int64     `json:"price"`
 }
 
+type ComboWithQuantity struct {
+	Combo
+	Quantity int64 `json:"quantity"`
+}
+
 func ToComboResponse(combo *domain.Combo) Combo {
 	return Combo{
 		Id:          combo.ID,
@@ -29,4 +34,15 @@ func ToListComboResponse(comboList []*domain.Combo) []Combo {
 		listCombo = append(listCombo, ToComboResponse(combo))
 	}
 	return listCombo
+}
+
+func ToListComboWithQuantity(comboList []domain.OrderCombo) []ComboWithQuantity {
+	var listComboWithQuantity []ComboWithQuantity
+	for _, combo := range comboList {
+		listComboWithQuantity = append(listComboWithQuantity, ComboWithQuantity{
+			Combo:    ToComboResponse(&combo.Combo),
+			Quantity: int64(combo.Quantity),
+		})
+	}
+	return listComboWithQuantity
 }

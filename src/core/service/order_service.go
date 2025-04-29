@@ -79,3 +79,19 @@ func (s *OrderService) GetById(ctx context.Context, orderId string) (*domain.Ord
 	}
 	return order, nil
 }
+
+func (s *OrderService) GetDetailById(ctx context.Context, orderId string) (*domain.Order, error) {
+	caller := "OrderService.GetDetailById"
+
+	uid, err := uuid.Parse(orderId)
+	if err != nil {
+		log.Error(ctx, "[%v] failed to get order detail %+v", caller, err)
+		return nil, err
+	}
+
+	order, err := s.orderRepo.GetDetailByID(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	return order, nil
+}

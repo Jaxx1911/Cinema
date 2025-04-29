@@ -107,17 +107,19 @@ func (u *UserController) GetPayments(ctx *gin.Context) {
 
 	user, ok := ctx.Get("user")
 	if !ok {
-		log.Error(ctxReq, "failed get user from context")
+		err := errors.New("user not found in context")
+		log.Error(ctxReq, "[%v] failed get user from context %+v", caller, err)
+		u.ServeErrResponse(ctx, err)
 	}
 
-	payments, err := u.userService.GetPayments(ctx, user.(domain.User).ID)
+	payments, err := u.userService.GetPayments(ctx, user.(*domain.User).ID)
 
 	if err != nil {
 		log.Error(ctxReq, "[%v] get user payments error %+v", caller, err)
 		u.ServeErrResponse(ctx, err)
 		return
 	}
-	u.ServeSuccessResponse(ctx, payments)
+	u.ServeSuccessResponse(ctx, response.ToPaymentsResponse(payments))
 }
 
 func (u *UserController) GetOrders(ctx *gin.Context) {
@@ -138,7 +140,7 @@ func (u *UserController) GetOrders(ctx *gin.Context) {
 		u.ServeErrResponse(ctx, err)
 		return
 	}
-	u.ServeSuccessResponse(ctx, orders)
+	u.ServeSuccessResponse(ctx, response.ToOrdersResponse(orders))
 }
 
 func (u *UserController) ChangeAvatar(ctx *gin.Context) {

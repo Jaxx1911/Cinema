@@ -29,6 +29,21 @@ func (o OrderRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Order, er
 	return &order, nil
 }
 
+func (o OrderRepo) GetDetailByID(ctx context.Context, id uuid.UUID) (*domain.Order, error) {
+	var order domain.Order
+	if err := o.db.WithContext(ctx).
+		Preload("Showtime").
+		Preload("Showtime.Room").
+		Preload("Showtime.Movie").
+		Preload("Showtime.Movie.Genres").
+		Preload("OrderCombos").
+		Preload("OrderCombos.Combo").
+		Preload("Tickets.Seat").First(&order, id).Error; err != nil {
+		return nil, o.returnError(ctx, err)
+	}
+	return &order, nil
+}
+
 type OrderComboRepo struct {
 	*BaseRepo
 }

@@ -33,3 +33,30 @@ func ToOrderResponse(order domain.Order) OrderResponse {
 		Tickets: ToListTicketWithSeat(order.Tickets),
 	}
 }
+
+func ToOrdersResponse(orders []domain.Order) []OrderResponse {
+	var orderResponses []OrderResponse
+	for _, order := range orders {
+		orderResponses = append(orderResponses, ToOrderResponse(order))
+	}
+	return orderResponses
+}
+
+type OrderDetailResponse struct {
+	OrderResponse
+	ShowtimeFullDetail
+	Combos []ComboWithQuantity `json:"combos"`
+}
+
+func ToOrderDetailResponse(order domain.Order) OrderDetailResponse {
+	var combos []*domain.Combo
+	for _, v := range order.OrderCombos {
+		combos = append(combos, &v.Combo)
+	}
+
+	return OrderDetailResponse{
+		OrderResponse:      ToOrderResponse(order),
+		ShowtimeFullDetail: ToShowtimeWithMovieAndRoom(order.Showtime),
+		Combos:             ToListComboWithQuantity(order.OrderCombos),
+	}
+}

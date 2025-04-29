@@ -135,6 +135,7 @@ func registerOrderRouter(root *gin.RouterGroup, in IRouter) {
 		orderRouter.Use(in.AuthHolder.RequireAuth())
 		orderRouter.POST("", in.OrderController.CreateOrder)
 		orderRouter.GET("/qr/:id", in.OrderController.GetOrderDetailsWithQr)
+		orderRouter.GET("/:id", in.OrderController.GetOrderDetails)
 	}
 }
 
