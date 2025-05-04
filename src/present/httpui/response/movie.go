@@ -29,8 +29,10 @@ type MovieOfListResponse struct {
 	PosterURL      string    `json:"poster_url"`
 	LargePosterURL string    `json:"large_poster_url"`
 	Description    string    `json:"description"`
+	ReleaseDate    string    `json:"release_date"`
 	TrailerURL     string    `json:"trailer_url"`
 	Genres         []string  `json:"genres"`
+	Status         string    `json:"status"`
 	Tag            string    `json:"tag"`
 }
 
@@ -77,8 +79,10 @@ func ToListMoviesResponse(movies []*domain.Movie) []*MovieOfListResponse {
 			PosterURL:      movie.PosterURL,
 			LargePosterURL: movie.LargePosterURL,
 			Description:    movie.Description,
+			ReleaseDate:    movie.ReleaseDate.Format("2006-01-02"),
 			TrailerURL:     movie.TrailerURL,
 			Genres:         genres,
+			Status:         movie.Status,
 			Tag:            movie.Tag,
 		}
 		movieResponses = append(movieResponses, movieResponse)

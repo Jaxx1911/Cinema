@@ -24,6 +24,7 @@ type IRouter struct {
 	DiscountController  *controller.DiscountController
 	OrderController     *controller.OrderController
 	PaymentController   *controller.PaymentController
+	GenreController     *controller.GenreController
 	WebSocketController *controller.WebSocketController
 }
 
@@ -53,6 +54,7 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerDiscountRouter(r, in)
 	registerOrderRouter(r, in)
 	registerPaymentRouter(r, in)
+	registerGenreRouter(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -86,7 +88,8 @@ func registerUsersRouters(root *gin.RouterGroup, in IRouter) {
 func registerMovieRouters(root *gin.RouterGroup, in IRouter) {
 	movieRouter := root.Group("/movie")
 	{
-		movieRouter.GET("", in.MovieController.GetList)
+		movieRouter.GET("", in.MovieController.GetListByStatus)
+		movieRouter.GET("/list", in.MovieController.GetList)
 		movieRouter.GET("/range", in.MovieController.GetListInDateRange)
 		movieRouter.GET("/:id", in.MovieController.GetDetail)
 		movieRouter.Use(in.AuthHolder.RequireAuth())
@@ -152,6 +155,13 @@ func registerDiscountRouter(root *gin.RouterGroup, in IRouter) {
 	discountRouter := root.Group("/discount")
 	{
 		discountRouter.GET("", in.DiscountController.GetDiscountByCode)
+	}
+}
+
+func registerGenreRouter(root *gin.RouterGroup, in IRouter) {
+	genreRouter := root.Group("/genre")
+	{
+		genreRouter.GET("", in.GenreController.GetGenres)
 	}
 }
 

@@ -17,5 +17,6 @@ func BuildServices() fx.Option {
 		fx.Provide(service.NewDiscountService),
 		fx.Provide(service.NewOrderService),
 		fx.Provide(service.NewPaymentService),
+		fx.Provide(service.NewGenreService),
 	)
 }

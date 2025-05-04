@@ -34,13 +34,9 @@ func (r *UserRepo) GetList(ctx context.Context, page request.Page) ([]*domain.Us
 	return users, nil
 }
 
-func (r *UserRepo) GetById(ctx context.Context, id string) (*domain.User, error) {
-	userId, err := uuid.Parse(id)
-	if err != nil {
-		return nil, r.returnError(ctx, err)
-	}
+func (r *UserRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	user := &domain.User{}
-	if err := r.db.WithContext(ctx).First(user, userId).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(user, id).Error; err != nil {
 		return nil, r.returnError(ctx, err)
 	}
 	return user, nil

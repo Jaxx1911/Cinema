@@ -34,14 +34,21 @@ func (u *UserController) UpdateInfo(ctx *gin.Context) {
 		return
 	}
 
-	id := ctx.Param("id")
-	user, err := u.userService.Update(ctx, id, &req)
+	user, ok := ctx.Get("user")
+	if !ok {
+		err := errors.New("user not found")
+		log.Error(ctxReq, "[%v] get user info error %+v", caller, err)
+		u.ServeErrResponse(ctx, err)
+		return
+	}
+
+	user, err := u.userService.Update(ctx, user.(*domain.User).ID, &req)
 	if err != nil {
 		log.Error(ctxReq, "[%v] update user info error %+v", caller, err)
 		u.ServeErrResponse(ctx, err)
 		return
 	}
-	u.ServeSuccessResponse(ctx, user)
+	u.ServeSuccessResponse(ctx, response.UserFromDomain(user.(*domain.User)))
 	return
 }
 

@@ -27,7 +27,7 @@ type User struct {
 type UserRepo interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	GetList(ctx context.Context, page request.Page) ([]*User, error)
-	GetById(ctx context.Context, id string) (*User, error)
+	GetById(ctx context.Context, id uuid.UUID) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
 	GetPaymentsById(ctx context.Context, id uuid.UUID) ([]Payment, error)

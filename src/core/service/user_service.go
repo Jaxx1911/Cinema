@@ -26,7 +26,7 @@ func NewUserService(userRepo domain.UserRepo, hashProvider crypto.HashProvider, 
 	}
 }
 
-func (u *UserService) Update(ctx context.Context, id string, req *request.UserInfo) (*domain.User, error) {
+func (u *UserService) Update(ctx context.Context, id uuid.UUID, req *request.UserInfo) (*domain.User, error) {
 	_ = "UserService.Update"
 	user, err := u.userRepo.GetById(ctx, id)
 	if err != nil {
@@ -56,16 +56,16 @@ func (u *UserService) Create(ctx context.Context, req *request.UserInfo) (*domai
 }
 
 func (u *UserService) buildModelUser(req *request.UserInfo, user *domain.User) *domain.User {
-	if req.Email == "" {
+	if req.Email != "" {
 		user.Email = req.Email
 	}
-	if req.Name == "" {
+	if req.Name != "" {
 		user.Name = req.Name
 	}
-	if req.Phone == "" {
+	if req.Phone != "" {
 		user.Phone = req.Phone
 	}
-	if req.Role == "" {
+	if req.Role != "" {
 		user.Phone = req.Phone
 	}
 	return user
@@ -80,7 +80,7 @@ func (u *UserService) GetList(ctx context.Context, page request.Page) ([]*domain
 	return users, nil
 }
 
-func (u *UserService) GetById(ctx context.Context, id string) (*domain.User, error) {
+func (u *UserService) GetById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	_ = "UserService.GetById"
 	user, err := u.userRepo.GetById(ctx, id)
 	if err != nil {

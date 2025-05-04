@@ -2,9 +2,11 @@ package controller
 
 import (
 	"TTCS/src/common/log"
+	"TTCS/src/core/domain"
 	"TTCS/src/core/service"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
+	"errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -134,6 +136,14 @@ func (a *AuthController) ChangePassword(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "AuthController.ChangePassword"
 
+	user, ok := ctx.Get("user")
+	if !ok {
+		err := errors.New("user not found")
+		log.Error(ctxReq, "[%v] get user info error %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+
 	var req request.ChangePasswordRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
@@ -141,7 +151,7 @@ func (a *AuthController) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	if err := a.authService.ChangePassword(ctxReq, req); err != nil {
+	if err := a.authService.ChangePassword(ctxReq, user.(*domain.User).ID, req); err != nil {
 		log.Error(ctxReq, "[%v] failed to change password: %+v", caller, err)
 		a.ServeErrResponse(ctx, err)
 		return

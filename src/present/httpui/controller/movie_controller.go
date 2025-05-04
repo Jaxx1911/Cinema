@@ -24,6 +24,28 @@ func (m *MovieController) GetList(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "UserController.GetList"
 
+	var page request.Page
+	if err := ctx.ShouldBindQuery(&page); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		m.ServeErrResponse(ctx, err)
+		return
+	}
+
+	page.SetDefaults()
+
+	movies, err := m.movieService.GetList(ctxReq, page)
+	if err != nil {
+		log.Error(ctxReq, "[%v] get movie list failed", caller, err)
+		m.ServeErrResponse(ctx, err)
+		return
+	}
+	m.ServeSuccessResponse(ctx, response.ToListMoviesResponse(movies))
+}
+
+func (m *MovieController) GetListByStatus(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "UserController.GetList"
+
 	status := ctx.Query("status")
 
 	var page request.Page
@@ -35,7 +57,7 @@ func (m *MovieController) GetList(ctx *gin.Context) {
 
 	page.SetDefaults()
 
-	movies, err := m.movieService.GetList(ctxReq, page, status)
+	movies, err := m.movieService.GetListByStatus(ctxReq, page, status)
 	if err != nil {
 		log.Error(ctxReq, "[%v] get movie list failed", caller, err)
 		m.ServeErrResponse(ctx, err)

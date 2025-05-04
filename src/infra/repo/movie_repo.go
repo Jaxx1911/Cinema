@@ -19,7 +19,16 @@ func NewMovieRepo(baseRepo *BaseRepo) domain.MovieRepo {
 	}
 }
 
-func (m MovieRepo) GetList(ctx context.Context, page request.Page, showingStatus string) ([]*domain.Movie, error) {
+func (m MovieRepo) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, error) {
+	var movies []*domain.Movie
+	limit, offset := m.toLimitOffset(ctx, page)
+	if err := m.db.Preload("Genres").Limit(limit).Offset(offset).Order("release_date").Find(&movies).Error; err != nil {
+		return nil, m.returnError(ctx, err)
+	}
+	return movies, nil
+}
+
+func (m MovieRepo) GetListByStatus(ctx context.Context, page request.Page, showingStatus string) ([]*domain.Movie, error) {
 	var movies []*domain.Movie
 	limit, offset := m.toLimitOffset(ctx, page)
 	if err := m.db.Preload("Genres").Where("status = ?", showingStatus).Limit(limit).Offset(offset).Order("release_date").Find(&movies).Error; err != nil {

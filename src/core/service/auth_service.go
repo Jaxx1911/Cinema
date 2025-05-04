@@ -12,6 +12,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 )
@@ -216,10 +217,10 @@ func (s *AuthService) VerifyToken(ctx context.Context, token string) (*domain.Us
 	return user, nil
 }
 
-func (s *AuthService) ChangePassword(ctx context.Context, req request.ChangePasswordRequest) error {
+func (s *AuthService) ChangePassword(ctx context.Context, id uuid.UUID, req request.ChangePasswordRequest) error {
 	caller := "AuthService.ChangePassword"
 
-	user, err := s.userRepo.GetByEmail(ctx, req.Email)
+	user, err := s.userRepo.GetById(ctx, id)
 	if err != nil {
 		return err
 	}

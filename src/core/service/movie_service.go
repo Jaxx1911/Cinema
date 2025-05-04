@@ -24,9 +24,18 @@ func NewMovieService(movieRepo domain.MovieRepo, genreRepo domain.GenreRepo, upl
 	}
 }
 
-func (m *MovieService) GetList(ctx context.Context, page request.Page, status string) ([]*domain.Movie, error) {
+func (m *MovieService) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, error) {
 	_ = "MovieService.GetList"
-	movies, err := m.movieRepo.GetList(ctx, page, status)
+	movies, err := m.movieRepo.GetList(ctx, page)
+	if err != nil {
+		return nil, err
+	}
+	return movies, nil
+}
+
+func (m *MovieService) GetListByStatus(ctx context.Context, page request.Page, status string) ([]*domain.Movie, error) {
+	_ = "MovieService.GetList"
+	movies, err := m.movieRepo.GetListByStatus(ctx, page, status)
 	if err != nil {
 		return nil, err
 	}
