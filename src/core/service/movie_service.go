@@ -34,7 +34,7 @@ func (m *MovieService) GetList(ctx context.Context, page request.Page) ([]*domai
 }
 
 func (m *MovieService) GetListByStatus(ctx context.Context, page request.Page, status string) ([]*domain.Movie, error) {
-	_ = "MovieService.GetList"
+	_ = "MovieService.GetListByStatus"
 	movies, err := m.movieRepo.GetListByStatus(ctx, page, status)
 	if err != nil {
 		return nil, err

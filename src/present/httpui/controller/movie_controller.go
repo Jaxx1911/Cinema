@@ -44,7 +44,7 @@ func (m *MovieController) GetList(ctx *gin.Context) {
 
 func (m *MovieController) GetListByStatus(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
-	caller := "UserController.GetList"
+	caller := "UserController.GetListByStatus"
 
 	status := ctx.Query("status")
 

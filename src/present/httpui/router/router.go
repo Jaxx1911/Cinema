@@ -112,7 +112,8 @@ func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
 func registerCinemaRouter(root *gin.RouterGroup, in IRouter) {
 	cinemaRouter := root.Group("/cinema")
 	{
-		cinemaRouter.GET("", in.CinemaController.GetList)
+		cinemaRouter.GET("", in.CinemaController.GetListByCity)
+		cinemaRouter.GET("/list", in.CinemaController.GetList)
 		cinemaRouter.GET("/facilities", in.CinemaController.GetFacilities)
 		cinemaRouter.GET("/:id", in.CinemaController.GetCinemaDetail)
 	}

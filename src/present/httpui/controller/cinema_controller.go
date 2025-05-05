@@ -24,6 +24,19 @@ func (c *CinemaController) GetList(ctx *gin.Context) {
 	caller := "CinemaController.GetList"
 	ctxReq := ctx.Request.Context()
 
+	cinemas, err := c.cinemaService.GetList(ctxReq)
+	if err != nil {
+		log.Error(ctxReq, "[%v] get cinema failed %+v", caller, err)
+		c.ServeErrResponse(ctx, err)
+		return
+	}
+	c.ServeSuccessResponse(ctx, response.ToListCinemaResponse(cinemas))
+}
+
+func (c *CinemaController) GetListByCity(ctx *gin.Context) {
+	caller := "CinemaController.GetListByCity"
+	ctxReq := ctx.Request.Context()
+
 	var req request.GetCinemaRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
