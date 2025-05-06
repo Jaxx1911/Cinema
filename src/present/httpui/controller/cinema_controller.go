@@ -91,3 +91,56 @@ func (c *CinemaController) GetCinemaDetail(ctx *gin.Context) {
 	}
 	c.ServeSuccessResponse(ctx, response.ToCinemaWithFacilitiesResponse(cinema))
 }
+
+func (c *CinemaController) Create(ctx *gin.Context) {
+	caller := "CinemaController.Create"
+	ctxReq := ctx.Request.Context()
+
+	var req request.CreateCinemaRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		c.ServeErrResponse(ctx, err)
+		return
+	}
+
+	cinema, err := c.cinemaService.Create(ctx, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] create cinema failed", caller, err)
+		c.ServeErrResponse(ctx, err)
+		return
+	}
+	c.ServeSuccessResponse(ctx, response.ToCinemaResponse(cinema))
+}
+
+func (c *CinemaController) Update(ctx *gin.Context) {
+	caller := "CinemaController.Update"
+	ctxReq := ctx.Request.Context()
+
+	var req request.UpdateCinemaRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		c.ServeErrResponse(ctx, err)
+		return
+	}
+
+	cinema, err := c.cinemaService.Update(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] update cinema failed", caller, err)
+		c.ServeErrResponse(ctx, err)
+		return
+	}
+	c.ServeSuccessResponse(ctx, response.ToCinemaResponse(cinema))
+}
+
+func (c *CinemaController) Delete(ctx *gin.Context) {
+	caller := "CinemaController.Delete"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+	if err := c.cinemaService.Delete(ctx, uuid.MustParse(id)); err != nil {
+		log.Error(ctxReq, "[%v] delete cinema failed", caller, err)
+		c.ServeErrResponse(ctx, err)
+		return
+	}
+	c.ServeSuccessResponse(ctx, true)
+}

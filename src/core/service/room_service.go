@@ -30,19 +30,15 @@ func (r *RoomService) Create(ctx context.Context, req request.CreateRoomReq) (*d
 	if err != nil {
 		return nil, err
 	}
-	for i := range req.RowCount {
-		for j := range req.ColumnCount {
-			var letter = 'A'
-			err := r.seatRepo.Create(ctx, &domain.Seat{
-				RoomID:     room.ID,
-				RowNumber:  string(letter + rune(i)),
-				SeatNumber: j + 1,
-				Type:       "",
-				Room:       domain.Room{},
-			})
-			if err != nil {
-				return nil, err
-			}
+	for _, v := range room.Seats {
+		err := r.seatRepo.Create(ctx, &domain.Seat{
+			RoomID:     room.ID,
+			RowNumber:  v.RowNumber,
+			SeatNumber: v.SeatNumber,
+			Type:       v.Type,
+		})
+		if err != nil {
+			return nil, err
 		}
 	}
 	return room, nil

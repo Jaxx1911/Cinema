@@ -46,8 +46,8 @@ func (*Genre) TableName() string {
 type MovieRepo interface {
 	GetList(ctx context.Context, page request.Page) ([]*Movie, error)
 	GetListByStatus(ctx context.Context, page request.Page, showingStatus string) ([]*Movie, error)
-	GetById(ctx context.Context, id string) (*Movie, error)
-	GetDetail(ctx context.Context, id string) (*Movie, error)
+	GetById(ctx context.Context, id uuid.UUID) (*Movie, error)
+	GetDetail(ctx context.Context, id uuid.UUID) (*Movie, error)
 	Create(ctx context.Context, movie *Movie) (*Movie, error)
 	Update(ctx context.Context, movie *Movie) (*Movie, error)
 	GetListInDateRange(ctx context.Context, startDate time.Time, endDate time.Time) ([]*Movie, error)
@@ -55,7 +55,7 @@ type MovieRepo interface {
 
 type GenreRepo interface {
 	GetList(ctx context.Context) ([]*Genre, error)
-	GetByID(ctx context.Context, id string) (*Genre, error)
-	GetByIDs(ctx context.Context, ids []string) ([]Genre, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*Genre, error)
+	GetByIDs(ctx context.Context, ids []uuid.UUID) ([]Genre, error)
 	Create(ctx context.Context, genre *Genre) (*Genre, error)
 }

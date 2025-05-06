@@ -6,6 +6,7 @@ import (
 	"TTCS/src/infra/upload"
 	"TTCS/src/present/httpui/request"
 	"context"
+	"github.com/google/uuid"
 	"mime/multipart"
 	"time"
 )
@@ -42,7 +43,7 @@ func (m *MovieService) GetListByStatus(ctx context.Context, page request.Page, s
 	return movies, nil
 }
 
-func (m *MovieService) GetDetail(ctx context.Context, id string) (*domain.Movie, error) {
+func (m *MovieService) GetDetail(ctx context.Context, id uuid.UUID) (*domain.Movie, error) {
 	_ = "MovieService.GetDetail"
 	movie, err := m.movieRepo.GetDetail(ctx, id)
 	if err != nil {
@@ -130,7 +131,7 @@ func (m *MovieService) Update(ctx context.Context, req request.UpdateMovieReques
 	return movie, nil
 }
 
-func (m *MovieService) UpdatePoster(ctx context.Context, id string, posterImage *multipart.FileHeader) (*domain.Movie, error) {
+func (m *MovieService) UpdatePoster(ctx context.Context, id uuid.UUID, posterImage *multipart.FileHeader) (*domain.Movie, error) {
 	caller := "MovieService.UpdatePoster"
 	movie, err := m.movieRepo.GetById(ctx, id)
 	if err != nil {
@@ -141,6 +142,24 @@ func (m *MovieService) UpdatePoster(ctx context.Context, id string, posterImage 
 		return nil, fault.Wrapf(err, "[%v] failed to upload movie poster", caller)
 	}
 	movie.PosterURL = url
+	movie, err = m.movieRepo.Update(ctx, movie)
+	if err != nil {
+		return nil, err
+	}
+	return movie, nil
+}
+
+func (m *MovieService) UpdateLargePoster(ctx context.Context, id uuid.UUID, posterImage *multipart.FileHeader) (*domain.Movie, error) {
+	caller := "MovieService.UpdatePoster"
+	movie, err := m.movieRepo.GetById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	url, err := m.upload.UploadFile(ctx, posterImage)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to upload movie poster", caller)
+	}
+	movie.LargePosterURL = url
 	movie, err = m.movieRepo.Update(ctx, movie)
 	if err != nil {
 		return nil, err

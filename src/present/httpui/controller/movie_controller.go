@@ -6,6 +6,7 @@ import (
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type MovieController struct {
@@ -70,7 +71,7 @@ func (m *MovieController) GetDetail(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "UserController.GetDetail"
 
-	movie, err := m.movieService.GetDetail(ctxReq, ctx.Param("id"))
+	movie, err := m.movieService.GetDetail(ctxReq, uuid.MustParse(ctx.Param("id")))
 	if err != nil {
 		log.Error(ctxReq, "[%v] get movie detail failed", caller, err)
 		m.ServeErrResponse(ctx, err)
@@ -111,7 +112,7 @@ func (m *MovieController) Update(ctx *gin.Context) {
 		return
 	}
 	id := ctx.Param("id")
-	req.Id = id
+	req.Id = uuid.MustParse(id)
 
 	movie, err := m.movieService.Update(ctxReq, req)
 	if err != nil {
@@ -134,7 +135,7 @@ func (m *MovieController) UpdatePoster(ctx *gin.Context) {
 		return
 	}
 
-	movie, err := m.movieService.UpdatePoster(ctxReq, id, poster)
+	movie, err := m.movieService.UpdatePoster(ctxReq, uuid.MustParse(id), poster)
 	if err != nil {
 		log.Error(ctxReq, "[%v] update movie failed %+v", caller, err)
 		m.ServeErrResponse(ctx, err)

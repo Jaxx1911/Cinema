@@ -54,3 +54,25 @@ func (c *CinemaRepo) GetDetail(ctx context.Context, id uuid.UUID) (*domain.Cinem
 	}
 	return &cinema, nil
 }
+
+func (c *CinemaRepo) Update(ctx context.Context, cinema *domain.Cinema) (*domain.Cinema, error) {
+	if err := c.db.WithContext(ctx).Model(cinema).Updates(cinema).Error; err != nil {
+		return nil, c.returnError(ctx, err)
+	}
+	return cinema, nil
+}
+
+func (c *CinemaRepo) FindByID(ctx context.Context, id uuid.UUID) (*domain.Cinema, error) {
+	cinema := new(domain.Cinema)
+	if err := c.db.WithContext(ctx).Where("id = ?", id).First(cinema).Error; err != nil {
+		return nil, c.returnError(ctx, err)
+	}
+	return cinema, nil
+}
+
+func (c *CinemaRepo) Delete(ctx context.Context, id uuid.UUID) error {
+	if err := c.db.WithContext(ctx).Where("id = ?", id).Update("is_active", false).Error; err != nil {
+		return c.returnError(ctx, err)
+	}
+	return nil
+}

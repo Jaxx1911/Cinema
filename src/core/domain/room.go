@@ -28,8 +28,8 @@ func (*Room) TableName() string {
 
 type RoomRepo interface {
 	Create(ctx context.Context, room *Room) (*Room, error)
-	GetById(ctx context.Context, roomID string) (*Room, error)
-	GetListByCinemaId(ctx context.Context, cinemaId string) ([]*Room, error)
+	GetById(ctx context.Context, roomID uuid.UUID) (*Room, error)
+	GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]*Room, error)
 	Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error
 }
 

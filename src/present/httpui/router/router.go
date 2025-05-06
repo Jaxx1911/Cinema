@@ -114,6 +114,8 @@ func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
 func registerCinemaRouter(root *gin.RouterGroup, in IRouter) {
 	cinemaRouter := root.Group("/cinema")
 	{
+		cinemaRouter.POST("", in.CinemaController.Create)
+		cinemaRouter.PUT("/:id", in.CinemaController.Update)
 		cinemaRouter.GET("", in.CinemaController.GetListByCity)
 		cinemaRouter.GET("/list", in.CinemaController.GetList)
 		cinemaRouter.GET("/facilities", in.CinemaController.GetFacilities)
@@ -124,6 +126,7 @@ func registerCinemaRouter(root *gin.RouterGroup, in IRouter) {
 func registerRoomRouter(root *gin.RouterGroup, in IRouter) {
 	roomRouter := root.Group("/room")
 	{
+		roomRouter.POST("")
 		roomRouter.PUT("/deactivate/:id", in.RoomController.Deactivate)
 	}
 }

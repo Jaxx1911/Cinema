@@ -1,11 +1,10 @@
 package repo
 
 import (
-	"TTCS/src/common/fault"
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"context"
-	uuid2 "github.com/google/uuid"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -51,25 +50,17 @@ func (m MovieRepo) Update(ctx context.Context, movie *domain.Movie) (*domain.Mov
 	return movie, nil
 }
 
-func (m MovieRepo) GetDetail(ctx context.Context, id string) (*domain.Movie, error) {
+func (m MovieRepo) GetDetail(ctx context.Context, id uuid.UUID) (*domain.Movie, error) {
 	movie := &domain.Movie{}
-	uuid, err := uuid2.Parse(id)
-	if err != nil {
-		return nil, fault.Wrapf(err, "invalid uuid").SetTag(fault.TagBadRequest)
-	}
-	if err = m.db.Preload("Showtimes").Preload("Genres").Where("id = ?", uuid).First(movie).Error; err != nil {
+	if err := m.db.Preload("Showtimes").Preload("Genres").Where("id = ?", id).First(movie).Error; err != nil {
 		return nil, m.returnError(ctx, err)
 	}
 	return movie, nil
 }
 
-func (m MovieRepo) GetById(ctx context.Context, id string) (*domain.Movie, error) {
+func (m MovieRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.Movie, error) {
 	movie := &domain.Movie{}
-	uuid, err := uuid2.Parse(id)
-	if err != nil {
-		return nil, fault.Wrapf(err, "invalid uuid").SetTag(fault.TagBadRequest)
-	}
-	if err = m.db.Where("id = ?", uuid).First(movie).Error; err != nil {
+	if err := m.db.Where("id = ?", id).First(movie).Error; err != nil {
 		return nil, m.returnError(ctx, err)
 	}
 	return movie, nil

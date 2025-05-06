@@ -1,10 +1,12 @@
 package request
 
+import "github.com/google/uuid"
+
 type CreateShowtime struct {
-	MovieId   string  `json:"movie_id"`
-	RoomId    string  `json:"room_id"`
-	StartTime string  `json:"start_time"`
-	Price     float64 `json:"price"`
+	MovieId   uuid.UUID `json:"movie_id"`
+	RoomId    uuid.UUID `json:"room_id"`
+	StartTime string    `json:"start_time"`
+	Price     float64   `json:"price"`
 }
 
 type GetShowtimesByUserFilter struct {

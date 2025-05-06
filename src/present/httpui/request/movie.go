@@ -1,6 +1,7 @@
 package request
 
 import (
+	"github.com/google/uuid"
 	"mime/multipart"
 )
 
@@ -15,19 +16,19 @@ type CreateMovieRequest struct {
 	ReleaseDate      string                `form:"release_date" binding:"required"`
 	TrailerURL       string                `form:"trailer_url" binding:"required"`
 	Status           string                `form:"status" binding:"required"`
-	Genres           []string              `form:"genres" binding:"required"`
+	Genres           []uuid.UUID           `form:"genres" binding:"required"`
 	Tag              string                `form:"tag" binding:"required"`
 }
 
 type UpdateMovieRequest struct {
-	Id          string   `form:"id,omitempty"`
-	Title       string   `form:"title" binding:"required"`
-	Duration    int      `form:"duration" binding:"required"`
-	Director    string   `form:"director" binding:"required"`
-	Caster      string   `form:"caster" binding:"required"`
-	Description string   `form:"description" binding:"required"`
-	ReleaseDate string   `form:"release_date" binding:"required"`
-	TrailerURL  string   `form:"trailer_url" binding:"required"`
-	Status      string   `form:"status" binding:"required"`
-	Genres      []string `form:"genres" binding:"required"`
+	Id          uuid.UUID   `form:"id,omitempty"`
+	Title       string      `form:"title" binding:"required"`
+	Duration    int         `form:"duration" binding:"required"`
+	Director    string      `form:"director" binding:"required"`
+	Caster      string      `form:"caster" binding:"required"`
+	Description string      `form:"description" binding:"required"`
+	ReleaseDate string      `form:"release_date" binding:"required"`
+	TrailerURL  string      `form:"trailer_url" binding:"required"`
+	Status      string      `form:"status" binding:"required"`
+	Genres      []uuid.UUID `form:"genres" binding:"required"`
 }
