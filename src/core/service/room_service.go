@@ -45,7 +45,7 @@ func (r *RoomService) Create(ctx context.Context, req request.CreateRoomReq) (*d
 }
 
 func (r *RoomService) Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error {
-	if err := r.Deactivate(ctx, id, isActive); err != nil {
+	if err := r.roomRepo.Deactivate(ctx, id, isActive); err != nil {
 		return err
 	}
 	return nil
