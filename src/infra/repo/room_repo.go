@@ -34,7 +34,7 @@ func (r RoomRepo) GetListByCinemaId(ctx context.Context, id uuid.UUID) ([]*domai
 }
 
 func (r RoomRepo) Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error {
-	if err := r.db.Where("id = ?", id).Update("is_active", isActive).Error; err != nil {
+	if err := r.db.Model(&domain.Room{}).Where("id = ?", id).Update("is_active", isActive).Error; err != nil {
 		return r.returnError(ctx, err)
 	}
 	return nil
