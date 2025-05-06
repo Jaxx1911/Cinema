@@ -23,7 +23,7 @@ type CinemaRepo interface {
 	GetList(ctx context.Context) ([]*Cinema, error)
 	GetListByCity(ctx context.Context, city string) ([]*Cinema, error)
 	GetWithRoomsByCity(ctx context.Context, city string) ([]*Cinema, error)
-	GetDetail(ctx context.Context, id string) (*Cinema, error)
+	GetDetail(ctx context.Context, id uuid.UUID) (*Cinema, error)
 }
 
 func (*Cinema) TableName() string {

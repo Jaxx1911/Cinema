@@ -3,6 +3,7 @@ package service
 import (
 	"TTCS/src/core/domain"
 	"context"
+	"github.com/google/uuid"
 )
 
 type CinemaService struct {
@@ -43,7 +44,7 @@ func (c *CinemaService) GetWithRoomsByCity(ctx context.Context, city string) ([]
 	return cinemas, nil
 }
 
-func (c *CinemaService) GetDetail(ctx context.Context, id string) (*domain.Cinema, error) {
+func (c *CinemaService) GetDetail(ctx context.Context, id uuid.UUID) (*domain.Cinema, error) {
 	cinema, err := c.cinemaRepo.GetDetail(ctx, id)
 	if err != nil {
 		return nil, err

@@ -14,6 +14,7 @@ type Room struct {
 	Type        string    `gorm:"type:varchar(50);not null"` // 2D, 3D, IMAX
 	RowCount    int       `gorm:"not null"`
 	ColumnCount int       `gorm:"not null"`
+	IsActive    bool      `gorm:"not null;default:true"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 
@@ -26,8 +27,10 @@ func (*Room) TableName() string {
 }
 
 type RoomRepo interface {
-	Create(ctx context.Context, room *Room) error
+	Create(ctx context.Context, room *Room) (*Room, error)
 	GetById(ctx context.Context, roomID string) (*Room, error)
+	GetListByCinemaId(ctx context.Context, cinemaId string) ([]*Room, error)
+	Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error
 }
 
 type Seat struct {

@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"TTCS/src/common/fault"
 	"TTCS/src/core/domain"
 	"context"
 	"github.com/google/uuid"
@@ -48,13 +47,9 @@ func (c *CinemaRepo) GetWithRoomsByCity(ctx context.Context, city string) ([]*do
 	return cinema, nil
 }
 
-func (c *CinemaRepo) GetDetail(ctx context.Context, id string) (*domain.Cinema, error) {
-	uid, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fault.Wrapf(err, "fail to parse id: %s", id)
-	}
+func (c *CinemaRepo) GetDetail(ctx context.Context, id uuid.UUID) (*domain.Cinema, error) {
 	var cinema domain.Cinema
-	if err := c.db.WithContext(ctx).Where("id = ?", uid).Find(&cinema).Error; err != nil {
+	if err := c.db.WithContext(ctx).Preload("Rooms").Where("id = ?", id).Find(&cinema).Error; err != nil {
 		return nil, c.returnError(ctx, err)
 	}
 	return &cinema, nil

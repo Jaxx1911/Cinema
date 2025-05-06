@@ -19,6 +19,7 @@ type IRouter struct {
 	MovieController     *controller.MovieController
 	ShowtimeController  *controller.ShowtimeController
 	CinemaController    *controller.CinemaController
+	RoomController      *controller.RoomController
 	SeatController      *controller.SeatController
 	ComboController     *controller.ComboController
 	DiscountController  *controller.DiscountController
@@ -55,6 +56,7 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerOrderRouter(r, in)
 	registerPaymentRouter(r, in)
 	registerGenreRouter(r, in)
+	registerRoomRouter(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -116,6 +118,13 @@ func registerCinemaRouter(root *gin.RouterGroup, in IRouter) {
 		cinemaRouter.GET("/list", in.CinemaController.GetList)
 		cinemaRouter.GET("/facilities", in.CinemaController.GetFacilities)
 		cinemaRouter.GET("/:id", in.CinemaController.GetCinemaDetail)
+	}
+}
+
+func registerRoomRouter(root *gin.RouterGroup, in IRouter) {
+	roomRouter := root.Group("/room")
+	{
+		roomRouter.PUT("/deactivate/:id", in.RoomController.Deactivate)
 	}
 }
 

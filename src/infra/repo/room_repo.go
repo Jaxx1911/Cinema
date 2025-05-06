@@ -10,11 +10,11 @@ type RoomRepo struct {
 	*BaseRepo
 }
 
-func (r RoomRepo) Create(ctx context.Context, room *domain.Room) error {
+func (r RoomRepo) Create(ctx context.Context, room *domain.Room) (*domain.Room, error) {
 	if err := r.db.Create(room).Error; err != nil {
-		return err
+		return nil, r.returnError(ctx, err)
 	}
-	return nil
+	return room, nil
 }
 
 func (r RoomRepo) GetById(ctx context.Context, roomID string) (*domain.Room, error) {
@@ -35,10 +35,17 @@ func (r RoomRepo) GetListByCinemaId(ctx context.Context, cinemaId string) ([]*do
 		return nil, r.returnError(ctx, err)
 	}
 	var rooms []*domain.Room
-	if err = r.db.Where("cinema_id = ?", uid).Find(&rooms).Error; err != nil {
+	if err = r.db.Where("cinema_id = ?", uid).Where("is_active = ?", true).Find(&rooms).Error; err != nil {
 		return nil, r.returnError(ctx, err)
 	}
 	return rooms, nil
+}
+
+func (r RoomRepo) Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error {
+	if err := r.db.Where("id = ?", id).Set("is_active", isActive).Error; err != nil {
+		return r.returnError(ctx, err)
+	}
+	return nil
 }
 
 func NewRoomRepo(baseRepo *BaseRepo) domain.RoomRepo {

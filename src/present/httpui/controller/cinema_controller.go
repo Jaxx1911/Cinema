@@ -6,6 +6,7 @@ import (
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type CinemaController struct {
@@ -82,11 +83,11 @@ func (c *CinemaController) GetCinemaDetail(ctx *gin.Context) {
 
 	id := ctx.Param("id")
 
-	cinema, err := c.cinemaService.GetDetail(ctxReq, id)
+	cinema, err := c.cinemaService.GetDetail(ctxReq, uuid.MustParse(id))
 	if err != nil {
 		log.Error(ctxReq, "[%v] get cinema failed", caller, err)
 		c.ServeErrResponse(ctx, err)
 		return
 	}
-	c.ServeSuccessResponse(ctx, response.ToCinemaResponse(cinema))
+	c.ServeSuccessResponse(ctx, response.ToCinemaWithFacilitiesResponse(cinema))
 }
