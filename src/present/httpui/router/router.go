@@ -94,7 +94,7 @@ func registerMovieRouters(root *gin.RouterGroup, in IRouter) {
 		movieRouter.GET("/list", in.MovieController.GetList)
 		movieRouter.GET("/range", in.MovieController.GetListInDateRange)
 		movieRouter.GET("/:id", in.MovieController.GetDetail)
-		movieRouter.Use(in.AuthHolder.RequireAuth())
+		//movieRouter.Use(in.AuthHolder.RequireAuth())
 		movieRouter.POST("", in.MovieController.Create)
 		movieRouter.PUT("/:id", in.MovieController.Update)
 		movieRouter.PUT("/:id/poster", in.MovieController.UpdatePoster)

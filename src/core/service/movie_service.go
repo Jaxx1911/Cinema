@@ -8,6 +8,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"mime/multipart"
+	"strings"
 	"time"
 )
 
@@ -70,8 +71,11 @@ func (m *MovieService) Create(ctx context.Context, req request.CreateMovieReques
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to parse release date", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyMovie)
 	}
-
-	listGenre, err := m.genreRepo.GetByIDs(ctx, req.Genres)
+	ids := make([]uuid.UUID, 0)
+	for _, g := range req.Genres {
+		ids = append(ids, uuid.MustParse(g))
+	}
+	listGenre, err := m.genreRepo.GetByIDs(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +85,8 @@ func (m *MovieService) Create(ctx context.Context, req request.CreateMovieReques
 		Duration:       req.Duration,
 		PosterURL:      pUrl,
 		LargePosterURL: lUrl,
-		Director:       req.Director,
-		Caster:         req.Caster,
+		Director:       strings.Join(req.Director, ","),
+		Caster:         strings.Join(req.Caster, ","),
 		Description:    req.Description,
 		ReleaseDate:    releaseDate,
 		TrailerURL:     req.TrailerURL,
@@ -108,8 +112,11 @@ func (m *MovieService) Update(ctx context.Context, req request.UpdateMovieReques
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to parse release date", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyMovie)
 	}
-
-	listGenre, err := m.genreRepo.GetByIDs(ctx, req.Genres)
+	ids := make([]uuid.UUID, 0)
+	for _, g := range req.Genres {
+		ids = append(ids, uuid.MustParse(g))
+	}
+	listGenre, err := m.genreRepo.GetByIDs(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
