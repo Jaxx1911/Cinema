@@ -44,7 +44,7 @@ func (*Genre) TableName() string {
 }
 
 type MovieRepo interface {
-	GetList(ctx context.Context, page request.Page) ([]*Movie, int64, error)
+	GetList(ctx context.Context, page request.GetListMovie) ([]*Movie, int64, error)
 	GetListByStatus(ctx context.Context, page request.Page, showingStatus string) ([]*Movie, error)
 	GetById(ctx context.Context, id uuid.UUID) (*Movie, error)
 	GetDetail(ctx context.Context, id uuid.UUID) (*Movie, error)

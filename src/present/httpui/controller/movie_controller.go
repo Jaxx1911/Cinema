@@ -25,14 +25,14 @@ func (m *MovieController) GetList(ctx *gin.Context) {
 	ctxReq := ctx.Request.Context()
 	caller := "UserController.GetList"
 
-	var page request.Page
+	var page request.GetListMovie
 	if err := ctx.ShouldBindQuery(&page); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
 		m.ServeErrResponse(ctx, err)
 		return
 	}
 
-	page.SetDefaults()
+	page.Page.SetDefaults()
 
 	movies, total, err := m.movieService.GetList(ctxReq, page)
 	if err != nil {

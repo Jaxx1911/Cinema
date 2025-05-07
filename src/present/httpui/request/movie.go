@@ -40,3 +40,10 @@ type Genre struct {
 	Id   uuid.UUID `form:"id,omitempty"`
 	Name string    `form:"name"`
 }
+
+type GetListMovie struct {
+	Page
+	Tag    string `form:"tag"`
+	Status string `form:"status"`
+	Term   string `form:"term"`
+}

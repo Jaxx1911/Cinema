@@ -26,7 +26,7 @@ func NewMovieService(movieRepo domain.MovieRepo, genreRepo domain.GenreRepo, upl
 	}
 }
 
-func (m *MovieService) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, int64, error) {
+func (m *MovieService) GetList(ctx context.Context, page request.GetListMovie) ([]*domain.Movie, int64, error) {
 	_ = "MovieService.GetList"
 	movies, total, err := m.movieRepo.GetList(ctx, page)
 	if err != nil {

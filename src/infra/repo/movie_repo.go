@@ -4,6 +4,7 @@ import (
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"time"
 )
@@ -18,20 +19,29 @@ func NewMovieRepo(baseRepo *BaseRepo) domain.MovieRepo {
 	}
 }
 
-func (m MovieRepo) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, int64, error) {
+func (m MovieRepo) GetList(ctx context.Context, req request.GetListMovie) ([]*domain.Movie, int64, error) {
 	var movies []*domain.Movie
 	var totalCount int64
 
 	// Lấy limit và offset từ page
-	limit, offset := m.toLimitOffset(ctx, page)
-
+	limit, offset := m.toLimitOffset(ctx, req.Page)
+	query := m.db.Model(&domain.Movie{})
+	if req.Tag != "all" {
+		query = query.Where("tag = ?", req.Tag)
+	}
+	if req.Status != "all" {
+		query = query.Where("status = ?", req.Status)
+	}
+	if req.Term != "all" {
+		query = query.Where("title LIKE ?", fmt.Sprintf("%%%s%%", req.Term))
+	}
 	// Lấy tổng số phim
-	if err := m.db.Model(&domain.Movie{}).Count(&totalCount).Error; err != nil {
+	if err := query.Count(&totalCount).Error; err != nil {
 		return nil, 0, m.returnError(ctx, err)
 	}
 
 	// Lấy danh sách phim với limit và offset
-	if err := m.db.Preload("Genres").Limit(limit).Offset(offset).Order("release_date").Find(&movies).Error; err != nil {
+	if err := query.Preload("Genres").Limit(limit).Offset(offset).Order("release_date").Find(&movies).Error; err != nil {
 		return nil, 0, m.returnError(ctx, err)
 	}
 

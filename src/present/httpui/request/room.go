@@ -14,5 +14,5 @@ type CreateRoomReq struct {
 type CreateSeat struct {
 	RowNumber  string `json:"row_number"` // Hàng: A, B, C...
 	SeatNumber int    `json:"seat_number"`
-	Type       string `json:"type"`
+	Type       string `json:"type"` // Standard, Premium, Couple
 }
