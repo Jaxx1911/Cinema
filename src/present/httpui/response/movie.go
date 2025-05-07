@@ -64,6 +64,26 @@ func ToMovieDetailResponse(movie *domain.Movie) *MovieDetailResponse {
 	}
 }
 
+func ToMovieResponse(movie *domain.Movie) *MovieOfListResponse {
+	genres := make([]string, 0)
+	for _, genre := range movie.Genres {
+		genres = append(genres, genre.Name)
+	}
+	return &MovieOfListResponse{
+		ID:             movie.ID,
+		Title:          movie.Title,
+		Duration:       movie.Duration,
+		PosterURL:      movie.PosterURL,
+		LargePosterURL: movie.LargePosterURL,
+		Description:    movie.Description,
+		ReleaseDate:    movie.ReleaseDate.Format("2006-01-02"),
+		TrailerURL:     movie.TrailerURL,
+		Genres:         genres,
+		Status:         movie.Status,
+		Tag:            movie.Tag,
+	}
+}
+
 func ToListMoviesResponse(movies []*domain.Movie) []*MovieOfListResponse {
 	var movieResponses []*MovieOfListResponse
 

@@ -147,3 +147,31 @@ func (m *MovieController) GetListInDateRange(ctx *gin.Context) {
 	}
 	m.ServeSuccessResponse(ctx, response.ToListMoviesResponse(movies))
 }
+
+func (m *MovieController) StopMovie(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "UserController.GetListOutDateRange"
+
+	id := ctx.Param("id")
+
+	if err := m.movieService.StopMovie(ctxReq, uuid.MustParse(id)); err != nil {
+		log.Error(ctxReq, "[%v] stop movie failed %+v", caller, err)
+		m.ServeErrResponse(ctx, err)
+		return
+	}
+	m.ServeSuccessResponse(ctx, true)
+}
+
+func (m *MovieController) ReshowMovie(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "UserController.GetListOutDateRange"
+
+	id := ctx.Param("id")
+
+	if err := m.movieService.ReshowMovie(ctxReq, uuid.MustParse(id)); err != nil {
+		log.Error(ctxReq, "[%v] stop movie failed %+v", caller, err)
+		m.ServeErrResponse(ctx, err)
+		return
+	}
+	m.ServeSuccessResponse(ctx, true)
+}

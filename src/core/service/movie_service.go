@@ -185,3 +185,29 @@ func (m *MovieService) GetListInDateRange(ctx context.Context) ([]*domain.Movie,
 	}
 	return movies, nil
 }
+
+func (m *MovieService) StopMovie(ctx context.Context, id uuid.UUID) error {
+	movie, err := m.movieRepo.GetById(ctx, id)
+	if err != nil {
+		return err
+	}
+	movie.Status = "stop"
+	movie, err = m.movieRepo.Update(ctx, movie)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MovieService) ReshowMovie(ctx context.Context, id uuid.UUID) error {
+	movie, err := m.movieRepo.GetById(ctx, id)
+	if err != nil {
+		return err
+	}
+	movie.Status = "new"
+	movie, err = m.movieRepo.Update(ctx, movie)
+	if err != nil {
+		return err
+	}
+	return nil
+}

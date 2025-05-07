@@ -96,6 +96,8 @@ func registerMovieRouters(root *gin.RouterGroup, in IRouter) {
 		movieRouter.GET("/:id", in.MovieController.GetDetail)
 		//movieRouter.Use(in.AuthHolder.RequireAuth())
 		movieRouter.POST("", in.MovieController.Create)
+		movieRouter.PUT("/stop/:id", in.MovieController.StopMovie)
+		movieRouter.PUT("/reshow/:id", in.MovieController.ReshowMovie)
 		movieRouter.PUT("/:id", in.MovieController.Update)
 	}
 }

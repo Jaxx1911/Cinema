@@ -74,7 +74,7 @@ func (m MovieRepo) GetDetail(ctx context.Context, id uuid.UUID) (*domain.Movie, 
 
 func (m MovieRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.Movie, error) {
 	movie := &domain.Movie{}
-	if err := m.db.Where("id = ?", id).First(movie).Error; err != nil {
+	if err := m.db.Preload("Genres").Where("id = ?", id).First(movie).Error; err != nil {
 		return nil, m.returnError(ctx, err)
 	}
 	return movie, nil
