@@ -97,7 +97,7 @@ func (s *ShowtimeController) GetByRoomId(ctx *gin.Context) {
 		s.ServeErrResponse(ctx, err)
 		return
 	}
-	s.ServeSuccessResponse(ctx, response.ToListShowtimeWithRoom(showtimes))
+	s.ServeSuccessResponse(ctx, response.ToListShowtimeWithMovieAndRoom(showtimes))
 }
 
 func (s *ShowtimeController) GetById(ctx *gin.Context) {

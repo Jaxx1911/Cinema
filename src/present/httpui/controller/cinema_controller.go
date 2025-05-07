@@ -116,7 +116,12 @@ func (c *CinemaController) Update(ctx *gin.Context) {
 	caller := "CinemaController.Update"
 	ctxReq := ctx.Request.Context()
 
+	id := ctx.Param("id")
+
 	var req request.UpdateCinemaRequest
+
+	req.Id = uuid.MustParse(id)
+
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
 		c.ServeErrResponse(ctx, err)

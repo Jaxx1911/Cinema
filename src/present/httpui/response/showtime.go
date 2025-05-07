@@ -26,6 +26,14 @@ func ToShowtimeResponse(showtime domain.Showtime) ShowtimeResponse {
 	}
 }
 
+func ToListShowtimeResponse(showtimes []*domain.Showtime) []ShowtimeResponse {
+	var list []ShowtimeResponse
+	for _, v := range showtimes {
+		list = append(list, ToShowtimeResponse(*v))
+	}
+	return list
+}
+
 type ShowtimeFullDetail struct {
 	Showtime ShowtimeResponse    `json:"showtime"`
 	Movie    MovieDetailResponse `json:"movie"`
@@ -38,6 +46,14 @@ func ToShowtimeWithMovieAndRoom(showtime domain.Showtime) ShowtimeFullDetail {
 		Movie:    *ToMovieDetailResponse(&showtime.Movie),
 		Room:     ToRoomResponse(&showtime.Room),
 	}
+}
+
+func ToListShowtimeWithMovieAndRoom(showtimes []*domain.Showtime) []ShowtimeFullDetail {
+	var list []ShowtimeFullDetail
+	for _, v := range showtimes {
+		list = append(list, ToShowtimeWithMovieAndRoom(*v))
+	}
+	return list
 }
 
 type ShowtimeWithRoom struct {

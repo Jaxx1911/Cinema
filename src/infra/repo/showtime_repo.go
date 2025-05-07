@@ -67,6 +67,8 @@ func (s *ShowtimeRepo) GetListByRoomFilter(ctx context.Context, id uuid.UUID, da
 	var showtimes []*domain.Showtime
 
 	if err := s.db.WithContext(ctx).
+		Preload("Room").
+		Preload("Movie").
 		Where("room_id = ? AND DATE(showtime.start_time) >= ? AND DATE(showtime.start_time) < ?", id, day, day.Add(24*time.Hour)).
 		Order("start_time asc").Find(&showtimes).Error; err != nil {
 		return nil, s.returnError(ctx, err)
