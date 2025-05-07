@@ -71,6 +71,7 @@ func (c *CinemaService) Update(ctx context.Context, req request.UpdateCinemaRequ
 	cinema.Address = req.Address
 	cinema.Phone = req.Phone
 	cinema.OpeningHours = req.OpeningHours
+	cinema.IsActive = req.IsActive
 	cinema, err = c.cinemaRepo.Update(ctx, cinema)
 	if err != nil {
 		return nil, err

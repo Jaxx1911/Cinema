@@ -63,6 +63,17 @@ func (s *ShowtimeRepo) GetListByCinemaFilter(ctx context.Context, id uuid.UUID, 
 	return showtimes, nil
 }
 
+func (s *ShowtimeRepo) GetListByRoomFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*domain.Showtime, error) {
+	var showtimes []*domain.Showtime
+
+	if err := s.db.WithContext(ctx).
+		Where("room_id = ? AND DATE(showtime.start_time) >= ? AND DATE(showtime.start_time) < ?", id, day, day.Add(24*time.Hour)).
+		Order("start_time asc").Find(&showtimes).Error; err != nil {
+		return nil, s.returnError(ctx, err)
+	}
+	return showtimes, nil
+}
+
 func (s *ShowtimeRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.Showtime, error) {
 	var showtime domain.Showtime
 	if err := s.db.WithContext(ctx).Preload("Tickets").Preload("Room").Where("id = ?", id).First(&showtime).Error; err != nil {

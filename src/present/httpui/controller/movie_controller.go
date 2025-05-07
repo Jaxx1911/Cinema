@@ -34,13 +34,16 @@ func (m *MovieController) GetList(ctx *gin.Context) {
 
 	page.SetDefaults()
 
-	movies, err := m.movieService.GetList(ctxReq, page)
+	movies, total, err := m.movieService.GetList(ctxReq, page)
 	if err != nil {
 		log.Error(ctxReq, "[%v] get movie list failed", caller, err)
 		m.ServeErrResponse(ctx, err)
 		return
 	}
-	m.ServeSuccessResponse(ctx, response.ToListMoviesResponse(movies))
+	m.ServeSuccessResponse(ctx, response.MetaData{
+		Data:       response.ToListMoviesResponse(movies),
+		TotalCount: total,
+	})
 }
 
 func (m *MovieController) GetListByStatus(ctx *gin.Context) {
@@ -106,7 +109,7 @@ func (m *MovieController) Update(ctx *gin.Context) {
 	caller := "UserController.Update"
 
 	var req request.UpdateMovieRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBind(&req); err != nil {
 		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
 		m.ServeErrResponse(ctx, err)
 		return
@@ -120,28 +123,7 @@ func (m *MovieController) Update(ctx *gin.Context) {
 		m.ServeErrResponse(ctx, err)
 		return
 	}
-	m.ServeSuccessResponse(ctx, movie)
-}
-
-func (m *MovieController) UpdatePoster(ctx *gin.Context) {
-	ctxReq := ctx.Request.Context()
-	caller := "UserController.Update"
-
-	poster, err := ctx.FormFile("poster")
-	id := ctx.Param("id")
-	if err != nil {
-		log.Error(ctxReq, "[%v] invalid file %+v", caller, err)
-		m.ServeErrResponse(ctx, err)
-		return
-	}
-
-	movie, err := m.movieService.UpdatePoster(ctxReq, uuid.MustParse(id), poster)
-	if err != nil {
-		log.Error(ctxReq, "[%v] update movie failed %+v", caller, err)
-		m.ServeErrResponse(ctx, err)
-		return
-	}
-	m.ServeSuccessResponse(ctx, movie)
+	m.ServeSuccessResponse(ctx, response.ToMovieDetailResponse(movie))
 }
 
 func (m *MovieController) GetListInDateRange(ctx *gin.Context) {

@@ -26,13 +26,13 @@ func NewMovieService(movieRepo domain.MovieRepo, genreRepo domain.GenreRepo, upl
 	}
 }
 
-func (m *MovieService) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, error) {
+func (m *MovieService) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, int64, error) {
 	_ = "MovieService.GetList"
-	movies, err := m.movieRepo.GetList(ctx, page)
+	movies, total, err := m.movieRepo.GetList(ctx, page)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return movies, nil
+	return movies, total, nil
 }
 
 func (m *MovieService) GetListByStatus(ctx context.Context, page request.Page, status string) ([]*domain.Movie, error) {
@@ -127,23 +127,29 @@ func (m *MovieService) Update(ctx context.Context, req request.UpdateMovieReques
 	movie.ReleaseDate = releaseDate
 	movie.TrailerURL = req.TrailerURL
 	movie.Genres = listGenre
-	movie.Director = req.Director
-	movie.Caster = req.Caster
+	movie.Director = strings.Join(req.Director, ",")
+	movie.Caster = strings.Join(req.Caster, ",")
 	movie.Status = req.Status
 
 	movie, err = m.movieRepo.Update(ctx, movie)
+	if req.PosterImage != nil {
+		movie, err = m.UpdatePoster(ctx, movie, req.PosterImage)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if req.LargePosterImage != nil {
+		movie, err = m.UpdateLargePoster(ctx, movie, req.LargePosterImage)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	return movie, nil
 }
 
-func (m *MovieService) UpdatePoster(ctx context.Context, id uuid.UUID, posterImage *multipart.FileHeader) (*domain.Movie, error) {
+func (m *MovieService) UpdatePoster(ctx context.Context, movie *domain.Movie, posterImage *multipart.FileHeader) (*domain.Movie, error) {
 	caller := "MovieService.UpdatePoster"
-	movie, err := m.movieRepo.GetById(ctx, id)
-	if err != nil {
-		return nil, err
-	}
 	url, err := m.upload.UploadFile(ctx, posterImage)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to upload movie poster", caller)
@@ -156,12 +162,8 @@ func (m *MovieService) UpdatePoster(ctx context.Context, id uuid.UUID, posterIma
 	return movie, nil
 }
 
-func (m *MovieService) UpdateLargePoster(ctx context.Context, id uuid.UUID, posterImage *multipart.FileHeader) (*domain.Movie, error) {
+func (m *MovieService) UpdateLargePoster(ctx context.Context, movie *domain.Movie, posterImage *multipart.FileHeader) (*domain.Movie, error) {
 	caller := "MovieService.UpdatePoster"
-	movie, err := m.movieRepo.GetById(ctx, id)
-	if err != nil {
-		return nil, err
-	}
 	url, err := m.upload.UploadFile(ctx, posterImage)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to upload movie poster", caller)

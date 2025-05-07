@@ -18,13 +18,24 @@ func NewMovieRepo(baseRepo *BaseRepo) domain.MovieRepo {
 	}
 }
 
-func (m MovieRepo) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, error) {
+func (m MovieRepo) GetList(ctx context.Context, page request.Page) ([]*domain.Movie, int64, error) {
 	var movies []*domain.Movie
+	var totalCount int64
+
+	// Lấy limit và offset từ page
 	limit, offset := m.toLimitOffset(ctx, page)
-	if err := m.db.Preload("Genres").Limit(limit).Offset(offset).Order("release_date").Find(&movies).Error; err != nil {
-		return nil, m.returnError(ctx, err)
+
+	// Lấy tổng số phim
+	if err := m.db.Model(&domain.Movie{}).Count(&totalCount).Error; err != nil {
+		return nil, 0, m.returnError(ctx, err)
 	}
-	return movies, nil
+
+	// Lấy danh sách phim với limit và offset
+	if err := m.db.Preload("Genres").Limit(limit).Offset(offset).Order("release_date").Find(&movies).Error; err != nil {
+		return nil, 0, m.returnError(ctx, err)
+	}
+
+	return movies, totalCount, nil
 }
 
 func (m MovieRepo) GetListByStatus(ctx context.Context, page request.Page, showingStatus string) ([]*domain.Movie, error) {
@@ -44,7 +55,10 @@ func (m MovieRepo) Create(ctx context.Context, movie *domain.Movie) (*domain.Mov
 }
 
 func (m MovieRepo) Update(ctx context.Context, movie *domain.Movie) (*domain.Movie, error) {
-	if err := m.db.Save(movie).Error; err != nil {
+	if err := m.db.Updates(movie).Error; err != nil {
+		return nil, m.returnError(ctx, err)
+	}
+	if err := m.db.Model(movie).Association("Genres").Replace(movie.Genres); err != nil {
 		return nil, m.returnError(ctx, err)
 	}
 	return movie, nil

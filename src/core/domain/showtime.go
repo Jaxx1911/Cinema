@@ -31,5 +31,6 @@ type ShowtimeRepo interface {
 	FindConflictByRoomId(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time) ([]Showtime, error)
 	GetListByFilter(ctx context.Context, movieId uuid.UUID, cinemaId uuid.UUID, day time.Time) ([]*Showtime, error)
 	GetListByCinemaFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
+	GetListByRoomFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
 	GetById(ctx context.Context, id uuid.UUID) (*Showtime, error)
 }

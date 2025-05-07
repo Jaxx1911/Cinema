@@ -19,3 +19,8 @@ type GetShowtimesByCinemaIdFilter struct {
 	CinemaId string `json:"cinema_id" binding:"required" form:"cinema_id"`
 	Day      string `json:"day" binding:"required" form:"day"`
 }
+
+type GetShowtimesByRoomIdFilter struct {
+	RoomId string `json:"room_id" binding:"required" form:"room_id"`
+	Day    string `json:"day" binding:"required" form:"day"`
+}

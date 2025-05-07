@@ -132,6 +132,20 @@ func (s *ShowtimeService) GetByCinemaFilter(ctx context.Context, filter request.
 	return showtimes, nil
 }
 
+func (s *ShowtimeService) GetByRoomFilter(ctx context.Context, filter request.GetShowtimesByRoomIdFilter) ([]*domain.Showtime, error) {
+	caller := "ShowtimeService.GetByCinemaFilter"
+	day, err := time.ParseInLocation("02-01-2006", filter.Day, time.FixedZone("UTC+7", 7*60*60))
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to parse day", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+
+	showtimes, err := s.ShowtimeRepo.GetListByRoomFilter(ctx, uuid.MustParse(filter.RoomId), day)
+	if err != nil {
+		return nil, err
+	}
+	return showtimes, nil
+}
+
 func (s *ShowtimeService) GetById(ctx context.Context, id string) (*domain.Showtime, error) {
 	caller := "ShowtimeService.GetById"
 	uid, err := uuid.Parse(id)

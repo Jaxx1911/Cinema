@@ -8,8 +8,8 @@ type UserInfo struct {
 }
 
 type Page struct {
-	Limit int `json:"limit,omitempty"`
-	Page  int `json:"page,omitempty"`
+	Limit int `json:"limit" form:"limit"`
+	Page  int `json:"page" form:"page"`
 }
 
 func (p *Page) SetDefaults() {

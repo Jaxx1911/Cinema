@@ -30,4 +30,5 @@ type UpdateCinemaRequest struct {
 	Address      string    `json:"address"`
 	Phone        string    `json:"phone"`
 	OpeningHours string    `json:"opening_hours"`
+	IsActive     bool      `json:"is_active"`
 }

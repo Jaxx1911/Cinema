@@ -97,7 +97,6 @@ func registerMovieRouters(root *gin.RouterGroup, in IRouter) {
 		//movieRouter.Use(in.AuthHolder.RequireAuth())
 		movieRouter.POST("", in.MovieController.Create)
 		movieRouter.PUT("/:id", in.MovieController.Update)
-		movieRouter.PUT("/:id/poster", in.MovieController.UpdatePoster)
 	}
 }
 
@@ -108,6 +107,7 @@ func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
 		showtimeRouter.GET("", in.ShowtimeController.GetByUserFilter)
 		showtimeRouter.GET("/cinema", in.ShowtimeController.GetByCinemaId)
 		showtimeRouter.GET("/:id", in.ShowtimeController.GetById)
+		showtimeRouter.GET("/room", in.ShowtimeController.GetByRoomId)
 	}
 }
 
