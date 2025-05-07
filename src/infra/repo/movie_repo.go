@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"strings"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func (m MovieRepo) GetList(ctx context.Context, req request.GetListMovie) ([]*do
 		query = query.Where("status = ?", req.Status)
 	}
 	if req.Term != "all" {
-		query = query.Where("title LIKE ?", fmt.Sprintf("%%%s%%", req.Term))
+		query = query.Where("LOWER(title) LIKE ?", fmt.Sprintf("%%%s%%", strings.ToLower(req.Term)))
 	}
 	// Lấy tổng số phim
 	if err := query.Count(&totalCount).Error; err != nil {
