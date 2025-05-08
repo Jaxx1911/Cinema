@@ -3,6 +3,7 @@ package repo
 import (
 	"TTCS/src/core/domain"
 	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -19,7 +20,7 @@ func (c ComboRepository) Create(ctx context.Context, combo *domain.Combo) error 
 
 func (c ComboRepository) FindAll(ctx context.Context) ([]*domain.Combo, error) {
 	var combos []*domain.Combo
-	if err := c.db.WithContext(ctx).Find(&combos).Error; err != nil {
+	if err := c.db.WithContext(ctx).Order("price ASC").Find(&combos).Error; err != nil {
 		return nil, c.returnError(ctx, err)
 	}
 	return combos, nil
@@ -40,7 +41,9 @@ func (c ComboRepository) Update(ctx context.Context, combo *domain.Combo) error 
 	return nil
 }
 
+// Delete performs a soft delete on the combo by setting the DeletedAt timestamp
 func (c ComboRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	// Using Delete() without Unscoped() will perform a soft delete
 	if err := c.db.WithContext(ctx).Delete(&domain.Combo{}, id).Error; err != nil {
 		return c.returnError(ctx, err)
 	}

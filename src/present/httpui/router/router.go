@@ -4,6 +4,7 @@ import (
 	"TTCS/src/common/configs"
 	"TTCS/src/present/httpui/controller"
 	"TTCS/src/present/httpui/middleware"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	cors "github.com/rs/cors/wrapper/gin"
@@ -144,6 +145,10 @@ func registerComboRouter(root *gin.RouterGroup, in IRouter) {
 	comboRouter := root.Group("/combo")
 	{
 		comboRouter.GET("", in.ComboController.GetList)
+		comboRouter.GET("/:id", in.ComboController.GetDetail)
+		comboRouter.POST("", in.ComboController.Create)
+		comboRouter.PUT("/:id", in.ComboController.Update)
+		comboRouter.DELETE("/:id", in.ComboController.Delete)
 	}
 }
 
@@ -169,6 +174,10 @@ func registerPaymentRouter(root *gin.RouterGroup, in IRouter) {
 func registerDiscountRouter(root *gin.RouterGroup, in IRouter) {
 	discountRouter := root.Group("/discount")
 	{
+		discountRouter.POST("", in.DiscountController.Create)
+		discountRouter.PUT("/:id", in.DiscountController.Update)
+		discountRouter.GET("/list", in.DiscountController.GetDiscounts)
+		discountRouter.GET("/:id", in.DiscountController.GetDiscountByID)
 		discountRouter.GET("", in.DiscountController.GetDiscountByCode)
 	}
 }
