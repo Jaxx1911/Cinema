@@ -12,7 +12,7 @@ type Cinema struct {
 	Address      string    `gorm:"type:text;not null"`
 	Phone        string    `gorm:"type:varchar(20)"`
 	OpeningHours string    `gorm:"type:text"`
-	IsActive     bool      `gorm:"type:boolean;not null;default:true"`
+	IsActive     bool      `gorm:"type:boolean;not null"`
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 
