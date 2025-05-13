@@ -5,8 +5,10 @@ import (
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"context"
-	"github.com/google/uuid"
+	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type DiscountService struct {
@@ -25,8 +27,8 @@ func (d DiscountService) GetListDiscount(ctx context.Context) ([]domain.Discount
 	return d.discountRepo.GetListDiscount(ctx)
 }
 
-func (d DiscountService) GetDiscountByCode(ctx context.Context, code string) (domain.Discount, error) {
-	return d.GetDiscountByCode(ctx, code)
+func (d DiscountService) GetDiscountByCode(ctx context.Context, code string) (*domain.Discount, error) {
+	return d.discountRepo.GetDiscountByCode(ctx, code)
 }
 
 func (d DiscountService) Create(ctx context.Context, req request.Discount) (*domain.Discount, error) {
@@ -43,11 +45,19 @@ func (d DiscountService) Create(ctx context.Context, req request.Discount) (*dom
 		return nil, err
 	}
 
+	if req.UsageLimit < 0 {
+		err := errors.New("usage limit cannot be negative")
+		log.Error(ctx, "[%v] invalid usage limit %+v", caller, err)
+		return nil, err
+	}
+
 	return d.discountRepo.CreateDiscount(ctx, domain.Discount{
 		Code:       req.Code,
 		Percentage: req.Percentage,
 		StartDate:  start,
 		EndDate:    end,
+		IsActive:   req.IsActive,
+		UsageLimit: req.UsageLimit,
 	})
 }
 
@@ -65,6 +75,12 @@ func (d DiscountService) Update(ctx context.Context, id uuid.UUID, req request.D
 		return nil, err
 	}
 
+	if req.UsageLimit < 0 {
+		err := errors.New("usage limit cannot be negative")
+		log.Error(ctx, "[%v] invalid usage limit %+v", caller, err)
+		return nil, err
+	}
+
 	discount, err := d.discountRepo.GetDiscount(ctx, id)
 	if err != nil {
 		return nil, err
@@ -73,5 +89,18 @@ func (d DiscountService) Update(ctx context.Context, id uuid.UUID, req request.D
 	discount.Percentage = req.Percentage
 	discount.StartDate = start
 	discount.EndDate = end
+	discount.UsageLimit = req.UsageLimit
+	discount.IsActive = req.IsActive
 	return d.discountRepo.UpdateDiscount(ctx, *discount)
+}
+
+func (d DiscountService) SetStatus(ctx context.Context, id uuid.UUID, isActive bool) (*domain.Discount, error) {
+	caller := "DiscountService.SetStatus"
+
+	discount, err := d.discountRepo.SetDiscountStatus(ctx, id, isActive)
+	if err != nil {
+		log.Error(ctx, "[%v] failed to set discount status %+v", caller, err)
+		return nil, err
+	}
+	return discount, nil
 }

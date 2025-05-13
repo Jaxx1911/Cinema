@@ -3,15 +3,16 @@ package response
 import (
 	"TTCS/src/core/domain"
 	"github.com/google/uuid"
-	"time"
 )
 
 type Discount struct {
 	Id         uuid.UUID `json:"id"`
 	Code       string    `json:"code"`
 	Percentage float64   `json:"percentage"`
-	StartDate  time.Time `json:"start_date"`
-	EndDate    time.Time `json:"end_date"`
+	StartDate  string    `json:"start_date"`
+	EndDate    string    `json:"end_date"`
+	UsageLimit int       `json:"usage_limit"`
+	IsActive   bool      `json:"is_active"`
 }
 
 func ToDiscountResponse(discount domain.Discount) Discount {
@@ -19,8 +20,10 @@ func ToDiscountResponse(discount domain.Discount) Discount {
 		Id:         discount.ID,
 		Code:       discount.Code,
 		Percentage: discount.Percentage,
-		StartDate:  discount.StartDate,
-		EndDate:    discount.EndDate,
+		StartDate:  discount.StartDate.Format("2006-01-02"),
+		EndDate:    discount.EndDate.Format("2006-01-02"),
+		UsageLimit: discount.UsageLimit,
+		IsActive:   discount.IsActive,
 	}
 }
 

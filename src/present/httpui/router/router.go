@@ -179,6 +179,7 @@ func registerDiscountRouter(root *gin.RouterGroup, in IRouter) {
 		discountRouter.GET("/list", in.DiscountController.GetDiscounts)
 		discountRouter.GET("/:id", in.DiscountController.GetDiscountByID)
 		discountRouter.GET("", in.DiscountController.GetDiscountByCode)
+		discountRouter.PUT("/:id/status", in.DiscountController.SetStatus)
 	}
 }
 

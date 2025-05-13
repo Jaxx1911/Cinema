@@ -66,7 +66,7 @@ func (u *UserService) buildModelUser(req *request.UserInfo, user *domain.User) *
 		user.Phone = req.Phone
 	}
 	if req.Role != "" {
-		user.Phone = req.Phone
+		user.Role = req.Role
 	}
 	return user
 }

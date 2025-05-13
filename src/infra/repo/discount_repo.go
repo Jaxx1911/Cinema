@@ -4,6 +4,7 @@ import (
 	"TTCS/src/core/domain"
 	"context"
 	"errors"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -51,7 +52,40 @@ func (d DiscountRepo) CreateDiscount(ctx context.Context, discount domain.Discou
 }
 
 func (d DiscountRepo) UpdateDiscount(ctx context.Context, discount domain.Discount) (*domain.Discount, error) {
-	if err := d.db.WithContext(ctx).Save(&discount).Error; err != nil {
+	// Use Updates with map to ensure zero values are updated
+	if err := d.db.WithContext(ctx).Model(&discount).Updates(map[string]interface{}{
+		"code":        discount.Code,
+		"percentage":  discount.Percentage,
+		"start_date":  discount.StartDate,
+		"end_date":    discount.EndDate,
+		"usage_limit": discount.UsageLimit,
+		"is_active":   discount.IsActive,
+	}).Error; err != nil {
+		return nil, d.returnError(ctx, err)
+	}
+
+	// Fetch the updated record to return
+	if err := d.db.WithContext(ctx).First(&discount, discount.ID).Error; err != nil {
+		return nil, d.returnError(ctx, err)
+	}
+	return &discount, nil
+}
+
+func (d DiscountRepo) SetDiscountStatus(ctx context.Context, id uuid.UUID, isActive bool) (*domain.Discount, error) {
+	var discount domain.Discount
+	if err := d.db.WithContext(ctx).First(&discount, id).Error; err != nil {
+		return nil, d.returnError(ctx, err)
+	}
+
+	// Use Updates with map to ensure boolean field is updated even when false
+	if err := d.db.WithContext(ctx).Model(&discount).Updates(map[string]interface{}{
+		"is_active": isActive,
+	}).Error; err != nil {
+		return nil, d.returnError(ctx, err)
+	}
+
+	// Fetch the updated record to return
+	if err := d.db.WithContext(ctx).First(&discount, id).Error; err != nil {
 		return nil, d.returnError(ctx, err)
 	}
 	return &discount, nil

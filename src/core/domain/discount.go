@@ -2,8 +2,9 @@ package domain
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Discount struct {
@@ -12,6 +13,8 @@ type Discount struct {
 	Percentage float64   `gorm:"not null"`
 	StartDate  time.Time `gorm:"not null"`
 	EndDate    time.Time `gorm:"not null"`
+	UsageLimit int       `gorm:"not null;default:0"` // 0 means unlimited
+	IsActive   bool      `gorm:"not null;default:true"`
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"autoUpdateTime"`
 
@@ -24,6 +27,7 @@ type DiscountRepository interface {
 	GetDiscountByCode(ctx context.Context, code string) (*Discount, error)
 	CreateDiscount(ctx context.Context, discount Discount) (*Discount, error)
 	UpdateDiscount(ctx context.Context, discount Discount) (*Discount, error)
+	SetDiscountStatus(ctx context.Context, id uuid.UUID, isActive bool) (*Discount, error)
 }
 
 func (*Discount) TableName() string {

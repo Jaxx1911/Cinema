@@ -5,6 +5,7 @@ import (
 	"TTCS/src/core/service"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -32,7 +33,7 @@ func (d DiscountController) GetDiscountByCode(ctx *gin.Context) {
 		d.ServeErrResponse(ctx, err)
 		return
 	}
-	d.ServeSuccessResponse(ctx, response.ToDiscountResponse(discount))
+	d.ServeSuccessResponse(ctx, response.ToDiscountResponse(*discount))
 	return
 }
 
@@ -97,6 +98,22 @@ func (d DiscountController) Update(ctx *gin.Context) {
 	discount, err := d.discountService.Update(ctxReq, uuid.MustParse(id), req)
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to update discount %+v", caller, err)
+		d.ServeErrResponse(ctx, err)
+		return
+	}
+	d.ServeSuccessResponse(ctx, response.ToDiscountResponse(*discount))
+}
+
+func (d DiscountController) SetStatus(ctx *gin.Context) {
+	caller := "DiscountController.SetStatus"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+	isActive := ctx.Query("is_active") == "true"
+
+	discount, err := d.discountService.SetStatus(ctxReq, uuid.MustParse(id), isActive)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to set discount status %+v", caller, err)
 		d.ServeErrResponse(ctx, err)
 		return
 	}
