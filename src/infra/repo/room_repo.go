@@ -3,6 +3,7 @@ package repo
 import (
 	"TTCS/src/core/domain"
 	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -38,6 +39,20 @@ func (r RoomRepo) Deactivate(ctx context.Context, id uuid.UUID, isActive bool) e
 		return r.returnError(ctx, err)
 	}
 	return nil
+}
+
+func (r RoomRepo) Update(ctx context.Context, room *domain.Room) (*domain.Room, error) {
+	// Use Updates with map to ensure zero values are updated
+	if err := r.db.WithContext(ctx).Model(room).Updates(map[string]interface{}{
+		"name":      room.Name,
+		"type":      room.Type,
+		"is_active": room.IsActive,
+	}).Error; err != nil {
+		return nil, r.returnError(ctx, err)
+	}
+
+	// Fetch the updated record to return
+	return r.GetById(ctx, room.ID)
 }
 
 func NewRoomRepo(baseRepo *BaseRepo) domain.RoomRepo {

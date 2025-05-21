@@ -4,6 +4,7 @@ import (
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -12,8 +13,11 @@ type RoomService struct {
 	seatRepo domain.SeatRepo
 }
 
-func NewRoomService(roomRepo domain.RoomRepo) *RoomService {
-	return &RoomService{roomRepo: roomRepo}
+func NewRoomService(roomRepo domain.RoomRepo, seatRepo domain.SeatRepo) *RoomService {
+	return &RoomService{
+		roomRepo: roomRepo,
+		seatRepo: seatRepo,
+	}
 }
 
 func (r *RoomService) Create(ctx context.Context, req request.CreateRoomReq) (*domain.Room, error) {
@@ -44,9 +48,50 @@ func (r *RoomService) Create(ctx context.Context, req request.CreateRoomReq) (*d
 	return room, nil
 }
 
-func (r *RoomService) Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error {
-	if err := r.roomRepo.Deactivate(ctx, id, isActive); err != nil {
-		return err
+func (r *RoomService) Update(ctx context.Context, id uuid.UUID, req request.UpdateRoomReq) (*domain.Room, error) {
+	// Get the existing room
+	room, err := r.roomRepo.GetById(ctx, id)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+
+	// Update fields
+	room.Name = req.Name
+	room.Type = req.Type
+	room.IsActive = req.IsActive
+
+	// Save changes for the room
+	room, err = r.roomRepo.Update(ctx, room)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update seats if provided
+	if len(req.Seats) > 0 {
+		for _, seatReq := range req.Seats {
+			seat := &domain.Seat{
+				ID:         seatReq.ID,
+				RoomID:     room.ID,
+				RowNumber:  seatReq.RowNumber,
+				SeatNumber: seatReq.SeatNumber,
+				Type:       seatReq.Type,
+			}
+
+			if err := r.seatRepo.UpdateSeat(ctx, seat); err != nil {
+				return nil, err
+			}
+		}
+
+		// Reload room with updated seats
+		room, err = r.roomRepo.GetById(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return room, nil
+}
+
+func (r *RoomService) GetRoomById(ctx context.Context, id uuid.UUID) (*domain.Room, error) {
+	return r.roomRepo.GetById(ctx, id)
 }

@@ -129,8 +129,9 @@ func registerCinemaRouter(root *gin.RouterGroup, in IRouter) {
 func registerRoomRouter(root *gin.RouterGroup, in IRouter) {
 	roomRouter := root.Group("/room")
 	{
-		roomRouter.POST("")
-		roomRouter.PUT("/deactivate/:id", in.RoomController.Deactivate)
+		roomRouter.POST("", in.RoomController.Create)
+		roomRouter.GET("/:id", in.RoomController.GetRoomById)
+		roomRouter.PUT("/:id", in.RoomController.Update)
 	}
 }
 

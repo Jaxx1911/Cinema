@@ -2,8 +2,9 @@ package domain
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Room struct {
@@ -31,6 +32,7 @@ type RoomRepo interface {
 	GetById(ctx context.Context, roomID uuid.UUID) (*Room, error)
 	GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]*Room, error)
 	Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error
+	Update(ctx context.Context, room *Room) (*Room, error)
 }
 
 type Seat struct {
@@ -51,4 +53,5 @@ type SeatRepo interface {
 	Create(ctx context.Context, seat *Seat) error
 	GetById(ctx context.Context, seatID uuid.UUID) (*Seat, error)
 	GetByRoomID(ctx context.Context, roomID uuid.UUID) ([]Seat, error)
+	UpdateSeat(ctx context.Context, seat *Seat) error
 }

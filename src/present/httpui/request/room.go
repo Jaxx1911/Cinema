@@ -11,8 +11,22 @@ type CreateRoomReq struct {
 	Seats       []CreateSeat `json:"seats"`
 }
 
+type UpdateRoomReq struct {
+	Name     string       `json:"name"`
+	Type     string       `json:"type"`
+	IsActive bool         `json:"is_active"`
+	Seats    []UpdateSeat `json:"seats,omitempty"`
+}
+
 type CreateSeat struct {
 	RowNumber  string `json:"row_number"` // Hàng: A, B, C...
 	SeatNumber int    `json:"seat_number"`
 	Type       string `json:"type"` // Standard, Premium, Couple
+}
+
+type UpdateSeat struct {
+	ID         uuid.UUID `json:"id"`
+	RowNumber  string    `json:"row_number"` // Hàng: A, B, C...
+	SeatNumber int       `json:"seat_number"`
+	Type       string    `json:"type"` // Standard, Premium, Couple
 }

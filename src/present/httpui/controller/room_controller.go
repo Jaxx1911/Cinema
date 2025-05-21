@@ -5,6 +5,7 @@ import (
 	"TTCS/src/core/service"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -40,23 +41,38 @@ func (r *RoomController) Create(ctx *gin.Context) {
 	r.ServeSuccessResponse(ctx, response.ToRoomResponse(room))
 }
 
-func (r *RoomController) Deactivate(ctx *gin.Context) {
-	caller := "RoomController.Deactive"
+func (r *RoomController) Update(ctx *gin.Context) {
+	caller := "RoomController.Update"
 	ctxReq := ctx.Request.Context()
 
-	isActiveString := ctx.Query("is_active")
 	id := ctx.Param("id")
-
-	var isActive bool
-	if isActiveString == "true" {
-		isActive = true
-	} else {
-		isActive = false
-	}
-	if err := r.roomService.Deactivate(ctx, uuid.MustParse(id), isActive); err != nil {
-		log.Error(ctxReq, "[%v] failed to deactivate +%v", caller, err)
+	var req request.UpdateRoomReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid request +%v", caller, err)
 		r.ServeErrResponse(ctx, err)
 		return
 	}
-	r.ServeSuccessResponse(ctx, true)
+
+	room, err := r.roomService.Update(ctxReq, uuid.MustParse(id), req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] room update failed +%v", caller, err)
+		r.ServeErrResponse(ctx, err)
+		return
+	}
+	r.ServeSuccessResponse(ctx, response.ToRoomResponse(room))
+}
+
+func (r *RoomController) GetRoomById(ctx *gin.Context) {
+	caller := "RoomController.GetRoomById"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+
+	room, err := r.roomService.GetRoomById(ctxReq, uuid.MustParse(id))
+	if err != nil {
+		log.Error(ctxReq, "[%v] get room failed +%v", caller, err)
+		r.ServeErrResponse(ctx, err)
+		return
+	}
+	r.ServeSuccessResponse(ctx, response.ToRoomResponse(room))
 }
