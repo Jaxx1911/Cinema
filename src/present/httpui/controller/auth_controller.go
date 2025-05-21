@@ -7,6 +7,7 @@ import (
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
 	"errors"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -159,4 +160,33 @@ func (a *AuthController) ChangePassword(ctx *gin.Context) {
 	a.ServeSuccessResponse(ctx, true)
 	return
 
+}
+
+func (a *AuthController) LoginAdmin(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "AuthController.LoginAdmin"
+
+	var req request.LoginRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+
+	jwtToken, _, err := a.authService.LoginAdmin(ctxReq, req)
+
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to create token", caller)
+		a.ServeErrResponse(ctx, err)
+		return
+	}
+	a.ServeSuccessResponse(ctx, response.LoginResp{
+		Token: &response.Token{
+			AccessToken:      jwtToken.AccessToken.Token,
+			AccessExpiredAt:  jwtToken.AccessToken.Expire,
+			RefreshToken:     jwtToken.RefreshToken.Token,
+			RefreshExpiredAt: jwtToken.RefreshToken.Expire,
+		},
+	})
+	return
 }

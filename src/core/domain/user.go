@@ -3,9 +3,10 @@ package domain
 import (
 	"TTCS/src/present/httpui/request"
 	"context"
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type User struct {
@@ -26,10 +27,11 @@ type User struct {
 
 type UserRepo interface {
 	Create(ctx context.Context, user *User) (*User, error)
-	GetList(ctx context.Context, page request.Page) ([]*User, error)
+	GetList(ctx context.Context, page request.GetListUser) ([]*User, int64, error)
 	GetById(ctx context.Context, id uuid.UUID) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
+	Delete(ctx context.Context, user *User) error
 	GetPaymentsById(ctx context.Context, id uuid.UUID) ([]Payment, error)
 	GetOrdersById(ctx context.Context, id uuid.UUID) ([]Order, error)
 }

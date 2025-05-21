@@ -4,6 +4,7 @@ import (
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -25,13 +26,32 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.User) (*domain.User,
 	return user, nil
 }
 
-func (r *UserRepo) GetList(ctx context.Context, page request.Page) ([]*domain.User, error) {
+func (r *UserRepo) GetList(ctx context.Context, page request.GetListUser) ([]*domain.User, int64, error) {
 	var users []*domain.User
-	limit, offset := r.toLimitOffset(ctx, page)
-	if err := r.db.WithContext(ctx).Find(&users).Limit(limit).Offset(offset).Error; err != nil {
-		return nil, r.returnError(ctx, err)
+	var total int64
+
+	query := r.db.Model(&domain.User{})
+
+	// Apply filters
+	if page.Role != "" && page.Role != "all" {
+		query = query.Where("role = ?", page.Role)
 	}
-	return users, nil
+	if page.Name != "" {
+		query = query.Where("name LIKE ?", "%"+page.Name+"%")
+	}
+
+	// Get total count
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Apply pagination
+	limit, offset := r.toLimitOffset(ctx, page.Page)
+	if err := query.WithContext(ctx).Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+		return nil, 0, r.returnError(ctx, err)
+	}
+
+	return users, total, nil
 }
 
 func (r *UserRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
@@ -70,4 +90,11 @@ func (r *UserRepo) GetOrdersById(ctx context.Context, id uuid.UUID) ([]domain.Or
 		return nil, r.returnError(ctx, err)
 	}
 	return user.Orders, nil
+}
+
+func (r *UserRepo) Delete(ctx context.Context, user *domain.User) error {
+	if err := r.db.WithContext(ctx).Delete(user).Error; err != nil {
+		return r.returnError(ctx, err)
+	}
+	return nil
 }

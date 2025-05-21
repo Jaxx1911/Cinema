@@ -11,6 +11,7 @@ import (
 const SuccessCode = 0
 
 type Response struct {
+	Err     string      `json:"err"`
 	Key     string      `json:"key,omitempty"`
 	Body    interface{} `json:"body"`
 	Message string      `json:"message"`
@@ -55,6 +56,7 @@ func (*BaseController) ServeErrResponse(c *gin.Context, err error, statusCodes .
 	}
 
 	errRes := Response{
+		Err:     err.Error(),
 		Key:     fault.GetKey(err),
 		Message: fault.GetMessage(err),
 		Body:    nil,

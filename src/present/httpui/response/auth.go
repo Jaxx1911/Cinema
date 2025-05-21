@@ -2,8 +2,9 @@ package response
 
 import (
 	"TTCS/src/core/domain"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Otp struct {
@@ -22,17 +23,22 @@ type Token struct {
 }
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Phone     string    `json:"phone"`
-	Role      string    `json:"role"`
-	AvatarURL string    `json:"avatar_url"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID  `json:"id"`
+	Name      string     `json:"name"`
+	Email     string     `json:"email"`
+	Phone     string     `json:"phone"`
+	Role      string     `json:"role"`
+	AvatarURL string     `json:"avatar_url"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 func UserFromDomain(d *domain.User) *User {
+	var deletedAt *time.Time
+	if d.DeletedAt.Valid {
+		deletedAt = &d.DeletedAt.Time
+	}
 	return &User{
 		ID:        d.ID,
 		Name:      d.Name,
@@ -42,6 +48,7 @@ func UserFromDomain(d *domain.User) *User {
 		AvatarURL: d.AvatarUrl,
 		CreatedAt: d.CreatedAt,
 		UpdatedAt: d.UpdatedAt,
+		DeletedAt: deletedAt,
 	}
 }
 

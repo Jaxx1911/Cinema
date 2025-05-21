@@ -12,9 +12,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type AuthService struct {
@@ -154,6 +155,32 @@ func (s *AuthService) Login(ctx context.Context, req request.LoginRequest) (*dto
 	if err != nil {
 		return nil, nil, fault.Wrapf(err, "[%v] wrong password", caller).SetTag(fault.TagUnAuthorize).SetKey(fault.KeyAuth)
 	}
+	jwtToken, err := s.generateToken(ctx, user)
+	if err != nil {
+		return nil, nil, err
+	}
+	return jwtToken, user, nil
+}
+
+func (s *AuthService) LoginAdmin(ctx context.Context, req request.LoginRequest) (*dto.TokenDto, *domain.User, error) {
+	caller := "AuthService.LoginAdmin"
+
+	user, err := s.userRepo.GetByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Check if user is admin
+	if user.Role != constant.AdminRole {
+		err := fmt.Errorf("user is not an admin")
+		return nil, nil, fault.Wrapf(err, "[%v] unauthorized access", caller).SetTag(fault.TagForbidden).SetKey(fault.KeyAuth)
+	}
+
+	err = s.hashProvider.ComparePassword(req.Password, user.PasswordHash)
+	if err != nil {
+		return nil, nil, fault.Wrapf(err, "[%v] wrong password", caller).SetTag(fault.TagUnAuthorize).SetKey(fault.KeyAuth)
+	}
+
 	jwtToken, err := s.generateToken(ctx, user)
 	if err != nil {
 		return nil, nil, err

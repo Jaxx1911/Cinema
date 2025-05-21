@@ -65,6 +65,7 @@ func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 		authRouter.GET("/otp/:email", in.AuthController.SignUpOTP)
 		authRouter.POST("/signup", in.AuthController.SignUp)
 		authRouter.POST("/login", in.AuthController.Login)
+		authRouter.POST("/login/admin", in.AuthController.LoginAdmin)
 		authRouter.GET("/reset-otp/:email", in.AuthController.ResetOTP)
 		authRouter.POST("/reset-password", in.AuthController.ResetPassword)
 		authRouter.Use(in.AuthHolder.RequireAuth())
@@ -74,10 +75,11 @@ func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	}
 }
 func registerUsersRouters(root *gin.RouterGroup, in IRouter) {
-
 	userRouter := root.Group("/user")
 	{
 		userRouter.Use(in.AuthHolder.RequireAuth())
+		userRouter.GET("/me", in.UserController.GetMe)
+		userRouter.PUT("/:id", in.UserController.Update)
 		userRouter.PUT("", in.UserController.UpdateInfo)
 		userRouter.POST("", in.UserController.Create)
 		userRouter.GET("", in.UserController.GetList)
@@ -85,6 +87,7 @@ func registerUsersRouters(root *gin.RouterGroup, in IRouter) {
 		userRouter.GET("/payments", in.UserController.GetPayments)
 		userRouter.GET("/orders", in.UserController.GetOrders)
 		userRouter.PUT("/avatar", in.UserController.ChangeAvatar)
+		userRouter.DELETE("/:id", in.UserController.Delete)
 	}
 }
 

@@ -20,3 +20,9 @@ func (p *Page) SetDefaults() {
 		p.Page = 1
 	}
 }
+
+type GetListUser struct {
+	Page
+	Role string `form:"role"`
+	Name string `form:"name"`
+}

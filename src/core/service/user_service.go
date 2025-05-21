@@ -7,9 +7,10 @@ import (
 	"TTCS/src/infra/upload"
 	"TTCS/src/present/httpui/request"
 	"context"
-	"github.com/google/uuid"
 	"mime/multipart"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type UserService struct {
@@ -71,13 +72,13 @@ func (u *UserService) buildModelUser(req *request.UserInfo, user *domain.User) *
 	return user
 }
 
-func (u *UserService) GetList(ctx context.Context, page request.Page) ([]*domain.User, error) {
+func (u *UserService) GetList(ctx context.Context, page request.GetListUser) ([]*domain.User, int64, error) {
 	_ = "UserService.GetList"
-	users, err := u.userRepo.GetList(ctx, page)
+	users, total, err := u.userRepo.GetList(ctx, page)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return users, nil
+	return users, total, nil
 }
 
 func (u *UserService) GetById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
@@ -119,4 +120,21 @@ func (u *UserService) ChangeAvatar(ctx context.Context, file *multipart.FileHead
 		return nil, err
 	}
 	return user, nil
+}
+
+func (u *UserService) Delete(ctx context.Context, id uuid.UUID) error {
+	caller := "UserService.Delete"
+
+	// First check if user exists
+	user, err := u.userRepo.GetById(ctx, id)
+	if err != nil {
+		return fault.Wrapf(err, "[%v] failed to get user", caller)
+	}
+
+	// Use GORM's soft delete
+	if err := u.userRepo.Delete(ctx, user); err != nil {
+		return fault.Wrapf(err, "[%v] failed to delete user", caller)
+	}
+
+	return nil
 }

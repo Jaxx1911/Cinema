@@ -12,6 +12,7 @@ const (
 	TagNotFound       = "NOT_FOUND"
 	TagInternalServer = "INTERNAL_SERVER" // 500
 	TagDuplicate      = "DUPLICATE"
+	TagForbidden      = "FORBIDDEN"
 )
 
 const (
@@ -77,6 +78,7 @@ func (e *Error) SetKey(key string) *Error {
 var TagMap = map[string]int{
 	TagBadRequest:     400,
 	TagUnAuthorize:    401,
+	TagForbidden:      403,
 	TagNotFound:       404,
 	TagInternalServer: 500,
 }
