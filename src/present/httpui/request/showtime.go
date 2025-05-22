@@ -24,3 +24,19 @@ type GetShowtimesByRoomIdFilter struct {
 	RoomId string `json:"room_id" binding:"required" form:"room_id"`
 	Day    string `json:"day" binding:"required" form:"day"`
 }
+
+type GetListShowtime struct {
+	Page
+	MovieID  string `form:"movie_id"`
+	RoomID   string `form:"room_id"`
+	CinemaID string `form:"cinema_id"`
+	FromDate string `form:"from_date"`
+	ToDate   string `form:"to_date"`
+}
+
+type UpdateShowtime struct {
+	MovieId   uuid.UUID `json:"movie_id"`
+	RoomId    uuid.UUID `json:"room_id"`
+	StartTime string    `json:"start_time"`
+	Price     float64   `json:"price"`
+}

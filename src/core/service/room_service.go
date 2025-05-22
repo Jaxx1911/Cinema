@@ -1,6 +1,7 @@
 package service
 
 import (
+	"TTCS/src/common/fault"
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
 	"context"
@@ -94,4 +95,19 @@ func (r *RoomService) Update(ctx context.Context, id uuid.UUID, req request.Upda
 
 func (r *RoomService) GetRoomById(ctx context.Context, id uuid.UUID) (*domain.Room, error) {
 	return r.roomRepo.GetById(ctx, id)
+}
+
+func (r *RoomService) GetList(ctx context.Context, page request.GetListRoom) ([]*domain.Room, int64, error) {
+	caller := "RoomService.GetList"
+
+	rooms, total, err := r.roomRepo.GetList(ctx, page)
+	if err != nil {
+		return nil, 0, fault.Wrapf(err, "[%v] failed to get rooms", caller)
+	}
+
+	return rooms, total, nil
+}
+
+func (r *RoomService) GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]domain.Room, error) {
+	return r.roomRepo.GetListByCinemaId(ctx, cinemaId)
 }

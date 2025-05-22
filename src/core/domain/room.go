@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"TTCS/src/present/httpui/request"
 	"context"
 	"time"
 
@@ -30,7 +31,8 @@ func (*Room) TableName() string {
 type RoomRepo interface {
 	Create(ctx context.Context, room *Room) (*Room, error)
 	GetById(ctx context.Context, roomID uuid.UUID) (*Room, error)
-	GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]*Room, error)
+	GetList(ctx context.Context, page request.GetListRoom) ([]*Room, int64, error)
+	GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]Room, error)
 	Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error
 	Update(ctx context.Context, room *Room) (*Room, error)
 }

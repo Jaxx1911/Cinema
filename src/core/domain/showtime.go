@@ -1,9 +1,11 @@
 package domain
 
 import (
+	"TTCS/src/present/httpui/request"
 	"context"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Showtime struct {
@@ -33,4 +35,7 @@ type ShowtimeRepo interface {
 	GetListByCinemaFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
 	GetListByRoomFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
 	GetById(ctx context.Context, id uuid.UUID) (*Showtime, error)
+	GetList(ctx context.Context, page request.GetListShowtime) ([]*Showtime, int64, error)
+	Update(ctx context.Context, id uuid.UUID, showtime *Showtime) (*Showtime, error)
+	Delete(ctx context.Context, id uuid.UUID) error
 }

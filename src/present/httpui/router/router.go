@@ -114,6 +114,10 @@ func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
 		showtimeRouter.GET("/cinema", in.ShowtimeController.GetByCinemaId)
 		showtimeRouter.GET("/:id", in.ShowtimeController.GetById)
 		showtimeRouter.GET("/room", in.ShowtimeController.GetByRoomId)
+		//showtimeRouter.Use(in.AuthHolder.RequireAuth())
+		showtimeRouter.GET("/list", in.ShowtimeController.GetList)
+		showtimeRouter.PUT("/:id", in.ShowtimeController.Update)
+		showtimeRouter.DELETE("/:id", in.ShowtimeController.Delete)
 	}
 }
 
@@ -135,6 +139,7 @@ func registerRoomRouter(root *gin.RouterGroup, in IRouter) {
 		roomRouter.POST("", in.RoomController.Create)
 		roomRouter.GET("/:id", in.RoomController.GetRoomById)
 		roomRouter.PUT("/:id", in.RoomController.Update)
+		roomRouter.GET("/cinema/:id", in.RoomController.GetList)
 	}
 }
 

@@ -6,8 +6,9 @@ import (
 	"TTCS/src/present/httpui/request"
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ShowtimeService struct {
@@ -157,4 +158,86 @@ func (s *ShowtimeService) GetById(ctx context.Context, id string) (*domain.Showt
 		return nil, err
 	}
 	return showtime, nil
+}
+
+func (s *ShowtimeService) GetList(ctx context.Context, page request.GetListShowtime) ([]*domain.Showtime, int64, error) {
+	caller := "ShowtimeService.GetList"
+
+	showtimes, total, err := s.ShowtimeRepo.GetList(ctx, page)
+	if err != nil {
+		return nil, 0, fault.Wrapf(err, "[%v] failed to get showtimes", caller)
+	}
+
+	return showtimes, total, nil
+}
+
+func (s *ShowtimeService) Update(ctx context.Context, id string, req request.UpdateShowtime) (*domain.Showtime, error) {
+	caller := "ShowtimeService.Update"
+
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] invalid uuid", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+
+	// Get existing showtime
+	existingShowtime, err := s.ShowtimeRepo.GetById(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate movie and room
+	movie, err := s.MovieRepo.GetById(ctx, req.MovieId)
+	if err != nil {
+		return nil, err
+	}
+	room, err := s.RoomRepo.GetById(ctx, req.RoomId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse and validate start time
+	startTime, err := time.ParseInLocation("02-01-2006 15:04", req.StartTime, time.FixedZone("UTC+7", 7*60*60))
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to parse start time", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+
+	// Calculate end time
+	duration := time.Duration(movie.Duration) * time.Minute
+	endTime := startTime.Add(duration)
+
+	// Check for time conflicts
+	conflictTime, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-30*time.Minute), s.roundToNextHour(endTime))
+	if len(conflictTime) > 0 {
+		// Skip conflict check if it's the same showtime
+		if conflictTime[0].ID != uid {
+			err := errors.New("conflict time")
+			return nil, fault.Wrapf(err, "[%v] conflict time", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+		}
+	}
+
+	// Update showtime
+	existingShowtime.MovieID = movie.ID
+	existingShowtime.RoomID = room.ID
+	existingShowtime.StartTime = startTime
+	existingShowtime.EndTime = endTime
+	existingShowtime.Price = req.Price
+
+	return s.ShowtimeRepo.Update(ctx, uid, existingShowtime)
+}
+
+func (s *ShowtimeService) Delete(ctx context.Context, id string) error {
+	caller := "ShowtimeService.Delete"
+
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return fault.Wrapf(err, "[%v] invalid uuid", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+
+	// Check if showtime exists
+	_, err = s.ShowtimeRepo.GetById(ctx, uid)
+	if err != nil {
+		return err
+	}
+
+	return s.ShowtimeRepo.Delete(ctx, uid)
 }

@@ -5,6 +5,7 @@ import (
 	"TTCS/src/core/service"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -113,4 +114,70 @@ func (s *ShowtimeController) GetById(ctx *gin.Context) {
 		return
 	}
 	s.ServeSuccessResponse(ctx, response.ToShowtimeDetailResponse(showtime))
+}
+
+func (s *ShowtimeController) GetList(ctx *gin.Context) {
+	ctxReq := ctx.Request.Context()
+	caller := "ShowtimeController.GetList"
+
+	var req request.GetListShowtime
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	// Set default values for pagination
+	req.SetDefaults()
+
+	showtimes, total, err := s.ShowtimeService.GetList(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to get showtimes: %v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	s.ServeSuccessResponse(ctx, response.MetaData{
+		Data:       response.ToListShowtimeWithRoom(showtimes),
+		TotalCount: total,
+	})
+}
+
+func (s *ShowtimeController) Update(ctx *gin.Context) {
+	caller := "ShowtimeController.Update"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+
+	var req request.UpdateShowtime
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	showtime, err := s.ShowtimeService.Update(ctxReq, id, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to update showtime %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	s.ServeSuccessResponse(ctx, response.ToShowtimeResponse(*showtime))
+}
+
+func (s *ShowtimeController) Delete(ctx *gin.Context) {
+	caller := "ShowtimeController.Delete"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+
+	err := s.ShowtimeService.Delete(ctxReq, id)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to delete showtime %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	s.ServeSuccessResponse(ctx, gin.H{"message": "Showtime deleted successfully"})
 }

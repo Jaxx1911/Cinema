@@ -30,3 +30,8 @@ type UpdateSeat struct {
 	SeatNumber int       `json:"seat_number"`
 	Type       string    `json:"type"` // Standard, Premium, Couple
 }
+
+type GetListRoom struct {
+	Page
+	CinemaID string `form:"cinema_id"`
+}
