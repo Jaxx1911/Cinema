@@ -3,6 +3,7 @@ package service
 import (
 	"TTCS/src/common/fault"
 	"TTCS/src/core/domain"
+	"TTCS/src/core/dto"
 	"TTCS/src/present/httpui/request"
 	"context"
 	"errors"
@@ -240,4 +241,44 @@ func (s *ShowtimeService) Delete(ctx context.Context, id string) error {
 	}
 
 	return s.ShowtimeRepo.Delete(ctx, uid)
+}
+
+func (s *ShowtimeService) CheckShowtimeAvailability(ctx context.Context, req request.CheckShowtimeAvailability) (*dto.ShowtimeAvailabilityResponse, error) {
+	caller := "ShowtimeService.CheckShowtimeAvailability"
+
+	// Validate movie exists
+	movie, err := s.MovieRepo.GetById(ctx, req.MovieId)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] movie not found", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyMovie)
+	}
+
+	// Validate room exists
+	room, err := s.RoomRepo.GetById(ctx, req.RoomId)
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] room not found", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyRoom)
+	}
+
+	// Parse start time
+	startTime, err := time.ParseInLocation("02-01-2006 15:04", req.StartTime, time.FixedZone("UTC+7", 7*60*60))
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to parse start time", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
+	}
+
+	// Calculate end time based on movie duration
+	duration := time.Duration(movie.Duration) * time.Minute
+	endTime := startTime.Add(duration)
+
+	// Check for conflicts
+	conflictShowtimes, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-30*time.Minute), s.roundToNextHour(endTime))
+	if err != nil {
+		return nil, fault.Wrapf(err, "[%v] failed to check conflicts", caller)
+	}
+
+	// Prepare response
+	response := &dto.ShowtimeAvailabilityResponse{
+		IsAvailable: len(conflictShowtimes) == 0,
+		Conflicts:   conflictShowtimes,
+	}
+
+	return response, nil
 }

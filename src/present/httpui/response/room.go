@@ -2,6 +2,7 @@ package response
 
 import (
 	"TTCS/src/core/domain"
+
 	"github.com/google/uuid"
 )
 
@@ -13,6 +14,7 @@ type Room struct {
 	Type        string    `json:"type"`
 	RowCount    int       `json:"row_count"`
 	ColumnCount int       `json:"column_count"`
+	IsActive    bool      `json:"is_active"`
 }
 
 func ToRoomResponse(room *domain.Room) Room {
@@ -24,6 +26,7 @@ func ToRoomResponse(room *domain.Room) Room {
 		Type:        room.Type,
 		RowCount:    room.RowCount,
 		ColumnCount: room.ColumnCount,
+		IsActive:    room.IsActive,
 	}
 }
 

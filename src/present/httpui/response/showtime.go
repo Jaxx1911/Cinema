@@ -2,8 +2,10 @@ package response
 
 import (
 	"TTCS/src/core/domain"
-	"github.com/google/uuid"
+	"TTCS/src/core/dto"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ShowtimeResponse struct {
@@ -154,4 +156,39 @@ func ToListTicketWithSeat(seats []domain.Ticket) []TicketWithSeat {
 		list = append(list, ToTicketWithSeat(v))
 	}
 	return list
+}
+
+type ShowtimeAvailabilityResponse struct {
+	IsAvailable bool                `json:"is_available"`
+	Conflicts   []ShowtimeWithMovie `json:"conflicts,omitempty"`
+}
+
+type ShowtimeWithMovie struct {
+	Id        string    `json:"id"`
+	MovieId   string    `json:"movie_id"`
+	RoomId    string    `json:"room_id"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Price     float64   `json:"price"`
+	MovieName string    `json:"movie_name"`
+}
+
+func ToShowtimeAvailabilityResponse(resp *dto.ShowtimeAvailabilityResponse) ShowtimeAvailabilityResponse {
+	var conflicts []ShowtimeWithMovie
+	for _, conflict := range resp.Conflicts {
+		conflicts = append(conflicts, ShowtimeWithMovie{
+			Id:        conflict.ID.String(),
+			MovieId:   conflict.MovieID.String(),
+			RoomId:    conflict.RoomID.String(),
+			StartTime: conflict.StartTime,
+			EndTime:   conflict.EndTime,
+			Price:     conflict.Price,
+			MovieName: conflict.Movie.Title,
+		})
+	}
+
+	return ShowtimeAvailabilityResponse{
+		IsAvailable: resp.IsAvailable,
+		Conflicts:   conflicts,
+	}
 }

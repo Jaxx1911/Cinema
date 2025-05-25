@@ -110,6 +110,7 @@ func registerShowtimeRouter(root *gin.RouterGroup, in IRouter) {
 	showtimeRouter := root.Group("/showtime")
 	{
 		showtimeRouter.POST("", in.ShowtimeController.Create)
+		showtimeRouter.POST("/check-availability", in.ShowtimeController.CheckAvailability)
 		showtimeRouter.GET("", in.ShowtimeController.GetByUserFilter)
 		showtimeRouter.GET("/cinema", in.ShowtimeController.GetByCinemaId)
 		showtimeRouter.GET("/:id", in.ShowtimeController.GetById)

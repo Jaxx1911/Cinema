@@ -40,3 +40,9 @@ type UpdateShowtime struct {
 	StartTime string    `json:"start_time"`
 	Price     float64   `json:"price"`
 }
+
+type CheckShowtimeAvailability struct {
+	MovieId   uuid.UUID `json:"movie_id" binding:"required"`
+	RoomId    uuid.UUID `json:"room_id" binding:"required"`
+	StartTime string    `json:"start_time" binding:"required"`
+}

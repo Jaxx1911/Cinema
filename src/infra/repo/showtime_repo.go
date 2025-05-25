@@ -45,7 +45,7 @@ func (s *ShowtimeRepo) GetListByFilter(ctx context.Context, movieId uuid.UUID, c
 
 func (s *ShowtimeRepo) FindConflictByRoomId(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time) ([]domain.Showtime, error) {
 	var conflictingShowtimes []domain.Showtime
-	if err := s.db.WithContext(ctx).Where("room_id = ? AND start_time < ? AND end_time > ?", roomId, endTime, startTime).
+	if err := s.db.WithContext(ctx).Preload("Movie").Where("room_id = ? AND start_time < ? AND end_time > ?", roomId, endTime, startTime).
 		Find(&conflictingShowtimes).Error; err != nil {
 		return nil, s.returnError(ctx, err)
 	}

@@ -181,3 +181,24 @@ func (s *ShowtimeController) Delete(ctx *gin.Context) {
 
 	s.ServeSuccessResponse(ctx, gin.H{"message": "Showtime deleted successfully"})
 }
+
+func (s *ShowtimeController) CheckAvailability(ctx *gin.Context) {
+	caller := "ShowtimeController.CheckAvailability"
+	ctxReq := ctx.Request.Context()
+
+	var req request.CheckShowtimeAvailability
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	availabilityResp, err := s.ShowtimeService.CheckShowtimeAvailability(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to check showtime availability %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	s.ServeSuccessResponse(ctx, response.ToShowtimeAvailabilityResponse(availabilityResp))
+}
