@@ -35,7 +35,7 @@ func (r *RoomService) Create(ctx context.Context, req request.CreateRoomReq) (*d
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range room.Seats {
+	for _, v := range req.Seats {
 		err := r.seatRepo.Create(ctx, &domain.Seat{
 			RoomID:     room.ID,
 			RowNumber:  v.RowNumber,
