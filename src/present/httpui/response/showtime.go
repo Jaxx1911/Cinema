@@ -192,3 +192,96 @@ func ToShowtimeAvailabilityResponse(resp *dto.ShowtimeAvailabilityResponse) Show
 		Conflicts:   conflicts,
 	}
 }
+
+type ShowtimeAvailabilityResult struct {
+	IsAvailable bool                `json:"is_available"`
+	Conflicts   []ShowtimeWithMovie `json:"conflicts,omitempty"`
+	MovieId     string              `json:"movie_id"`
+	RoomId      string              `json:"room_id"`
+	StartTime   string              `json:"start_time"`
+}
+
+type ShowtimesAvailabilityResponse struct {
+	Results []ShowtimeAvailabilityResult `json:"results"`
+}
+
+type CreateShowtimeResult struct {
+	Success   bool              `json:"success"`
+	Showtime  *ShowtimeResponse `json:"showtime,omitempty"`
+	Error     string            `json:"error,omitempty"`
+	MovieId   string            `json:"movie_id"`
+	RoomId    string            `json:"room_id"`
+	StartTime string            `json:"start_time"`
+}
+
+type CreateShowtimesResponse struct {
+	Results []CreateShowtimeResult `json:"results"`
+	Summary struct {
+		Total   int `json:"total"`
+		Success int `json:"success"`
+		Failed  int `json:"failed"`
+	} `json:"summary"`
+}
+
+func ToShowtimesAvailabilityResponse(resp *dto.ShowtimesAvailabilityResponse) ShowtimesAvailabilityResponse {
+	var results []ShowtimeAvailabilityResult
+	for _, result := range resp.Results {
+		var conflicts []ShowtimeWithMovie
+		for _, conflict := range result.Conflicts {
+			conflicts = append(conflicts, ShowtimeWithMovie{
+				Id:        conflict.ID.String(),
+				MovieId:   conflict.MovieID.String(),
+				RoomId:    conflict.RoomID.String(),
+				StartTime: conflict.StartTime,
+				EndTime:   conflict.EndTime,
+				Price:     conflict.Price,
+				MovieName: conflict.Movie.Title,
+			})
+		}
+
+		results = append(results, ShowtimeAvailabilityResult{
+			IsAvailable: result.IsAvailable,
+			Conflicts:   conflicts,
+			MovieId:     result.MovieId,
+			RoomId:      result.RoomId,
+			StartTime:   result.StartTime,
+		})
+	}
+
+	return ShowtimesAvailabilityResponse{
+		Results: results,
+	}
+}
+
+func ToCreateShowtimesResponse(resp *dto.CreateShowtimesResponse) CreateShowtimesResponse {
+	var results []CreateShowtimeResult
+	for _, result := range resp.Results {
+		var showtimeResp *ShowtimeResponse
+		if result.Showtime != nil {
+			resp := ToShowtimeResponse(*result.Showtime)
+			showtimeResp = &resp
+		}
+
+		results = append(results, CreateShowtimeResult{
+			Success:   result.Success,
+			Showtime:  showtimeResp,
+			Error:     result.Error,
+			MovieId:   result.MovieId,
+			RoomId:    result.RoomId,
+			StartTime: result.StartTime,
+		})
+	}
+
+	return CreateShowtimesResponse{
+		Results: results,
+		Summary: struct {
+			Total   int `json:"total"`
+			Success int `json:"success"`
+			Failed  int `json:"failed"`
+		}{
+			Total:   resp.Summary.Total,
+			Success: resp.Summary.Success,
+			Failed:  resp.Summary.Failed,
+		},
+	}
+}

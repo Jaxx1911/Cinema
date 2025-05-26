@@ -35,7 +35,7 @@ func (r *RoomService) Create(ctx context.Context, req request.CreateRoomReq) (*d
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range room.Seats {
+	for _, v := range req.Seats {
 		err := r.seatRepo.Create(ctx, &domain.Seat{
 			RoomID:     room.ID,
 			RowNumber:  v.RowNumber,
@@ -110,4 +110,22 @@ func (r *RoomService) GetList(ctx context.Context, page request.GetListRoom) ([]
 
 func (r *RoomService) GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]domain.Room, error) {
 	return r.roomRepo.GetListByCinemaId(ctx, cinemaId)
+}
+
+func (r *RoomService) Delete(ctx context.Context, id uuid.UUID) error {
+	caller := "RoomService.Delete"
+
+	// Kiểm tra room có tồn tại không
+	_, err := r.roomRepo.GetById(ctx, id)
+	if err != nil {
+		return fault.Wrapf(err, "[%v] room not found", caller).SetTag(fault.TagNotFound).SetKey(fault.KeyRoom)
+	}
+
+	// Xóa room (seats sẽ được xóa tự động do CASCADE)
+	err = r.roomRepo.Delete(ctx, id)
+	if err != nil {
+		return fault.Wrapf(err, "[%v] failed to delete room", caller)
+	}
+
+	return nil
 }

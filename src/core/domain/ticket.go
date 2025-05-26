@@ -23,6 +23,7 @@ type TicketRepo interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*Ticket, error)
 	FindByBatch(ctx context.Context, ids []uuid.UUID) ([]Ticket, error)
 	UpdateBatch(ctx context.Context, tickets []Ticket) ([]Ticket, error)
+	FindByOrderID(ctx context.Context, orderID uuid.UUID) ([]Ticket, error)
 }
 
 func (*Ticket) TableName() string {

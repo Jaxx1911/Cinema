@@ -46,3 +46,11 @@ type CheckShowtimeAvailability struct {
 	RoomId    uuid.UUID `json:"room_id" binding:"required"`
 	StartTime string    `json:"start_time" binding:"required"`
 }
+
+type CheckShowtimesAvailability struct {
+	Showtimes []CheckShowtimeAvailability `json:"showtimes" binding:"required"`
+}
+
+type CreateShowtimes struct {
+	Showtimes []CreateShowtime `json:"showtimes" binding:"required"`
+}

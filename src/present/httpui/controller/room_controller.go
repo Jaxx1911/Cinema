@@ -92,3 +92,25 @@ func (r *RoomController) GetList(ctx *gin.Context) {
 
 	r.ServeSuccessResponse(ctx, response.ToListRoomResponse(rooms))
 }
+
+func (r *RoomController) Delete(ctx *gin.Context) {
+	caller := "RoomController.Delete"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+	roomID, err := uuid.Parse(id)
+	if err != nil {
+		log.Error(ctxReq, "[%v] invalid room ID %+v", caller, err)
+		r.ServeErrResponse(ctx, err)
+		return
+	}
+
+	err = r.roomService.Delete(ctxReq, roomID)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to delete room %+v", caller, err)
+		r.ServeErrResponse(ctx, err)
+		return
+	}
+
+	r.ServeSuccessResponse(ctx, gin.H{"message": "Room deleted successfully"})
+}

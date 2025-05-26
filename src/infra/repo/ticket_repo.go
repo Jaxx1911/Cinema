@@ -10,6 +10,14 @@ type TicketRepo struct {
 	*BaseRepo
 }
 
+func (t TicketRepo) FindByOrderID(ctx context.Context, orderID uuid.UUID) ([]domain.Ticket, error) {
+	var tickets []domain.Ticket
+	if err := t.db.WithContext(ctx).Where("order_id = ?", orderID).Find(&tickets).Error; err != nil {
+		return nil, t.returnError(ctx, err)
+	}
+	return tickets, nil
+}
+
 func (t TicketRepo) Create(ctx context.Context, ticket []*domain.Ticket) ([]*domain.Ticket, error) {
 	if err := t.db.WithContext(ctx).Create(ticket).Error; err != nil {
 		return nil, t.returnError(ctx, err)

@@ -78,6 +78,13 @@ func (r *RoomRepo) GetList(ctx context.Context, page request.GetListRoom) ([]*do
 	return rooms, total, nil
 }
 
+func (r RoomRepo) Delete(ctx context.Context, id uuid.UUID) error {
+	if err := r.db.WithContext(ctx).Delete(&domain.Room{}, "id = ?", id).Error; err != nil {
+		return r.returnError(ctx, err)
+	}
+	return nil
+}
+
 func NewRoomRepo(baseRepo *BaseRepo) domain.RoomRepo {
 	return &RoomRepo{BaseRepo: baseRepo}
 }

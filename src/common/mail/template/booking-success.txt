@@ -1,0 +1,30 @@
+Chào {{.UserName}},
+
+Cảm ơn bạn đã đặt vé tại HeraCinema! Đơn hàng của bạn đã được thanh toán thành công.
+
+THÔNG TIN ĐẶT VÉ:
+==================
+Mã đơn hàng: {{.OrderID}}
+Phim: {{.MovieTitle}}
+Rạp: {{.CinemaName}}
+Phòng: {{.RoomName}}
+Ngày chiếu: {{.ShowDate}}
+Giờ chiếu: {{.ShowTime}}
+Ghế: {{.Seats}}
+
+{{if .Combos}}
+COMBO ĐI KÈM:
+=============
+{{range .Combos}}
+- {{.Name}} x{{.Quantity}} = {{.Price}}đ
+{{end}}
+{{end}}
+
+TỔNG TIỀN: {{.TotalAmount}}đ
+
+Vui lòng đến rạp trước giờ chiếu 15 phút để làm thủ tục vào phòng.
+
+Cảm ơn bạn đã sử dụng dịch vụ của HeraCinema!
+
+Trân trọng,
+Đội ngũ HeraCinema 

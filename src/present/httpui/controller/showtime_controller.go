@@ -202,3 +202,45 @@ func (s *ShowtimeController) CheckAvailability(ctx *gin.Context) {
 
 	s.ServeSuccessResponse(ctx, response.ToShowtimeAvailabilityResponse(availabilityResp))
 }
+
+func (s *ShowtimeController) CheckShowtimesAvailability(ctx *gin.Context) {
+	caller := "ShowtimeController.CheckShowtimesAvailability"
+	ctxReq := ctx.Request.Context()
+
+	var req request.CheckShowtimesAvailability
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	result, err := s.ShowtimeService.CheckShowtimesAvailability(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to check showtimes availability %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	s.ServeSuccessResponse(ctx, response.ToShowtimesAvailabilityResponse(result))
+}
+
+func (s *ShowtimeController) CreateShowtimes(ctx *gin.Context) {
+	caller := "ShowtimeController.CreateShowtimes"
+	ctxReq := ctx.Request.Context()
+
+	var req request.CreateShowtimes
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid param %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	result, err := s.ShowtimeService.CreateShowtimes(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to create showtimes %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	s.ServeSuccessResponse(ctx, response.ToCreateShowtimesResponse(result))
+}

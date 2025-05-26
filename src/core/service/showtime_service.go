@@ -47,7 +47,7 @@ func (s *ShowtimeService) Create(ctx context.Context, req request.CreateShowtime
 	duration := time.Duration(movie.Duration) * time.Minute
 	endTime := startTime.Add(duration)
 
-	conflictTime, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-30*time.Minute), s.roundToNextHour(endTime))
+	conflictTime, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-15*time.Minute), s.roundToNextHour(endTime))
 	if len(conflictTime) > 0 {
 		err := errors.New("conflict time")
 		return nil, fault.Wrapf(err, "[%v] conflict time", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
@@ -207,7 +207,7 @@ func (s *ShowtimeService) Update(ctx context.Context, id string, req request.Upd
 	endTime := startTime.Add(duration)
 
 	// Check for time conflicts
-	conflictTime, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-30*time.Minute), s.roundToNextHour(endTime))
+	conflictTime, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-15*time.Minute), s.roundToNextHour(endTime))
 	if len(conflictTime) > 0 {
 		// Skip conflict check if it's the same showtime
 		if conflictTime[0].ID != uid {
@@ -246,39 +246,95 @@ func (s *ShowtimeService) Delete(ctx context.Context, id string) error {
 func (s *ShowtimeService) CheckShowtimeAvailability(ctx context.Context, req request.CheckShowtimeAvailability) (*dto.ShowtimeAvailabilityResponse, error) {
 	caller := "ShowtimeService.CheckShowtimeAvailability"
 
-	// Validate movie exists
 	movie, err := s.MovieRepo.GetById(ctx, req.MovieId)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] movie not found", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyMovie)
 	}
 
-	// Validate room exists
 	room, err := s.RoomRepo.GetById(ctx, req.RoomId)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] room not found", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyRoom)
 	}
 
-	// Parse start time
 	startTime, err := time.ParseInLocation("02-01-2006 15:04", req.StartTime, time.FixedZone("UTC+7", 7*60*60))
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to parse start time", caller).SetTag(fault.TagBadRequest).SetKey(fault.KeyShowtime)
 	}
 
-	// Calculate end time based on movie duration
 	duration := time.Duration(movie.Duration) * time.Minute
 	endTime := startTime.Add(duration)
 
-	// Check for conflicts
-	conflictShowtimes, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-30*time.Minute), s.roundToNextHour(endTime))
+	conflictShowtimes, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-15*time.Minute), s.roundToNextHour(endTime))
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to check conflicts", caller)
 	}
 
-	// Prepare response
 	response := &dto.ShowtimeAvailabilityResponse{
 		IsAvailable: len(conflictShowtimes) == 0,
 		Conflicts:   conflictShowtimes,
 	}
 
 	return response, nil
+}
+
+func (s *ShowtimeService) CheckShowtimesAvailability(ctx context.Context, req request.CheckShowtimesAvailability) (*dto.ShowtimesAvailabilityResponse, error) {
+	results := make([]dto.ShowtimeAvailabilityResult, 0, len(req.Showtimes))
+
+	for _, showtime := range req.Showtimes {
+		availability, err := s.CheckShowtimeAvailability(ctx, showtime)
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, dto.ShowtimeAvailabilityResult{
+			ShowtimeAvailabilityResponse: *availability,
+			MovieId:                      showtime.MovieId.String(),
+			RoomId:                       showtime.RoomId.String(),
+			StartTime:                    showtime.StartTime,
+		})
+	}
+
+	return &dto.ShowtimesAvailabilityResponse{
+		Results: results,
+	}, nil
+}
+
+func (s *ShowtimeService) CreateShowtimes(ctx context.Context, req request.CreateShowtimes) (*dto.CreateShowtimesResponse, error) {
+	results := make([]dto.CreateShowtimeResult, 0, len(req.Showtimes))
+	successCount := 0
+	failedCount := 0
+
+	for _, showtimeReq := range req.Showtimes {
+		result := dto.CreateShowtimeResult{
+			MovieId:   showtimeReq.MovieId.String(),
+			RoomId:    showtimeReq.RoomId.String(),
+			StartTime: showtimeReq.StartTime,
+		}
+
+		showtime, err := s.Create(ctx, showtimeReq)
+		if err != nil {
+			result.Success = false
+			result.Error = err.Error()
+			failedCount++
+		} else {
+			result.Success = true
+			result.Showtime = showtime
+			successCount++
+		}
+
+		results = append(results, result)
+	}
+
+	return &dto.CreateShowtimesResponse{
+		Results: results,
+		Summary: struct {
+			Total   int `json:"total"`
+			Success int `json:"success"`
+			Failed  int `json:"failed"`
+		}{
+			Total:   len(req.Showtimes),
+			Success: successCount,
+			Failed:  failedCount,
+		},
+	}, nil
 }
