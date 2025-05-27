@@ -1,7 +1,6 @@
 package log
 
 import (
-	"TTCS/src/common/configs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -35,7 +34,7 @@ func NewLogger() {
 
 	var encoder zapcore.Encoder
 	var level zapcore.Level
-	if configs.GetConfig().Mode == "prod" {
+	if os.Getenv("MODE") == "prod" {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
 		level = zap.InfoLevel
 	} else {

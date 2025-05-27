@@ -1,10 +1,11 @@
 package cache
 
 import (
-	"TTCS/src/common/configs"
 	"TTCS/src/common/log"
 	"context"
 	"github.com/redis/go-redis/v9"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -13,11 +14,11 @@ type RedisCache struct {
 }
 
 func NewRedisClient() *RedisCache {
-	redisConfigs := configs.GetConfig().Redis
+	db, _ := strconv.ParseInt(os.Getenv("REDIS_DB"), 10, 64)
 	client := redis.NewClient(&redis.Options{
-		Addr:     redisConfigs.Address,
-		Password: redisConfigs.Password,
-		DB:       redisConfigs.DB,
+		Addr:     os.Getenv("REDIS_ADDRESS"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       int(db),
 	})
 	err := client.Ping(context.Background()).Err()
 	if err != nil {

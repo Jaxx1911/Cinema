@@ -80,3 +80,17 @@ func (o OrderController) GetOrderDetails(ctx *gin.Context) {
 	o.ServeSuccessResponse(ctx, response.ToOrderDetailResponse(*order))
 	return
 }
+
+func (o OrderController) DeleteOrder(ctx *gin.Context) {
+	caller := "OrderController.DeleteOrder"
+	ctxReq := ctx.Request.Context()
+
+	id := ctx.Param("id")
+	err := o.orderService.Delete(ctxReq, id)
+	if err != nil {
+		log.Error(ctxReq, "[%v] delete order failed, %+v", caller, err)
+		o.ServeErrResponse(ctx, err)
+		return
+	}
+	o.ServeSuccessResponse(ctx, nil)
+}

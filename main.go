@@ -2,11 +2,10 @@ package main
 
 import (
 	"TTCS/src/bootstrap"
-	"TTCS/src/common/configs"
 	"TTCS/src/common/genqr"
 	"TTCS/src/common/log"
 	"context"
-	"flag"
+	"github.com/joho/godotenv"
 	"github.com/shopspring/decimal"
 	"go.uber.org/fx"
 	"os"
@@ -20,14 +19,18 @@ const (
 )
 
 func init() {
-	var pathConfig string
-	flag.StringVar(&pathConfig, "config", "configs/config.yaml", "path to config file")
-	flag.Parse()
-
-	err := configs.InitConfig(pathConfig)
-	if err != nil {
-		panic(err)
+	//var pathConfig string
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Failed to load the env vars: %v", err)
 	}
+
+	//flag.StringVar(&pathConfig, "config", ".env", "path to config file")
+	//flag.Parse()
+
+	//err := configs.InitConfig(pathConfig)
+	//if err != nil {
+	//	panic(err)
+	//}
 	log.NewLogger()
 	genqr.InitQrService()
 	//Json float to float (default float to string)
@@ -35,7 +38,7 @@ func init() {
 }
 
 func main() {
-	log.Debug(context.Background(), "App %s is running", configs.GetConfig().Mode)
+	log.Debug(context.Background(), "App %s is running", os.Getenv("SERVER_NAME"))
 	app := fx.New(
 		bootstrap.BuildCrypto(),
 		bootstrap.BuildMailService(),

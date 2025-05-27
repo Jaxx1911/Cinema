@@ -1,7 +1,6 @@
 package mail
 
 import (
-	"TTCS/src/common/configs"
 	"TTCS/src/common/log"
 	"bytes"
 	"context"
@@ -14,6 +13,7 @@ import (
 	"google.golang.org/api/option"
 	"html/template"
 	"mime"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -26,16 +26,16 @@ func NewGmailService() *GmailService {
 	ctx := context.Background()
 	log.Info(ctx, "📧Connecting to email service... ")
 	config := oauth2.Config{
-		ClientID:     configs.GetConfig().Mail.ClientId,
-		ClientSecret: configs.GetConfig().Mail.ClientSecret,
+		ClientID:     os.Getenv("MAIL_CLIENT_ID"),
+		ClientSecret: os.Getenv("MAIL_CLIENT_SECRET"),
 		Endpoint:     google.Endpoint,
 		RedirectURL:  "http://localhost",
 		Scopes:       []string{"https://www.googleapis.com/auth/gmail.send"},
 	}
 	token := oauth2.Token{
-		AccessToken:  configs.GetConfig().Mail.AccessToken,
+		AccessToken:  os.Getenv("MAIL_ACCESS_TOKEN"),
 		TokenType:    "Bearer",
-		RefreshToken: configs.GetConfig().Mail.RefreshToken,
+		RefreshToken: os.Getenv("MAIL_REFRESH_TOKEN"),
 		Expiry:       time.Now(),
 	}
 	var tokenSource = config.TokenSource(ctx, &token)

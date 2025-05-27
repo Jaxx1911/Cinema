@@ -28,6 +28,7 @@ type OrderRepo interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*Order, error)
 	GetDetailByID(ctx context.Context, id uuid.UUID) (*Order, error)
 	Update(ctx context.Context, order *Order) (*Order, error)
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 func (*Order) TableName() string {

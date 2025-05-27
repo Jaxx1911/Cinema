@@ -26,7 +26,7 @@ func (d DiscountController) GetDiscountByCode(ctx *gin.Context) {
 	caller := "DiscountController.GetDiscountByCode"
 	ctxReq := ctx.Request.Context()
 
-	code := ctx.Param("code")
+	code := ctx.Query("code")
 	discount, err := d.discountService.GetDiscountByCode(ctxReq, code)
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to get discount %+v", caller, err)

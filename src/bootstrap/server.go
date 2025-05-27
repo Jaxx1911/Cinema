@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"TTCS/src/common/configs"
 	"TTCS/src/common/log"
 	"TTCS/src/common/ws"
 	"TTCS/src/present/httpui/router"
@@ -10,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 	"net/http"
+	"os"
 )
 
 func BuildHTTPServerModule() fx.Option {
@@ -34,7 +34,7 @@ func newWsHub(lc fx.Lifecycle, hub *ws.Hub) {
 
 func newHttpServer(lc fx.Lifecycle, engine *gin.Engine) {
 	server := &http.Server{
-		Addr:    configs.GetConfig().Server.Address,
+		Addr:    os.Getenv("SERVER_ADDRESS"),
 		Handler: engine,
 	}
 	lc.Append(fx.Hook{

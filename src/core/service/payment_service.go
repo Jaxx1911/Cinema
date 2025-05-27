@@ -112,11 +112,9 @@ func (p *PaymentService) HandleCallback(ctx context.Context, callback request.Pa
 		return nil, err
 	}
 
-	// Lấy thông tin chi tiết để gửi email
 	emailData, err := p.prepareEmailData(ctx, order, user)
 	if err != nil {
 		log.Error(ctx, "[%v] failed to prepare email data %+v", caller, err)
-		// Không return error vì payment đã thành công, chỉ log lỗi
 	} else {
 		err = p.mailService.SendEmailOAuth2("Đặt vé thành công", user.Email, emailData, "booking-success.txt")
 		if err != nil {

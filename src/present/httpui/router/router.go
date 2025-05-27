@@ -1,9 +1,9 @@
 package router
 
 import (
-	"TTCS/src/common/configs"
 	"TTCS/src/present/httpui/controller"
 	"TTCS/src/present/httpui/middleware"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -37,7 +37,7 @@ func RegisterHandler(engine *gin.Engine) {
 func RegisterGinRouters(in IRouter) {
 	in.Engine.Use(cors.AllowAll())
 
-	group := in.Engine.Group(configs.GetConfig().Server.Prefix)
+	group := in.Engine.Group(os.Getenv("SERVER_PREFIX"))
 	group.GET("/ping")
 
 	registerRouters(group, in)
@@ -172,6 +172,7 @@ func registerOrderRouter(root *gin.RouterGroup, in IRouter) {
 		orderRouter.POST("", in.OrderController.CreateOrder)
 		orderRouter.GET("/qr/:id", in.OrderController.GetOrderDetailsWithQr)
 		orderRouter.GET("/:id", in.OrderController.GetOrderDetails)
+		orderRouter.DELETE("/:id", in.OrderController.DeleteOrder)
 	}
 }
 

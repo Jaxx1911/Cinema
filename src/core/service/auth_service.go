@@ -1,7 +1,6 @@
 package service
 
 import (
-	"TTCS/src/common/configs"
 	"TTCS/src/common/constant"
 	"TTCS/src/common/crypto"
 	"TTCS/src/common/fault"
@@ -12,6 +11,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -195,12 +196,14 @@ func (s *AuthService) generateToken(ctx context.Context, user *domain.User) (*dt
 		Id:       user.ID.String(),
 		Username: user.Email,
 	}
-
-	accessToken, err := s.jwtProvider.Generate(configs.GetConfig().Jwt.AccessSecret, payload, configs.GetConfig().Jwt.ExpireAccess)
+	exA, _ := strconv.ParseInt(os.Getenv("JWT_EXPIRE_ACCESS"), 10, 64)
+	accessToken, err := s.jwtProvider.Generate(os.Getenv("JWT_ACCESS_SECRET"), payload, exA)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to gen token", caller).SetTag(fault.TagInternalServer).SetKey(fault.KeyAuth)
 	}
-	refreshToken, err := s.jwtProvider.Generate(configs.GetConfig().Jwt.RefreshSecret, payload, configs.GetConfig().Jwt.ExpireRefresh)
+
+	exR, _ := strconv.ParseInt(os.Getenv("JWT_EXPIRE_REFRESH"), 10, 64)
+	refreshToken, err := s.jwtProvider.Generate(os.Getenv("JWT_REFRESH_SECRET"), payload, exR)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to gen token", caller).SetTag(fault.TagInternalServer).SetKey(fault.KeyAuth)
 	}
@@ -228,7 +231,7 @@ func (s *AuthService) verifyOTP(ctx context.Context, otp string, email string) (
 func (s *AuthService) VerifyToken(ctx context.Context, token string) (*domain.User, error) {
 	caller := "AuthUserUseCase.VerifyToken"
 
-	payload, err := s.jwtProvider.Verify(configs.GetConfig().Jwt.AccessSecret, token)
+	payload, err := s.jwtProvider.Verify(os.Getenv("JWT_ACCESS_SECRET"), token)
 	if errors.Is(err, crypto.ErrTokenExpired) {
 		return nil, fault.Wrapf(err, "[%v] token expired", caller).SetTag(fault.TagUnAuthorize).SetKey(fault.KeyAuth)
 
