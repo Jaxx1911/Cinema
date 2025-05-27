@@ -4,6 +4,7 @@ import (
 	"TTCS/src/present/httpui/controller"
 	"TTCS/src/present/httpui/middleware"
 	"TTCS/src/present/httpui/validator"
+
 	"go.uber.org/fx"
 )
 
@@ -23,6 +24,7 @@ func BuildControllers() fx.Option {
 		fx.Provide(controller.NewPaymentController),
 		fx.Provide(controller.NewGenreController),
 		fx.Provide(controller.NewWebSocketController),
+		fx.Provide(controller.NewStatisticController),
 	)
 }
 

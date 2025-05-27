@@ -31,6 +31,7 @@ func (*Showtime) TableName() string {
 type ShowtimeRepo interface {
 	Create(ctx context.Context, showtime *Showtime) (*Showtime, error)
 	FindConflictByRoomId(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time) ([]Showtime, error)
+	FindConflictToUpdate(ctx context.Context, roomId uuid.UUID, startTime, endTime time.Time, id uuid.UUID) ([]Showtime, error)
 	GetListByFilter(ctx context.Context, movieId uuid.UUID, cinemaId uuid.UUID, day time.Time) ([]*Showtime, error)
 	GetListByCinemaFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
 	GetListByRoomFilter(ctx context.Context, id uuid.UUID, day time.Time) ([]*Showtime, error)
@@ -38,4 +39,6 @@ type ShowtimeRepo interface {
 	GetList(ctx context.Context, page request.GetListShowtime) ([]*Showtime, int64, error)
 	Update(ctx context.Context, id uuid.UUID, showtime *Showtime) (*Showtime, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	GetByMovieIDAndDateRange(ctx context.Context, movieID uuid.UUID, startDate, endDate time.Time) ([]Showtime, error)
+	GetByRoomIDAndDateRange(ctx context.Context, roomID uuid.UUID, startDate, endDate time.Time) ([]Showtime, error)
 }

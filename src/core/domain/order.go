@@ -2,8 +2,9 @@ package domain
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Order struct {
@@ -29,6 +30,7 @@ type OrderRepo interface {
 	GetDetailByID(ctx context.Context, id uuid.UUID) (*Order, error)
 	Update(ctx context.Context, order *Order) (*Order, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	GetOrdersByDateRange(ctx context.Context, startDate, endDate time.Time) ([]Order, error)
 }
 
 func (*Order) TableName() string {
@@ -49,6 +51,7 @@ type OrderCombo struct {
 type OrderComboRepository interface {
 	Create(ctx context.Context, orderCombo *OrderCombo) (*OrderCombo, error)
 	GetByOrderID(ctx context.Context, orderID uuid.UUID) ([]OrderCombo, error)
+	GetAll(ctx context.Context) ([]OrderCombo, error)
 }
 
 func (*OrderCombo) TableName() string {

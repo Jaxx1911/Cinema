@@ -28,6 +28,7 @@ type IRouter struct {
 	PaymentController   *controller.PaymentController
 	GenreController     *controller.GenreController
 	WebSocketController *controller.WebSocketController
+	StatisticController *controller.StatisticController
 }
 
 func RegisterHandler(engine *gin.Engine) {
@@ -58,6 +59,7 @@ func registerRouters(r *gin.RouterGroup, in IRouter) {
 	registerPaymentRouter(r, in)
 	registerGenreRouter(r, in)
 	registerRoomRouter(r, in)
+	registerStatisticRouter(r, in)
 }
 func registerAuthRouters(root *gin.RouterGroup, in IRouter) {
 	authRouter := root.Group("/auth")
@@ -213,4 +215,13 @@ func registerWebSocket(root *gin.Engine, in IRouter) {
 		return
 	})
 	websocketGroup.GET("", in.WebSocketController.HandleWebSocket)
+}
+
+func registerStatisticRouter(root *gin.RouterGroup, in IRouter) {
+	statisticRouter := root.Group("/statistic")
+	{
+		statisticRouter.GET("/movie-revenue", in.StatisticController.GetMovieRevenue)
+		statisticRouter.GET("/cinema-revenue", in.StatisticController.GetCinemaRevenue)
+		statisticRouter.GET("/combo", in.StatisticController.GetComboStatistics)
+	}
 }

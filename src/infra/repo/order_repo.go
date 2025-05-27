@@ -3,6 +3,7 @@ package repo
 import (
 	"TTCS/src/core/domain"
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -69,6 +70,14 @@ func (o OrderComboRepo) GetByOrderID(ctx context.Context, orderID uuid.UUID) ([]
 	return order, nil
 }
 
+func (o OrderComboRepo) GetAll(ctx context.Context) ([]domain.OrderCombo, error) {
+	var orderCombos []domain.OrderCombo
+	if err := o.db.WithContext(ctx).Find(&orderCombos).Error; err != nil {
+		return nil, o.returnError(ctx, err)
+	}
+	return orderCombos, nil
+}
+
 func (o OrderRepo) Update(ctx context.Context, order *domain.Order) (*domain.Order, error) {
 	if err := o.db.WithContext(ctx).Save(order).Error; err != nil {
 		return nil, o.returnError(ctx, err)
@@ -113,4 +122,12 @@ func (o OrderRepo) Delete(ctx context.Context, id uuid.UUID) error {
 
 		return nil
 	})
+}
+
+func (o OrderRepo) GetOrdersByDateRange(ctx context.Context, start time.Time, end time.Time) ([]domain.Order, error) {
+	var orders []domain.Order
+	if err := o.db.WithContext(ctx).Where("created_at BETWEEN ? AND ?", start, end).Find(&orders).Error; err != nil {
+		return nil, o.returnError(ctx, err)
+	}
+	return orders, nil
 }

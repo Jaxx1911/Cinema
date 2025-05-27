@@ -83,13 +83,23 @@ func (s *ShowtimeService) Create(ctx context.Context, req request.CreateShowtime
 }
 
 func (s *ShowtimeService) roundToNextHour(t time.Time) time.Time {
-	var roundedTime time.Time
-	if t.Minute() <= 30 {
-		roundedTime = t.Add(time.Hour/2 - time.Duration(t.Minute())*time.Minute)
-	} else {
-		roundedTime = t.Add(time.Hour - time.Duration(t.Minute())*time.Minute)
+	m := t.Minute()
+	sec := t.Second()
+	nano := t.Nanosecond()
+
+	// Reset về đầu phút để tính toán dễ hơn
+	t = t.Add(-time.Duration(m)*time.Minute - time.Duration(sec)*time.Second - time.Duration(nano)*time.Nanosecond)
+
+	switch {
+	case m <= 15:
+		return t.Add(30 * time.Minute)
+	case m <= 30:
+		return t.Add(45 * time.Minute)
+	case m <= 45:
+		return t.Add(1 * time.Hour)
+	default:
+		return t.Add(1*time.Hour + 15*time.Minute)
 	}
-	return roundedTime.Add(30 * time.Minute)
 }
 
 func (s *ShowtimeService) GetByUserFilter(ctx context.Context, filter request.GetShowtimesByUserFilter) ([]*domain.Showtime, error) {
@@ -263,6 +273,18 @@ func (s *ShowtimeService) CheckShowtimeAvailability(ctx context.Context, req req
 
 	duration := time.Duration(movie.Duration) * time.Minute
 	endTime := startTime.Add(duration)
+
+	if req.Id != nil {
+		conflictShowtimes, err := s.ShowtimeRepo.FindConflictToUpdate(ctx, room.ID, startTime.Add(-15*time.Minute), s.roundToNextHour(endTime), *req.Id)
+		if err != nil {
+			return nil, fault.Wrapf(err, "[%v] failed to check conflicts", caller)
+		}
+		response := &dto.ShowtimeAvailabilityResponse{
+			IsAvailable: len(conflictShowtimes) == 0,
+			Conflicts:   conflictShowtimes,
+		}
+		return response, nil
+	}
 
 	conflictShowtimes, err := s.ShowtimeRepo.FindConflictByRoomId(ctx, room.ID, startTime.Add(-15*time.Minute), s.roundToNextHour(endTime))
 	if err != nil {
