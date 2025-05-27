@@ -7,18 +7,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type ShowtimeRepo struct {
 	*BaseRepo
-	db *gorm.DB
 }
 
-func NewShowtimeRepo(baseRepo *BaseRepo, db *gorm.DB) domain.ShowtimeRepo {
+func NewShowtimeRepo(baseRepo *BaseRepo) domain.ShowtimeRepo {
 	return &ShowtimeRepo{
 		BaseRepo: baseRepo,
-		db:       db,
 	}
 }
 

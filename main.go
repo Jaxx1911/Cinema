@@ -40,6 +40,7 @@ func main() {
 		bootstrap.BuildCrypto(),
 		bootstrap.BuildMailService(),
 		bootstrap.BuildDatabasesModule(),
+		bootstrap.BuildProvider(),
 		bootstrap.BuildHTTPServerModule(),
 		bootstrap.BuildServices(),
 		bootstrap.BuildValidators(),

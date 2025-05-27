@@ -2,6 +2,7 @@ package service
 
 import (
 	"TTCS/src/common/fault"
+	"TTCS/src/common/transaction"
 	"TTCS/src/core/domain"
 	"TTCS/src/core/dto"
 	"TTCS/src/present/httpui/request"
@@ -17,14 +18,16 @@ type ShowtimeService struct {
 	MovieRepo    domain.MovieRepo
 	RoomRepo     domain.RoomRepo
 	TicketRepo   domain.TicketRepo
+	Transaction  *transaction.Provider
 }
 
-func NewShowtimeService(showtimeRepo domain.ShowtimeRepo, movieRepo domain.MovieRepo, roomRepo domain.RoomRepo, ticketRepo domain.TicketRepo) *ShowtimeService {
+func NewShowtimeService(showtimeRepo domain.ShowtimeRepo, movieRepo domain.MovieRepo, roomRepo domain.RoomRepo, ticketRepo domain.TicketRepo, transaction *transaction.Provider) *ShowtimeService {
 	return &ShowtimeService{
 		ShowtimeRepo: showtimeRepo,
 		MovieRepo:    movieRepo,
 		RoomRepo:     roomRepo,
 		TicketRepo:   ticketRepo,
+		Transaction:  transaction,
 	}
 }
 
