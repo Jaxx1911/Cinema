@@ -252,40 +252,47 @@ func (s *StatisticService) GetCinemaRevenue(ctx context.Context, req request.Sta
 	}, nil
 }
 
-func (s *StatisticService) GetComboStatistics(ctx context.Context) (*response.ComboStatisticResponse, error) {
+func (s *StatisticService) GetComboStatistics(ctx context.Context, req request.StatisticDateRange) (*response.ComboStatisticResponse, error) {
 	caller := "StatisticService.GetComboStatistics"
 
-	// Lấy tất cả order combos
-	orderCombos, err := s.orderComboRepo.GetAll(ctx)
+	// Lấy tất cả orders trong khoảng thời gian
+	orders, err := s.orderRepo.GetOrdersByDateRange(ctx, req.StartDate, req.EndDate)
 	if err != nil {
-		return nil, fault.Wrapf(err, "[%v] failed to get order combos", caller)
+		return nil, fault.Wrapf(err, "[%v] failed to get orders", caller)
 	}
 
 	comboStats := make(map[uuid.UUID]*comboStatData)
 	var totalRevenue float64
 	var totalQuantitySold int
 
-	for _, orderCombo := range orderCombos {
-		// Kiểm tra order có thành công không
-		order, err := s.orderRepo.GetByID(ctx, orderCombo.OrderID)
-		if err != nil || order.Status != "success" {
+	for _, order := range orders {
+		// Chỉ xử lý orders thành công
+		if order.Status != "success" {
 			continue
 		}
 
-		if _, exists := comboStats[orderCombo.ComboID]; !exists {
-			comboStats[orderCombo.ComboID] = &comboStatData{
-				ComboID:      orderCombo.ComboID,
-				QuantitySold: 0,
-				TotalRevenue: 0,
-			}
+		// Lấy order combos của order này
+		orderCombos, err := s.orderComboRepo.GetByOrderID(ctx, order.ID)
+		if err != nil {
+			continue
 		}
 
-		stat := comboStats[orderCombo.ComboID]
-		stat.QuantitySold += orderCombo.Quantity
-		stat.TotalRevenue += orderCombo.TotalPrice
+		for _, orderCombo := range orderCombos {
+			if _, exists := comboStats[orderCombo.ComboID]; !exists {
+				comboStats[orderCombo.ComboID] = &comboStatData{
+					ComboID:      orderCombo.ComboID,
+					QuantitySold: 0,
+					TotalRevenue: 0,
+				}
+			}
 
-		totalQuantitySold += orderCombo.Quantity
-		totalRevenue += orderCombo.TotalPrice
+			stat := comboStats[orderCombo.ComboID]
+			stat.QuantitySold += orderCombo.Quantity
+			stat.TotalRevenue += orderCombo.TotalPrice
+
+			totalQuantitySold += orderCombo.Quantity
+			totalRevenue += orderCombo.TotalPrice
+		}
 	}
 
 	// Chuyển đổi sang response format
@@ -296,11 +303,20 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context) (*response.Co
 			continue
 		}
 
+		// Tính phần trăm của tổng doanh thu
+		percentageOfTotal := float64(0)
+		if totalRevenue > 0 {
+			percentageOfTotal = (stat.TotalRevenue / totalRevenue) * 100
+		}
+
 		comboItems = append(comboItems, response.ComboStatisticItem{
-			ComboID:      comboID,
-			ComboName:    combo.Name,
-			QuantitySold: stat.QuantitySold,
-			TotalRevenue: stat.TotalRevenue,
+			ID:                comboID,
+			Name:              combo.Name,
+			Description:       combo.Description,
+			Price:             combo.Price,
+			Quantity:          stat.QuantitySold,
+			Revenue:           stat.TotalRevenue,
+			PercentageOfTotal: percentageOfTotal,
 		})
 	}
 
@@ -310,6 +326,8 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context) (*response.Co
 			TotalRevenue:      totalRevenue,
 			TotalQuantitySold: totalQuantitySold,
 		},
+		StartDate: req.StartDate,
+		EndDate:   req.EndDate,
 	}, nil
 }
 

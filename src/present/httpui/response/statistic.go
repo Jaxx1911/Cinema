@@ -54,10 +54,13 @@ type CinemaRevenueResponse struct {
 
 // Combo Statistics
 type ComboStatisticItem struct {
-	ComboID      uuid.UUID `json:"combo_id"`
-	ComboName    string    `json:"combo_name"`
-	QuantitySold int       `json:"quantity_sold"`
-	TotalRevenue float64   `json:"total_revenue"`
+	ID                uuid.UUID `json:"id"`
+	Name              string    `json:"name"`
+	Description       string    `json:"description"`
+	Price             float64   `json:"price"`
+	Quantity          int       `json:"quantity"`
+	Revenue           float64   `json:"revenue"`
+	PercentageOfTotal float64   `json:"percentage_of_total"`
 }
 
 type ComboStatisticSummary struct {
@@ -66,6 +69,8 @@ type ComboStatisticSummary struct {
 }
 
 type ComboStatisticResponse struct {
-	Combos  []ComboStatisticItem  `json:"combos"`
-	Summary ComboStatisticSummary `json:"summary"`
+	Combos    []ComboStatisticItem  `json:"combos"`
+	Summary   ComboStatisticSummary `json:"summary"`
+	StartDate time.Time             `json:"start_date"`
+	EndDate   time.Time             `json:"end_date"`
 }

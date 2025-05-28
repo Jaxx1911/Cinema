@@ -2,18 +2,30 @@ package response
 
 import (
 	"TTCS/src/core/domain"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Payment struct {
-	ID            uuid.UUID `json:"id"`
-	UserID        uuid.UUID `json:"user_id"`
-	OrderID       uuid.UUID `json:"order_id"`
-	TransactionID string    `json:"transaction_id"`
-	Status        string    `json:"status"`
-	Amount        int64     `json:"amount"`
-	PaymentTime   time.Time `json:"payment_time"`
+	ID            uuid.UUID  `json:"id"`
+	UserID        *uuid.UUID `json:"user_id"`
+	OrderID       *uuid.UUID `json:"order_id"`
+	TransactionID string     `json:"transaction_id"`
+	Status        string     `json:"status"`
+	Amount        float64    `json:"amount"`
+	PaymentTime   time.Time  `json:"payment_time"`
+}
+
+type PaymentDetail struct {
+	Date             time.Time `json:"date"`
+	UserName         string    `json:"user_name"`
+	MovieName        string    `json:"movie_name"`
+	RoomName         string    `json:"room_name"`
+	Tickets          []string  `json:"tickets"`
+	TotalComboAmount float64   `json:"total_combo_amount"`
+	TotalAmount      float64   `json:"total_amount"`
+	Status           string    `json:"status"`
 }
 
 func ToPaymentResponse(payment domain.Payment) Payment {
@@ -34,4 +46,8 @@ func ToPaymentsResponse(payments []domain.Payment) []Payment {
 		paymentsResp = append(paymentsResp, ToPaymentResponse(payment))
 	}
 	return paymentsResp
+}
+
+func ToPaymentDetailsResponse(paymentDetails []PaymentDetail) []PaymentDetail {
+	return paymentDetails
 }

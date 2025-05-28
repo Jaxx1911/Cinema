@@ -8,7 +8,9 @@ import (
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type PaymentController struct {
@@ -44,7 +46,7 @@ func (p *PaymentController) CallBack(ctx *gin.Context) {
 		return
 	}
 
-	_ = p.hub.SendMessageToClient(payment.UserID, ws.Message{
+	_ = p.hub.SendMessageToClient(*payment.UserID, ws.Message{
 		Type: "payment",
 		Data: Response{
 			Key:     "payment",
@@ -76,4 +78,39 @@ func (p *PaymentController) GetListByUserId(ctx *gin.Context) {
 	}
 	p.ServeSuccessResponse(ctx, response.ToPaymentsResponse(payments))
 
+}
+
+func (p *PaymentController) GetPaymentsByCinemaId(ctx *gin.Context) {
+	caller := "PaymentController.GetPaymentsByCinemaId"
+	ctxReq := ctx.Request.Context()
+
+	cinemaId := ctx.Param("id")
+
+	var req request.GetPaymentsByCinemaRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid query parameters %+v", caller, err)
+		p.ServeErrResponse(ctx, err)
+		return
+	}
+
+	paymentDetails, err := p.paymentService.GetPaymentsByCinemaId(ctxReq, uuid.MustParse(cinemaId), req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to get payments by cinema id %+v", caller, err)
+		p.ServeErrResponse(ctx, err)
+		return
+	}
+	p.ServeSuccessResponse(ctx, response.ToPaymentDetailsResponse(paymentDetails))
+}
+
+func (p *PaymentController) AcceptAll(ctx *gin.Context) {
+	caller := "PaymentController.AcceptAll"
+	ctxReq := ctx.Request.Context()
+
+	err := p.paymentService.AcceptAll(ctxReq)
+	if err != nil {
+		log.Error(ctxReq, "[%v] accept all payments failed, %+v", caller, err)
+		p.ServeErrResponse(ctx, err)
+		return
+	}
+	p.ServeSuccessResponse(ctx, nil)
 }

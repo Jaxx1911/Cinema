@@ -5,9 +5,12 @@ import (
 	"TTCS/src/common/mail"
 	"TTCS/src/core/domain"
 	"TTCS/src/present/httpui/request"
+	"TTCS/src/present/httpui/response"
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -60,11 +63,17 @@ func NewPaymentService(
 }
 
 func (p *PaymentService) HandleCallback(ctx context.Context, callback request.PaymentCallback) (*domain.Payment, error) {
-	//log.Info(ctx, "receive callback test %v", callback)
-	//return &domain.Payment{}, nil
 	caller := "PaymentService.HandleCallback"
 	oid, err := uuid.Parse(callback.Payment.Content)
 	if err != nil {
+		_, err = p.paymentRepo.Create(ctx, &domain.Payment{
+			UserID:        nil,
+			OrderID:       nil,
+			TransactionID: callback.Payment.TransactionId,
+			Status:        "failed",
+			Amount:        callback.Payment.Amount,
+			PaymentTime:   time.Now(),
+		})
 		log.Error(ctx, "[%v] invalid content %+v", caller, err)
 		return nil, err
 	}
@@ -72,15 +81,23 @@ func (p *PaymentService) HandleCallback(ctx context.Context, callback request.Pa
 	if err != nil {
 		return nil, err
 	}
-	if int64(order.TotalPrice) != callback.Payment.Amount {
+	if order.TotalPrice != callback.Payment.Amount {
 		err := errors.New("invalid amount")
+		_, err = p.paymentRepo.Create(ctx, &domain.Payment{
+			UserID:        &order.UserID,
+			OrderID:       &order.ID,
+			TransactionID: callback.Payment.TransactionId,
+			Status:        "failed",
+			Amount:        callback.Payment.Amount,
+			PaymentTime:   time.Now(),
+		})
 		log.Error(ctx, "[%v] invalid amount %+v", caller, err)
 		return nil, err
 	}
 
 	payment, err := p.paymentRepo.Create(ctx, &domain.Payment{
-		UserID:        order.UserID,
-		OrderID:       order.ID,
+		UserID:        &order.UserID,
+		OrderID:       &order.ID,
 		TransactionID: callback.Payment.TransactionId,
 		Status:        "success",
 		Amount:        callback.Payment.Amount,
@@ -208,6 +225,116 @@ func (p *PaymentService) GetPaymentsByUserID(ctx context.Context, userID uuid.UU
 		return nil, err
 	}
 	return payments, nil
+}
+
+func (p *PaymentService) GetPaymentsByCinemaId(ctx context.Context, cinemaID uuid.UUID, req request.GetPaymentsByCinemaRequest) ([]response.PaymentDetail, error) {
+	// Set end date to end of day
+	endDate := req.EndDate.Add(24*time.Hour - time.Second)
+
+	payments, err := p.paymentRepo.GetByCinemaIDAndDateRange(ctx, cinemaID, req.StartDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	var paymentDetails []response.PaymentDetail
+	for _, payment := range payments {
+		if payment.OrderID == nil {
+			continue
+		}
+
+		// Lấy order
+		order, err := p.orderRepo.GetByID(ctx, *payment.OrderID)
+		if err != nil {
+			continue
+		}
+
+		// Lấy user
+		user, err := p.userRepo.GetById(ctx, order.UserID)
+		if err != nil {
+			continue
+		}
+
+		// Lấy showtime
+		showtime, err := p.showtimeRepo.GetById(ctx, order.ShowtimeID)
+		if err != nil {
+			continue
+		}
+
+		// Lấy movie
+		movie, err := p.movieRepo.GetById(ctx, showtime.MovieID)
+		if err != nil {
+			continue
+		}
+
+		// Lấy room
+		room, err := p.roomRepo.GetById(ctx, showtime.RoomID)
+		if err != nil {
+			continue
+		}
+
+		// Lấy tickets và tạo danh sách ghế
+		tickets, err := p.ticketRepo.FindByOrderID(ctx, order.ID)
+		if err != nil {
+			continue
+		}
+
+		var seatNames []string
+		for _, ticket := range tickets {
+			seat, err := p.seatRepo.GetById(ctx, ticket.SeatID)
+			if err != nil {
+				continue
+			}
+			seatName := fmt.Sprintf("%s%d", seat.RowNumber, seat.SeatNumber)
+			seatNames = append(seatNames, seatName)
+		}
+
+		// Tính tổng combo amount
+		orderCombos, err := p.orderComboRepo.GetByOrderID(ctx, order.ID)
+		totalComboAmount := float64(0)
+		if err == nil {
+			for _, combo := range orderCombos {
+				totalComboAmount += combo.TotalPrice
+			}
+		}
+
+		paymentDetail := response.PaymentDetail{
+			Date:             payment.PaymentTime,
+			UserName:         user.Name,
+			MovieName:        movie.Title,
+			RoomName:         room.Name,
+			Tickets:          seatNames,
+			TotalComboAmount: totalComboAmount,
+			TotalAmount:      payment.Amount,
+			Status:           payment.Status,
+		}
+
+		paymentDetails = append(paymentDetails, paymentDetail)
+	}
+
+	return paymentDetails, nil
+}
+
+func (p *PaymentService) AcceptAll(ctx context.Context) error {
+	orders, err := p.orderRepo.GetAllPendingOrders(ctx)
+	if err != nil {
+		return err
+	}
+	for _, order := range orders {
+		_, err := p.HandleCallback(ctx, request.PaymentCallback{
+			Payment: request.Payment{
+				TransactionId:   "tp-bank" + strconv.Itoa(rand.Intn(100000000)),
+				Content:         order.ID.String(),
+				Amount:          order.TotalPrice,
+				Date:            time.Now(),
+				Gate:            "tp-bank",
+				AccountReceiver: "10001259387",
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type emailData struct {

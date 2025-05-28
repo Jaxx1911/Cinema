@@ -136,3 +136,11 @@ func (o OrderRepo) GetOrdersByDateRange(ctx context.Context, start time.Time, en
 	}
 	return orders, nil
 }
+
+func (o OrderRepo) GetAllPendingOrders(ctx context.Context) ([]domain.Order, error) {
+	var orders []domain.Order
+	if err := o.db.WithContext(ctx).Where("status = ?", "pending").Find(&orders).Error; err != nil {
+		return nil, o.returnError(ctx, err)
+	}
+	return orders, nil
+}

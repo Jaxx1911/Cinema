@@ -31,6 +31,7 @@ type OrderRepo interface {
 	Update(ctx context.Context, order *Order) (*Order, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetOrdersByDateRange(ctx context.Context, startDate, endDate time.Time) ([]Order, error)
+	GetAllPendingOrders(ctx context.Context) ([]Order, error)
 }
 
 func (*Order) TableName() string {

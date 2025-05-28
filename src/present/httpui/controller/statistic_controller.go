@@ -66,7 +66,14 @@ func (s *StatisticController) GetComboStatistics(ctx *gin.Context) {
 	caller := "StatisticController.GetComboStatistics"
 	ctxReq := ctx.Request.Context()
 
-	result, err := s.statisticService.GetComboStatistics(ctxReq)
+	var req request.StatisticDateRange
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid request %+v", caller, err)
+		s.ServeErrResponse(ctx, err)
+		return
+	}
+
+	result, err := s.statisticService.GetComboStatistics(ctxReq, req)
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to get combo statistics %+v", caller, err)
 		s.ServeErrResponse(ctx, err)
