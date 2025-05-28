@@ -111,7 +111,12 @@ func (o OrderRepo) Delete(ctx context.Context, id uuid.UUID) error {
 		}
 
 		// Set order_id to null for related tickets
-		if err := tx.Model(&domain.Ticket{}).Where("order_id = ?", id).Update("order_id", nil).Update("status", "available").Error; err != nil {
+		if err := tx.Model(&domain.Ticket{}).
+			Where("order_id = ?", id).
+			Updates(map[string]interface{}{
+				"order_id": nil,
+				"status":   "available",
+			}).Error; err != nil {
 			return o.returnError(ctx, err)
 		}
 
