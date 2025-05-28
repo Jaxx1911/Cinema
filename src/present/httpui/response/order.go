@@ -2,6 +2,7 @@ package response
 
 import (
 	"TTCS/src/core/domain"
+	"sort"
 
 	"github.com/google/uuid"
 )
@@ -37,6 +38,9 @@ func ToOrderResponse(order domain.Order) OrderResponse {
 
 func ToOrdersResponse(orders []domain.Order) []OrderResponse {
 	var orderResponses []OrderResponse
+	sort.Slice(orders, func(i, j int) bool {
+		return orders[i].CreatedAt.After(orders[j].CreatedAt)
+	})
 	for _, order := range orders {
 		orderResponses = append(orderResponses, ToOrderResponse(order))
 	}

@@ -106,12 +106,24 @@ func (p *PaymentController) AcceptAll(ctx *gin.Context) {
 	caller := "PaymentController.AcceptAll"
 	ctxReq := ctx.Request.Context()
 
-	err := p.paymentService.AcceptAll(ctxReq)
+	payments, err := p.paymentService.AcceptAll(ctxReq)
 	if err != nil {
 		log.Error(ctxReq, "[%v] accept all payments failed, %+v", caller, err)
 		p.ServeErrResponse(ctx, err)
 		return
 	}
+
+	for _, payment := range payments {
+		_ = p.hub.SendMessageToClient(*payment.UserID, ws.Message{
+			Type: "payment",
+			Data: Response{
+				Key:     "payment",
+				Body:    payment,
+				Message: "success",
+			},
+		})
+	}
+
 	p.ServeSuccessResponse(ctx, nil)
 }
 

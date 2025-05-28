@@ -274,15 +274,16 @@ func (p *PaymentService) GetPaymentsByCinemaId(ctx context.Context, cinemaID uui
 	return paymentDetails, nil
 }
 
-func (p *PaymentService) AcceptAll(ctx context.Context) error {
+func (p *PaymentService) AcceptAll(ctx context.Context) ([]domain.Payment, error) {
 	orders, err := p.orderRepo.GetAllPendingOrders(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var payments []domain.Payment
 	for _, order := range orders {
-		_, err := p.HandleCallback(ctx, request.PaymentCallback{
+		payment, err := p.HandleCallback(ctx, request.PaymentCallback{
 			Payment: request.Payment{
-				TransactionId:   "tp-bank" + strconv.Itoa(rand.Intn(100000000)),
+				TransactionId:   "tbbank" + strconv.Itoa(rand.Intn(100000000000)),
 				Content:         order.ID.String(),
 				Amount:          order.TotalPrice,
 				Date:            time.Now(),
@@ -291,10 +292,11 @@ func (p *PaymentService) AcceptAll(ctx context.Context) error {
 			},
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
+		payments = append(payments, *payment)
 	}
-	return nil
+	return payments, nil
 }
 
 func (p *PaymentService) GetList(ctx context.Context, req request.GetListPaymentRequest) ([]response.PaymentWithCustomerAndDiscount, int64, error) {
