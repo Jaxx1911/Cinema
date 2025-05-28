@@ -7,13 +7,14 @@ import (
 	"TTCS/src/infra/upload"
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"go.uber.org/fx"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"os"
 )
 
 func BuildDatabasesModule() fx.Option {
@@ -88,7 +89,7 @@ func NewMinioClient() *minio.Client {
 
 	minioClient, err := minio.New(os.Getenv("MINIO_ENDPOINT"), &minio.Options{
 		Creds:  credentials.NewStaticV4(os.Getenv("MINIO_ACCESS_KEY"), os.Getenv("MINIO_SECRET_KEY"), ""),
-		Secure: true,
+		Secure: false,
 	})
 	if err != nil {
 		log.Fatal("Failed to create minio client")
