@@ -20,3 +20,9 @@ type GetPaymentsByCinemaRequest struct {
 	StartDate time.Time `form:"start_date" binding:"required" time_format:"2006-01-02T15:04:05Z"`
 	EndDate   time.Time `form:"end_date" binding:"required" time_format:"2006-01-02T15:04:05Z"`
 }
+
+type GetListPaymentRequest struct {
+	Page
+	Status string `form:"status"`  // success, failed, pending
+	SortBy string `form:"sort_by"` // date_desc, date_asc, amount_desc, amount_asc
+}

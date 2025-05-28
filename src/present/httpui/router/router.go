@@ -183,6 +183,7 @@ func registerPaymentRouter(root *gin.RouterGroup, in IRouter) {
 	{
 		paymentRouter.POST("/callback", in.PaymentController.CallBack)
 		paymentRouter.GET("", in.PaymentController.GetListByUserId)
+		paymentRouter.GET("/list", in.PaymentController.GetList)
 		paymentRouter.GET("/cinema/:id", in.PaymentController.GetPaymentsByCinemaId)
 		paymentRouter.POST("/accept-all", in.PaymentController.AcceptAll)
 	}

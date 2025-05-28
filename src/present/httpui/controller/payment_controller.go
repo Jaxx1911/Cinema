@@ -99,7 +99,7 @@ func (p *PaymentController) GetPaymentsByCinemaId(ctx *gin.Context) {
 		p.ServeErrResponse(ctx, err)
 		return
 	}
-	p.ServeSuccessResponse(ctx, response.ToPaymentDetailsResponse(paymentDetails))
+	p.ServeSuccessResponse(ctx, response.ToPaymentCinemaDetailsResponse(paymentDetails))
 }
 
 func (p *PaymentController) AcceptAll(ctx *gin.Context) {
@@ -113,4 +113,28 @@ func (p *PaymentController) AcceptAll(ctx *gin.Context) {
 		return
 	}
 	p.ServeSuccessResponse(ctx, nil)
+}
+
+func (p *PaymentController) GetList(ctx *gin.Context) {
+	caller := "PaymentController.GetList"
+	ctxReq := ctx.Request.Context()
+
+	var req request.GetListPaymentRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		log.Error(ctxReq, "[%v] invalid query parameters %+v", caller, err)
+		p.ServeErrResponse(ctx, err)
+		return
+	}
+
+	payments, total, err := p.paymentService.GetList(ctxReq, req)
+	if err != nil {
+		log.Error(ctxReq, "[%v] failed to get payments list %+v", caller, err)
+		p.ServeErrResponse(ctx, err)
+		return
+	}
+
+	p.ServeSuccessResponse(ctx, response.MetaData{
+		Data:       payments,
+		TotalCount: total,
+	})
 }

@@ -227,7 +227,7 @@ func (p *PaymentService) GetPaymentsByUserID(ctx context.Context, userID uuid.UU
 	return payments, nil
 }
 
-func (p *PaymentService) GetPaymentsByCinemaId(ctx context.Context, cinemaID uuid.UUID, req request.GetPaymentsByCinemaRequest) ([]response.PaymentDetail, error) {
+func (p *PaymentService) GetPaymentsByCinemaId(ctx context.Context, cinemaID uuid.UUID, req request.GetPaymentsByCinemaRequest) ([]response.PaymentCinemaDetail, error) {
 	// Set end date to end of day
 	endDate := req.EndDate.Add(24*time.Hour - time.Second)
 
@@ -236,7 +236,7 @@ func (p *PaymentService) GetPaymentsByCinemaId(ctx context.Context, cinemaID uui
 		return nil, err
 	}
 
-	var paymentDetails []response.PaymentDetail
+	var paymentDetails []response.PaymentCinemaDetail
 	for _, payment := range payments {
 		if payment.OrderID == nil {
 			continue
@@ -248,66 +248,26 @@ func (p *PaymentService) GetPaymentsByCinemaId(ctx context.Context, cinemaID uui
 			continue
 		}
 
-		// Lấy user
-		user, err := p.userRepo.GetById(ctx, order.UserID)
-		if err != nil {
-			continue
-		}
-
-		// Lấy showtime
-		showtime, err := p.showtimeRepo.GetById(ctx, order.ShowtimeID)
-		if err != nil {
-			continue
-		}
-
-		// Lấy movie
-		movie, err := p.movieRepo.GetById(ctx, showtime.MovieID)
-		if err != nil {
-			continue
-		}
-
-		// Lấy room
-		room, err := p.roomRepo.GetById(ctx, showtime.RoomID)
-		if err != nil {
-			continue
-		}
-
-		// Lấy tickets và tạo danh sách ghế
-		tickets, err := p.ticketRepo.FindByOrderID(ctx, order.ID)
-		if err != nil {
-			continue
-		}
-
-		var seatNames []string
-		for _, ticket := range tickets {
-			seat, err := p.seatRepo.GetById(ctx, ticket.SeatID)
-			if err != nil {
-				continue
-			}
-			seatName := fmt.Sprintf("%s%d", seat.RowNumber, seat.SeatNumber)
-			seatNames = append(seatNames, seatName)
-		}
-
 		// Tính tổng combo amount
 		orderCombos, err := p.orderComboRepo.GetByOrderID(ctx, order.ID)
-		totalComboAmount := float64(0)
+		totalComboPrice := float64(0)
 		if err == nil {
 			for _, combo := range orderCombos {
-				totalComboAmount += combo.TotalPrice
+				totalComboPrice += combo.TotalPrice
 			}
 		}
 
-		paymentDetail := response.PaymentDetail{
-			Date:             payment.PaymentTime,
-			UserName:         user.Name,
-			MovieName:        movie.Title,
-			RoomName:         room.Name,
-			Tickets:          seatNames,
-			TotalComboAmount: totalComboAmount,
-			TotalAmount:      payment.Amount,
-			Status:           payment.Status,
+		// Lấy thông tin discount nếu có
+		var discountInfo *response.DiscountInfo
+		if order.DiscountID != nil && payment.Order.Discount != nil {
+			discountInfo = &response.DiscountInfo{
+				ID:         payment.Order.Discount.ID,
+				Code:       payment.Order.Discount.Code,
+				Percentage: payment.Order.Discount.Percentage,
+			}
 		}
 
+		paymentDetail := response.ToPaymentCinemaDetailResponse(payment, *order, totalComboPrice, discountInfo)
 		paymentDetails = append(paymentDetails, paymentDetail)
 	}
 
@@ -335,6 +295,33 @@ func (p *PaymentService) AcceptAll(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (p *PaymentService) GetList(ctx context.Context, req request.GetListPaymentRequest) ([]response.PaymentWithCustomerAndDiscount, int64, error) {
+	// Set default values for pagination
+	req.Page.SetDefaults()
+
+	payments, total, err := p.paymentRepo.GetList(ctx, req)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Tính tổng combo price cho tất cả orders
+	orderCombos := make(map[uuid.UUID]float64)
+	for _, payment := range payments {
+		if payment.OrderID != nil {
+			combos, err := p.orderComboRepo.GetByOrderID(ctx, *payment.OrderID)
+			if err == nil {
+				totalComboPrice := float64(0)
+				for _, combo := range combos {
+					totalComboPrice += combo.TotalPrice
+				}
+				orderCombos[*payment.OrderID] = totalComboPrice
+			}
+		}
+	}
+
+	return response.ToPaymentsWithCustomerAndDiscountResponse(payments, orderCombos), total, nil
 }
 
 type emailData struct {

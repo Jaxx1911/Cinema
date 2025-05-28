@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"TTCS/src/present/httpui/request"
 	"context"
 	"time"
 
@@ -26,6 +27,7 @@ type PaymentRepo interface {
 	GetByUserID(ctx context.Context, userID uuid.UUID) ([]Payment, error)
 	GetByCinemaID(ctx context.Context, cinemaID uuid.UUID) ([]Payment, error)
 	GetByCinemaIDAndDateRange(ctx context.Context, cinemaID uuid.UUID, startDate, endDate time.Time) ([]Payment, error)
+	GetList(ctx context.Context, req request.GetListPaymentRequest) ([]Payment, int64, error)
 }
 
 func (*Payment) TableName() string {
