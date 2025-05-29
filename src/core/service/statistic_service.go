@@ -266,7 +266,6 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context, req request.S
 	var totalQuantitySold int
 
 	for _, order := range orders {
-		// Chỉ xử lý orders thành công
 		if order.Status != "success" {
 			continue
 		}
@@ -303,7 +302,7 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context, req request.S
 			continue
 		}
 
-		// Tính phần trăm của tổng doanh thu
+		// Tính phần trăm tổng doanh thu
 		percentageOfTotal := float64(0)
 		if totalRevenue > 0 {
 			percentageOfTotal = (stat.TotalRevenue / totalRevenue) * 100

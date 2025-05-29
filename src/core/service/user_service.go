@@ -59,7 +59,6 @@ func (u *UserService) Create(ctx context.Context, req *request.UserInfo) (*domai
 		return nil, err
 	}
 
-	// Gửi email thông báo tài khoản được tạo nếu role là customer
 	if req.Role == "customer" {
 		emailData := struct {
 			Name     string
@@ -74,7 +73,6 @@ func (u *UserService) Create(ctx context.Context, req *request.UserInfo) (*domai
 		err = u.mailService.SendEmailOAuth2("Tài khoản được tạo thành công", user.Email, emailData, "account-created.txt")
 		if err != nil {
 			log.Error(ctx, "[%v] failed to send account creation email %+v", caller, err)
-			// Không return error vì tạo user đã thành công, chỉ log lỗi gửi email
 		}
 	}
 
@@ -150,13 +148,11 @@ func (u *UserService) ChangeAvatar(ctx context.Context, file *multipart.FileHead
 func (u *UserService) Delete(ctx context.Context, id uuid.UUID) error {
 	caller := "UserService.Delete"
 
-	// First check if user exists
 	user, err := u.userRepo.GetById(ctx, id)
 	if err != nil {
 		return fault.Wrapf(err, "[%v] failed to get user", caller)
 	}
 
-	// Use GORM's soft delete
 	if err := u.userRepo.Delete(ctx, user); err != nil {
 		return fault.Wrapf(err, "[%v] failed to delete user", caller)
 	}
