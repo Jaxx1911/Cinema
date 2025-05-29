@@ -89,7 +89,7 @@ func NewMinioClient() *minio.Client {
 
 	minioClient, err := minio.New(os.Getenv("MINIO_ENDPOINT"), &minio.Options{
 		Creds:  credentials.NewStaticV4(os.Getenv("MINIO_ACCESS_KEY"), os.Getenv("MINIO_SECRET_KEY"), ""),
-		Secure: false,
+		Secure: true,
 	})
 	if err != nil {
 		log.Fatal("Failed to create minio client")
