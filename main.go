@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/shopspring/decimal"
 	"go.uber.org/fx"
 )
@@ -21,9 +20,9 @@ const (
 
 func init() {
 	//var pathConfig string
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Failed to load the env vars: %v", err)
-	}
+	//if err := godotenv.Load(); err != nil {
+	//	log.Fatal("Failed to load the env vars: %v", err)
+	//}
 
 	//flag.StringVar(&pathConfig, "config", ".env", "path to config file")
 	//flag.Parse()
