@@ -5,9 +5,10 @@ import (
 	"TTCS/src/present/httpui/request"
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type MovieRepo struct {
@@ -94,6 +95,18 @@ func (m MovieRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.Movie, er
 func (m MovieRepo) GetListInDateRange(ctx context.Context, startDate time.Time, endDate time.Time) ([]*domain.Movie, error) {
 	var movies []*domain.Movie
 	if err := m.db.Preload("Genres").Where("status != ? AND release_date <= ?", "off", endDate).Order("title").Find(&movies).Error; err != nil {
+		return nil, m.returnError(ctx, err)
+	}
+	return movies, nil
+}
+
+func (m MovieRepo) GetMoviesByReleaseDateAndStatus(ctx context.Context, releaseDate time.Time, status string) ([]*domain.Movie, error) {
+	var movies []*domain.Movie
+	// Query movies where release_date is today (same date) and status matches
+	startOfDay := time.Date(releaseDate.Year(), releaseDate.Month(), releaseDate.Day(), 0, 0, 0, 0, releaseDate.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	if err := m.db.Preload("Genres").Where("status = ? AND release_date >= ? AND release_date < ?", status, startOfDay, endOfDay).Find(&movies).Error; err != nil {
 		return nil, m.returnError(ctx, err)
 	}
 	return movies, nil

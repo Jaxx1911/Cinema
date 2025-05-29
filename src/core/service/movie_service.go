@@ -6,10 +6,11 @@ import (
 	"TTCS/src/infra/upload"
 	"TTCS/src/present/httpui/request"
 	"context"
-	"github.com/google/uuid"
 	"mime/multipart"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type MovieService struct {
@@ -209,5 +210,32 @@ func (m *MovieService) ReshowMovie(ctx context.Context, id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// UpdateMovieStatusOnReleaseDate updates movie status from "incoming" to "new" for movies with release date today
+func (m *MovieService) UpdateMovieStatusOnReleaseDate(ctx context.Context) error {
+	caller := "MovieService.UpdateMovieStatusOnReleaseDate"
+
+	// Get current date
+	today := time.Now()
+
+	// Get all movies with status "incoming" and release date today
+	movies, err := m.movieRepo.GetMoviesByReleaseDateAndStatus(ctx, today, "incoming")
+	if err != nil {
+		return fault.Wrapf(err, "[%v] failed to get movies with incoming status", caller)
+	}
+
+	// Update status for each movie
+	for _, movie := range movies {
+		movie.Status = "new"
+		_, err := m.movieRepo.Update(ctx, movie)
+		if err != nil {
+			// Log error but continue with other movies
+			fault.Wrapf(err, "[%v] failed to update movie %s status", caller, movie.Title)
+			continue
+		}
+	}
+
 	return nil
 }

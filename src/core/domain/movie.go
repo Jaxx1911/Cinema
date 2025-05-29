@@ -3,8 +3,9 @@ package domain
 import (
 	"TTCS/src/present/httpui/request"
 	"context"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Movie struct {
@@ -51,6 +52,7 @@ type MovieRepo interface {
 	Create(ctx context.Context, movie *Movie) (*Movie, error)
 	Update(ctx context.Context, movie *Movie) (*Movie, error)
 	GetListInDateRange(ctx context.Context, startDate time.Time, endDate time.Time) ([]*Movie, error)
+	GetMoviesByReleaseDateAndStatus(ctx context.Context, releaseDate time.Time, status string) ([]*Movie, error)
 }
 
 type GenreRepo interface {

@@ -5,13 +5,14 @@ import (
 	"TTCS/src/common/genqr"
 	"TTCS/src/common/log"
 	"context"
-	"github.com/joho/godotenv"
-	"github.com/shopspring/decimal"
-	"go.uber.org/fx"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/joho/godotenv"
+	"github.com/shopspring/decimal"
+	"go.uber.org/fx"
 )
 
 const (
@@ -48,6 +49,7 @@ func main() {
 		bootstrap.BuildValidators(),
 		bootstrap.BuildMiddlewares(),
 		bootstrap.BuildControllers(),
+		bootstrap.BuildCronjobModule(),
 	)
 	startContext, cancel := context.WithTimeout(context.Background(), defaultGracefulTimeout)
 	defer cancel()
