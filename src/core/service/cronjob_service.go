@@ -15,8 +15,8 @@ type CronjobService struct {
 
 func NewCronjobService(movieService *MovieService) *CronjobService {
 	// Create cron with timezone (UTC+7 for Vietnam)
-	location, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
-	c := cron.New(cron.WithLocation(location))
+	vietnamTZ := time.FixedZone("Vietnam", 7*60*60) // +7 hours in seconds
+	c := cron.New(cron.WithLocation(vietnamTZ))
 
 	return &CronjobService{
 		movieService: movieService,
