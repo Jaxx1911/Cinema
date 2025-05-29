@@ -4,6 +4,7 @@ import (
 	"TTCS/src/common/log"
 	"TTCS/src/common/mail"
 	"TTCS/src/core/domain"
+	"TTCS/src/infra/cache"
 	"TTCS/src/present/httpui/request"
 	"TTCS/src/present/httpui/response"
 	"context"
@@ -29,6 +30,7 @@ type PaymentService struct {
 	showtimeRepo   domain.ShowtimeRepo
 	comboRepo      domain.ComboRepository
 	orderComboRepo domain.OrderComboRepository
+	cache          *cache.RedisCache
 	mailService    *mail.GmailService
 }
 
@@ -44,6 +46,7 @@ func NewPaymentService(
 	showtimeRepo domain.ShowtimeRepo,
 	comboRepo domain.ComboRepository,
 	orderComboRepo domain.OrderComboRepository,
+	cache *cache.RedisCache,
 	mailService *mail.GmailService,
 ) *PaymentService {
 	return &PaymentService{
@@ -58,12 +61,18 @@ func NewPaymentService(
 		showtimeRepo:   showtimeRepo,
 		comboRepo:      comboRepo,
 		orderComboRepo: orderComboRepo,
+		cache:          cache,
 		mailService:    mailService,
 	}
 }
 
 func (p *PaymentService) HandleCallback(ctx context.Context, callback request.PaymentCallback) (*domain.Payment, error) {
 	caller := "PaymentService.HandleCallback"
+	if p.cache.Exists(callback.Payment.TransactionId) {
+		err := fmt.Errorf("[%v] block duplicate transaction id %v", caller, callback.Payment.TransactionId)
+		return nil, err
+	}
+	_ = p.cache.Set(callback.Payment.TransactionId, true, 60)
 	oid, err := uuid.Parse(callback.Payment.Content)
 	if err != nil {
 		_, err = p.paymentRepo.Create(ctx, &domain.Payment{
@@ -188,7 +197,7 @@ func (p *PaymentService) prepareEmailData(ctx context.Context, order *domain.Ord
 		CinemaName:  cinema.Name,
 		RoomName:    room.Name,
 		ShowDate:    showtime.StartTime.Format("02/01/2006"),
-		ShowTime:    showtime.StartTime.Format("15:04"),
+		ShowTime:    showtime.StartTime.Add(7 * time.Hour).Format("15:04"),
 		Seats:       strings.Join(seatNames, ", "),
 		Combos:      orderCombos,
 		TotalAmount: fmt.Sprintf("%.0f", order.TotalPrice),

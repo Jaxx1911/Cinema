@@ -24,7 +24,7 @@ TỔNG TIỀN: {{.TotalAmount}}đ
 
 Vui lòng đến rạp trước giờ chiếu 15 phút để làm thủ tục vào phòng.
 
-Cảm ơn bạn đã sử dụng dịch vụ của HeraCinema!
+Cảm ơn bạn đã sử dụng dịch vụ của BNC Cinema!
 
 Trân trọng,
-Đội ngũ HeraCinema 
+Đội ngũ BNC Cinema

@@ -36,3 +36,19 @@ func (r *RedisCache) Set(key string, value interface{}, expiration time.Duration
 func (r *RedisCache) Get(key string) (interface{}, error) {
 	return r.c.Get(context.Background(), key).Result()
 }
+
+func (r *RedisCache) Del(key string) error {
+	return r.c.Del(context.Background(), key).Err()
+}
+
+func (r *RedisCache) Expire(key string, expiration time.Duration) error {
+	return r.c.Expire(context.Background(), key, expiration).Err()
+}
+
+func (r *RedisCache) Exists(key string) bool {
+	_, err := r.c.Exists(context.Background(), key).Result()
+	if err != nil {
+		return false
+	}
+	return true
+}
