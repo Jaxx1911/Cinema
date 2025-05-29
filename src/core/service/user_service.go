@@ -3,6 +3,8 @@ package service
 import (
 	"TTCS/src/common/crypto"
 	"TTCS/src/common/fault"
+	"TTCS/src/common/log"
+	"TTCS/src/common/mail"
 	"TTCS/src/core/domain"
 	"TTCS/src/infra/upload"
 	"TTCS/src/present/httpui/request"
@@ -17,13 +19,15 @@ type UserService struct {
 	userRepo     domain.UserRepo
 	hashProvider crypto.HashProvider
 	upload       *upload.UploadService
+	mailService  *mail.GmailService
 }
 
-func NewUserService(userRepo domain.UserRepo, hashProvider crypto.HashProvider, upload *upload.UploadService) *UserService {
+func NewUserService(userRepo domain.UserRepo, hashProvider crypto.HashProvider, upload *upload.UploadService, mailService *mail.GmailService) *UserService {
 	return &UserService{
 		userRepo:     userRepo,
 		hashProvider: hashProvider,
 		upload:       upload,
+		mailService:  mailService,
 	}
 }
 
@@ -44,7 +48,8 @@ func (u *UserService) Create(ctx context.Context, req *request.UserInfo) (*domai
 	caller := "UserService.Create"
 	user := u.buildModelUser(req, &domain.User{})
 
-	hashedPw, err := u.hashProvider.Hash(strings.TrimSuffix(req.Email, "@gmail.com"))
+	password := strings.TrimSuffix(req.Email, "@gmail.com")
+	hashedPw, err := u.hashProvider.Hash(password)
 	if err != nil {
 		return nil, fault.Wrapf(err, "[%v] failed to hash email", caller).SetKey(fault.KeyUser)
 	}
@@ -53,6 +58,26 @@ func (u *UserService) Create(ctx context.Context, req *request.UserInfo) (*domai
 	if err != nil {
 		return nil, err
 	}
+
+	// Gửi email thông báo tài khoản được tạo nếu role là customer
+	if req.Role == "customer" {
+		emailData := struct {
+			Name     string
+			Email    string
+			Password string
+		}{
+			Name:     user.Name,
+			Email:    user.Email,
+			Password: password,
+		}
+
+		err = u.mailService.SendEmailOAuth2("Tài khoản được tạo thành công", user.Email, emailData, "account-created.txt")
+		if err != nil {
+			log.Error(ctx, "[%v] failed to send account creation email %+v", caller, err)
+			// Không return error vì tạo user đã thành công, chỉ log lỗi gửi email
+		}
+	}
+
 	return user, nil
 }
 

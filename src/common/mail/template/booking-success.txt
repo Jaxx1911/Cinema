@@ -1,6 +1,6 @@
 Chào {{.UserName}},
 
-Cảm ơn bạn đã đặt vé tại HeraCinema! Đơn hàng của bạn đã được thanh toán thành công.
+Cảm ơn bạn đã đặt vé tại BNC Cinema! Đơn hàng của bạn đã được thanh toán thành công.
 
 THÔNG TIN ĐẶT VÉ:
 ==================

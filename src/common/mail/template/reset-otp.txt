@@ -1,5 +1,5 @@
 Xin chào {{.Email}},
-Đã có yêu cầu đổi mật khẩu với tài khoản của bạn, đây là mã xác thực của bạn {{.Otp}} để xác thực tài khoản. Mã sẽ hết hạn sau 10 phút.
+Đã có yêu cầu đổi mật khẩu với tài khoản của bạn trong hệ thống BNC Cinema, đây là mã xác thực của bạn {{.Otp}} để xác thực tài khoản. Mã sẽ hết hạn sau 10 phút.
 
 Nếu không phải bạn, vui lòng bỏ qua email này
 Xin cảm ơn.

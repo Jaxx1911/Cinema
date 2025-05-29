@@ -1,0 +1,16 @@
+Chào {{.Name}},
+
+Tài khoản của bạn đã được tạo thành công tại BNC Cinema!
+
+THÔNG TIN TÀI KHOẢN:
+====================
+Tên: {{.Name}}
+Email: {{.Email}}
+Mật khẩu: {{.Password}}
+
+Vui lòng đăng nhập vào hệ thống và đổi mật khẩu để bảo mật tài khoản.
+
+Cảm ơn bạn đã tham gia cộng đồng BNC Cinema!
+
+Trân trọng,
+Đội ngũ BNC Cinema 
