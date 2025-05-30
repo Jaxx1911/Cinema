@@ -66,10 +66,10 @@ func NewPostgresDB(lc fx.Lifecycle) *gorm.DB {
 	//	&domain.User{}, &domain.Order{}, &domain.Combo{}, &domain.OrderCombo{}, &domain.Ticket{},
 	//	&domain.Showtime{}, &domain.Payment{}, &domain.Otp{},
 	//)
-	if err != nil {
-		log.Fatal("Failed to migrate Postgres")
-		return nil
-	}
+	//if err != nil {
+	//	log.Fatal("Failed to migrate Postgres")
+	//	return nil
+	//}
 
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
@@ -89,7 +89,7 @@ func NewMinioClient() *minio.Client {
 
 	minioClient, err := minio.New(os.Getenv("MINIO_ENDPOINT"), &minio.Options{
 		Creds:  credentials.NewStaticV4(os.Getenv("MINIO_ACCESS_KEY"), os.Getenv("MINIO_SECRET_KEY"), ""),
-		Secure: true,
+		Secure: false,
 	})
 	if err != nil {
 		log.Fatal("Failed to create minio client")

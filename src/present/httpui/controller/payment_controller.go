@@ -55,6 +55,7 @@ func (p *PaymentController) CallBack(ctx *gin.Context) {
 		},
 	})
 	log.Info(ctxReq, "[%v] payment success %+v", caller, payment)
+	p.ServeSuccessResponse(ctx, true)
 	return
 }
 

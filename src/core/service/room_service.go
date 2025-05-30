@@ -108,8 +108,12 @@ func (r *RoomService) GetList(ctx context.Context, page request.GetListRoom) ([]
 	return rooms, total, nil
 }
 
-func (r *RoomService) GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]domain.Room, error) {
-	return r.roomRepo.GetListByCinemaId(ctx, cinemaId)
+func (r *RoomService) GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID, status string) ([]domain.Room, error) {
+	if status != "" {
+		return r.roomRepo.GetActiveByCinemaId(ctx, cinemaId)
+	} else {
+		return r.roomRepo.GetListByCinemaId(ctx, cinemaId)
+	}
 }
 
 func (r *RoomService) Delete(ctx context.Context, id uuid.UUID) error {
