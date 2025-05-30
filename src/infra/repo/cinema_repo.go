@@ -33,7 +33,7 @@ func (c *CinemaRepo) GetList(ctx context.Context) ([]*domain.Cinema, error) {
 
 func (c *CinemaRepo) GetListByCity(ctx context.Context, city string) ([]*domain.Cinema, error) {
 	var cinema []*domain.Cinema
-	if err := c.db.WithContext(ctx).Where("address LIKE ?", "%"+city+"%").Find(&cinema).Error; err != nil {
+	if err := c.db.WithContext(ctx).Where("address LIKE ? AND is_active = ?", "%"+city+"%", true).Find(&cinema).Error; err != nil {
 		return nil, c.returnError(ctx, err)
 	}
 	return cinema, nil
