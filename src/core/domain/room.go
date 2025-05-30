@@ -33,6 +33,7 @@ type RoomRepo interface {
 	GetById(ctx context.Context, roomID uuid.UUID) (*Room, error)
 	GetList(ctx context.Context, page request.GetListRoom) ([]*Room, int64, error)
 	GetListByCinemaId(ctx context.Context, cinemaId uuid.UUID) ([]Room, error)
+	GetActiveByCinemaId(ctx context.Context, id uuid.UUID) ([]Room, error)
 	Deactivate(ctx context.Context, id uuid.UUID, isActive bool) error
 	Update(ctx context.Context, room *Room) (*Room, error)
 	Delete(ctx context.Context, id uuid.UUID) error

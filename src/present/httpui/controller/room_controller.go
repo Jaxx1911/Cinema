@@ -83,7 +83,9 @@ func (r *RoomController) GetList(ctx *gin.Context) {
 
 	cinemaId := ctx.Param("id")
 
-	rooms, err := r.roomService.GetListByCinemaId(ctxReq, uuid.MustParse(cinemaId))
+	status := ctx.Query("status")
+
+	rooms, err := r.roomService.GetListByCinemaId(ctxReq, uuid.MustParse(cinemaId), status)
 	if err != nil {
 		log.Error(ctxReq, "[%v] failed to get rooms %+v", caller, err)
 		r.ServeErrResponse(ctx, err)

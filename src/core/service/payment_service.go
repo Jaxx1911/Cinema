@@ -125,8 +125,8 @@ func (p *PaymentService) HandleCallback(ctx context.Context, callback request.Pa
 	if err != nil {
 		return nil, err
 	}
-	for _, ticket := range tickets {
-		ticket.Status = "success"
+	for i := range tickets {
+		tickets[i].Status = "success"
 	}
 	tickets, err = p.ticketRepo.UpdateBatch(ctx, tickets)
 	if err != nil {

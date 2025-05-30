@@ -172,7 +172,7 @@ func (s *AuthService) LoginAdmin(ctx context.Context, req request.LoginRequest) 
 	}
 
 	// Check if user is admin
-	if user.Role != constant.AdminRole {
+	if user.Role != constant.AdminRole && user.Role != constant.StaffRole {
 		err := fmt.Errorf("user is not an admin")
 		return nil, nil, fault.Wrapf(err, "[%v] unauthorized access", caller).SetTag(fault.TagForbidden).SetKey(fault.KeyAuth)
 	}

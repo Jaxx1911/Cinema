@@ -29,6 +29,14 @@ func (r RoomRepo) GetById(ctx context.Context, id uuid.UUID) (*domain.Room, erro
 
 func (r RoomRepo) GetListByCinemaId(ctx context.Context, id uuid.UUID) ([]domain.Room, error) {
 	var rooms []domain.Room
+	if err := r.db.Where("cinema_id = ?", id).Find(&rooms).Error; err != nil {
+		return nil, r.returnError(ctx, err)
+	}
+	return rooms, nil
+}
+
+func (r RoomRepo) GetActiveByCinemaId(ctx context.Context, id uuid.UUID) ([]domain.Room, error) {
+	var rooms []domain.Room
 	if err := r.db.Where("cinema_id = ?", id).Where("is_active = ?", true).Find(&rooms).Error; err != nil {
 		return nil, r.returnError(ctx, err)
 	}
@@ -54,7 +62,7 @@ func (r RoomRepo) Update(ctx context.Context, room *domain.Room) (*domain.Room, 
 	return r.GetById(ctx, room.ID)
 }
 
-func (r *RoomRepo) GetList(ctx context.Context, page request.GetListRoom) ([]*domain.Room, int64, error) {
+func (r RoomRepo) GetList(ctx context.Context, page request.GetListRoom) ([]*domain.Room, int64, error) {
 	var rooms []*domain.Room
 	var total int64
 

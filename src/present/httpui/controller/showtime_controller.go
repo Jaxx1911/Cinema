@@ -138,7 +138,7 @@ func (s *ShowtimeController) GetList(ctx *gin.Context) {
 	}
 
 	s.ServeSuccessResponse(ctx, response.MetaData{
-		Data:       response.ToListShowtimeWithRoom(showtimes),
+		Data:       response.ToListShowtimeWithRoomAndSoldTickets(showtimes),
 		TotalCount: total,
 	})
 }

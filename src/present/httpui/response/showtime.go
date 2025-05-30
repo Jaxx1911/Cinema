@@ -69,6 +69,19 @@ type ShowtimeWithRoom struct {
 	Room Room `json:"room"`
 }
 
+// New response struct for showtime list with sold tickets count
+type ShowtimeWithRoomAndSoldTickets struct {
+	Id          string    `json:"id"`
+	MovieId     string    `json:"movie_id"`
+	RoomId      string    `json:"room_id"`
+	StartTime   time.Time `json:"start_time"`
+	EndTime     time.Time `json:"end_time"`
+	Price       float64   `json:"price"`
+	SoldTickets int       `json:"sold_tickets"`
+
+	Room Room `json:"room"`
+}
+
 type ShowtimeDetail struct {
 	ShowtimeWithRoom
 	Tickets []Ticket `json:"tickets"`
@@ -284,4 +297,34 @@ func ToCreateShowtimesResponse(resp *dto.CreateShowtimesResponse) CreateShowtime
 			Failed:  resp.Summary.Failed,
 		},
 	}
+}
+
+func ToShowtimeWithRoomAndSoldTickets(showtime *domain.Showtime) ShowtimeWithRoomAndSoldTickets {
+	// Count sold tickets (tickets with status "success")
+	soldTickets := 0
+	for _, ticket := range showtime.Tickets {
+		if ticket.Status == "success" {
+			soldTickets++
+		}
+	}
+
+	return ShowtimeWithRoomAndSoldTickets{
+		Id:          showtime.ID.String(),
+		MovieId:     showtime.MovieID.String(),
+		RoomId:      showtime.RoomID.String(),
+		StartTime:   showtime.StartTime,
+		EndTime:     showtime.EndTime,
+		Price:       showtime.Price,
+		SoldTickets: soldTickets,
+
+		Room: ToRoomResponse(&showtime.Room),
+	}
+}
+
+func ToListShowtimeWithRoomAndSoldTickets(showtimes []*domain.Showtime) []ShowtimeWithRoomAndSoldTickets {
+	var list []ShowtimeWithRoomAndSoldTickets
+	for _, v := range showtimes {
+		list = append(list, ToShowtimeWithRoomAndSoldTickets(v))
+	}
+	return list
 }

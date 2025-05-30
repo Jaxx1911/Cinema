@@ -93,6 +93,7 @@ func (r *ShowtimeRepo) GetList(ctx context.Context, page request.GetListShowtime
 	query := r.db.Model(&domain.Showtime{}).
 		Preload("Movie").
 		Preload("Room").
+		Preload("Tickets").
 		Joins("JOIN room ON room.id = showtime.room_id")
 
 	// Apply filters

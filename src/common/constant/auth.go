@@ -4,6 +4,7 @@ const (
 	DefaultUserName = "user"
 	DefaultRole     = "customer"
 	AdminRole       = "admin"
+	StaffRole       = "staff"
 )
 
 const (
