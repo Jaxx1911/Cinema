@@ -68,11 +68,6 @@ func NewPaymentService(
 
 func (p *PaymentService) HandleCallback(ctx context.Context, callback request.PaymentCallback) (*domain.Payment, error) {
 	caller := "PaymentService.HandleCallback"
-	if p.cache.Exists(callback.Payment.TransactionId) {
-		err := fmt.Errorf("[%v] block duplicate transaction id %v", caller, callback.Payment.TransactionId)
-		return nil, err
-	}
-	_ = p.cache.Set(callback.Payment.TransactionId, true, 60)
 	oid, err := uuid.Parse(callback.Payment.Content)
 	if err != nil {
 		_, err = p.paymentRepo.Create(ctx, &domain.Payment{
@@ -89,6 +84,9 @@ func (p *PaymentService) HandleCallback(ctx context.Context, callback request.Pa
 	order, err := p.orderRepo.GetByID(ctx, oid)
 	if err != nil {
 		return nil, err
+	}
+	if order.Status == "success" {
+		return &domain.Payment{}, nil
 	}
 	if order.TotalPrice != callback.Payment.Amount {
 		err := errors.New("invalid amount")
