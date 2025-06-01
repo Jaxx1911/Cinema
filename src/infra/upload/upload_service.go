@@ -41,6 +41,6 @@ func (u *UploadService) UploadFile(ctx context.Context, file *multipart.FileHead
 	if errPut != nil {
 		return "", errPut
 	}
-	fileURL := fmt.Sprintf("http://%s/%s/%s", u.minioClient.EndpointURL().Host, u.bucketName, objectName)
+	fileURL := fmt.Sprintf("https://%s/%s/%s", u.minioClient.EndpointURL().Host, u.bucketName, objectName)
 	return fileURL, nil
 }
