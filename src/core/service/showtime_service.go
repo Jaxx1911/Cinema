@@ -173,7 +173,6 @@ func (s *ShowtimeService) GetById(ctx context.Context, id string) (*domain.Showt
 
 func (s *ShowtimeService) GetList(ctx context.Context, page request.GetListShowtime) ([]*domain.Showtime, int64, error) {
 	caller := "ShowtimeService.GetList"
-
 	showtimes, total, err := s.ShowtimeRepo.GetList(ctx, page)
 	if err != nil {
 		return nil, 0, fault.Wrapf(err, "[%v] failed to get showtimes", caller)

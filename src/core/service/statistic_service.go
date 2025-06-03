@@ -21,6 +21,7 @@ type StatisticService struct {
 	seatRepo       domain.SeatRepo
 	comboRepo      domain.ComboRepository
 	orderComboRepo domain.OrderComboRepository
+	discountRepo   domain.DiscountRepository
 }
 
 func NewStatisticService(
@@ -33,6 +34,7 @@ func NewStatisticService(
 	seatRepo domain.SeatRepo,
 	comboRepo domain.ComboRepository,
 	orderComboRepo domain.OrderComboRepository,
+	discountRepo domain.DiscountRepository,
 ) *StatisticService {
 	return &StatisticService{
 		orderRepo:      orderRepo,
@@ -44,6 +46,7 @@ func NewStatisticService(
 		seatRepo:       seatRepo,
 		comboRepo:      comboRepo,
 		orderComboRepo: orderComboRepo,
+		discountRepo:   discountRepo,
 	}
 }
 
@@ -56,7 +59,7 @@ func (s *StatisticService) GetMovieRevenue(ctx context.Context, req request.Stat
 		return nil, fault.Wrapf(err, "[%v] failed to get orders", caller)
 	}
 
-	movieStats := make(map[uuid.UUID]*movieStatData)
+	movieStats := make(map[uuid.UUID]*domain.MovieStatistic)
 	var totalRevenue float64
 	var totalTicketsSold int
 
@@ -82,31 +85,49 @@ func (s *StatisticService) GetMovieRevenue(ctx context.Context, req request.Stat
 			continue
 		}
 
-		// Tính doanh thu vé (loại trừ combo)
+		// Tính doanh thu combo (xử lý discount nếu có)
 		orderCombos, _ := s.orderComboRepo.GetByOrderID(ctx, order.ID)
 		comboRevenue := float64(0)
 		for _, combo := range orderCombos {
 			comboRevenue += combo.TotalPrice
 		}
-		ticketRevenue := order.TotalPrice - comboRevenue
+
+		var ticketRevenue float64
+		// Nếu có discount, cần tính lại comboRevenue gốc trước khi áp discount
+		if order.DiscountID != nil {
+			// Lấy thông tin discount
+			discount, err := s.discountRepo.GetDiscount(ctx, *order.DiscountID)
+			if err != nil {
+				return nil, fault.Wrapf(err, "[%v] failed to get discount", caller)
+			}
+
+			ticketRevenue = order.TotalPrice - comboRevenue*(1-discount.Percentage/100)
+		} else {
+			ticketRevenue = order.TotalPrice - comboRevenue
+		}
 
 		if _, exists := movieStats[showtime.MovieID]; !exists {
-			movieStats[showtime.MovieID] = &movieStatData{
+			movie, err := s.movieRepo.GetById(ctx, showtime.MovieID)
+			if err != nil {
+				continue
+			}
+
+			movieStats[showtime.MovieID] = &domain.MovieStatistic{
 				MovieID:       showtime.MovieID,
+				MovieTitle:    movie.Title,
 				TicketsSold:   0,
 				TotalRevenue:  0,
+				AveragePrice:  0,
 				ShowtimeCount: 0,
-				ShowtimeIDs:   make(map[uuid.UUID]bool),
+				OccupancyRate: 0,
+				StartDate:     req.StartDate,
+				EndDate:       req.EndDate,
 			}
 		}
 
 		stat := movieStats[showtime.MovieID]
 		stat.TicketsSold += ticketCount
 		stat.TotalRevenue += ticketRevenue
-		if !stat.ShowtimeIDs[showtime.ID] {
-			stat.ShowtimeCount++
-			stat.ShowtimeIDs[showtime.ID] = true
-		}
 
 		totalRevenue += ticketRevenue
 		totalTicketsSold += ticketCount
@@ -115,26 +136,28 @@ func (s *StatisticService) GetMovieRevenue(ctx context.Context, req request.Stat
 	// Chuyển đổi sang response format
 	var movieItems []response.MovieRevenueItem
 	for movieID, stat := range movieStats {
-		movie, err := s.movieRepo.GetById(ctx, movieID)
+		// Tính số suất chiếu thực tế (tất cả suất chiếu trong khoảng thời gian)
+		actualShowtimes, err := s.showtimeRepo.GetByMovieIDAndDateRange(ctx, movieID, req.StartDate, req.EndDate)
 		if err != nil {
 			continue
 		}
+		stat.ShowtimeCount = len(actualShowtimes)
 
-		// Tính tỷ lệ lấp đầy
-		occupancyRate := s.calculateMovieOccupancyRate(ctx, movieID, req.StartDate, req.EndDate, stat.TicketsSold)
+		// Tính tỷ lệ lấp đầy chính xác
+		stat.OccupancyRate = s.calculateMovieOccupancyRate(ctx, movieID, req.StartDate, req.EndDate, stat.TicketsSold)
 
-		averagePrice := float64(0)
+		// Tính giá trung bình
 		if stat.TicketsSold > 0 {
-			averagePrice = stat.TotalRevenue / float64(stat.TicketsSold)
+			stat.AveragePrice = stat.TotalRevenue / float64(stat.TicketsSold)
 		}
 
 		movieItems = append(movieItems, response.MovieRevenueItem{
-			MovieID:       movieID,
-			MovieTitle:    movie.Title,
+			MovieID:       stat.MovieID,
+			MovieTitle:    stat.MovieTitle,
 			TicketsSold:   stat.TicketsSold,
-			AveragePrice:  averagePrice,
+			AveragePrice:  stat.AveragePrice,
 			ShowtimeCount: stat.ShowtimeCount,
-			OccupancyRate: occupancyRate,
+			OccupancyRate: stat.OccupancyRate,
 		})
 	}
 
@@ -157,7 +180,7 @@ func (s *StatisticService) GetCinemaRevenue(ctx context.Context, req request.Sta
 		return nil, fault.Wrapf(err, "[%v] failed to get orders", caller)
 	}
 
-	cinemaStats := make(map[uuid.UUID]*cinemaStatData)
+	cinemaStats := make(map[uuid.UUID]*domain.CinemaStatistic)
 	var totalRevenue, totalTicketRevenue, totalComboRevenue float64
 
 	for _, order := range orders {
@@ -185,33 +208,49 @@ func (s *StatisticService) GetCinemaRevenue(ctx context.Context, req request.Sta
 			continue
 		}
 
-		// Tính doanh thu combo
+		// Tính doanh thu combo (xử lý discount nếu có)
 		orderCombos, _ := s.orderComboRepo.GetByOrderID(ctx, order.ID)
 		comboRevenue := float64(0)
 		for _, combo := range orderCombos {
 			comboRevenue += combo.TotalPrice
 		}
-		ticketRevenue := order.TotalPrice - comboRevenue
+
+		var ticketRevenue float64
+		if order.DiscountID != nil {
+			discount, err := s.discountRepo.GetDiscount(ctx, *order.DiscountID)
+			if err != nil {
+				return nil, fault.Wrapf(err, "[%v] failed to get discount", caller)
+			}
+
+			ticketRevenue = order.TotalPrice - comboRevenue*(1-discount.Percentage/100)
+		} else {
+			ticketRevenue = order.TotalPrice - comboRevenue
+		}
 
 		if _, exists := cinemaStats[room.CinemaID]; !exists {
-			cinemaStats[room.CinemaID] = &cinemaStatData{
+			cinema, err := s.cinemaRepo.FindByID(ctx, room.CinemaID)
+			if err != nil {
+				continue
+			}
+
+			cinemaStats[room.CinemaID] = &domain.CinemaStatistic{
 				CinemaID:      room.CinemaID,
+				CinemaName:    cinema.Name,
 				TicketRevenue: 0,
 				ComboRevenue:  0,
+				TotalRevenue:  0,
 				TicketsSold:   0,
 				ShowtimeCount: 0,
-				ShowtimeIDs:   make(map[uuid.UUID]bool),
+				OccupancyRate: 0,
+				StartDate:     req.StartDate,
+				EndDate:       req.EndDate,
 			}
 		}
 
 		stat := cinemaStats[room.CinemaID]
 		stat.TicketRevenue += ticketRevenue
-		stat.ComboRevenue += comboRevenue
+		stat.ComboRevenue += comboRevenue // combo revenue đã bao gồm discount
 		stat.TicketsSold += ticketCount
-		if !stat.ShowtimeIDs[showtime.ID] {
-			stat.ShowtimeCount++
-			stat.ShowtimeIDs[showtime.ID] = true
-		}
 
 		totalTicketRevenue += ticketRevenue
 		totalComboRevenue += comboRevenue
@@ -221,22 +260,34 @@ func (s *StatisticService) GetCinemaRevenue(ctx context.Context, req request.Sta
 	// Chuyển đổi sang response format
 	var cinemaItems []response.CinemaRevenueItem
 	for cinemaID, stat := range cinemaStats {
-		cinema, err := s.cinemaRepo.FindByID(ctx, cinemaID)
+		// Tính số suất chiếu thực tế của cinema
+		rooms, err := s.roomRepo.GetListByCinemaId(ctx, cinemaID)
 		if err != nil {
 			continue
 		}
 
-		// Tính tỷ lệ lấp đầy
-		occupancyRate := s.calculateCinemaOccupancyRate(ctx, cinemaID, req.StartDate, req.EndDate, stat.TicketsSold)
+		actualShowtimeCount := 0
+		for _, room := range rooms {
+			roomShowtimes, err := s.showtimeRepo.GetByRoomIDAndDateRange(ctx, room.ID, req.StartDate, req.EndDate)
+			if err != nil {
+				continue
+			}
+			actualShowtimeCount += len(roomShowtimes)
+		}
+		stat.ShowtimeCount = actualShowtimeCount
+
+		// Tính tỷ lệ lấp đầy và tổng doanh thu
+		stat.OccupancyRate = s.calculateCinemaOccupancyRate(ctx, cinemaID, req.StartDate, req.EndDate, stat.TicketsSold)
+		stat.TotalRevenue = stat.TicketRevenue + stat.ComboRevenue
 
 		cinemaItems = append(cinemaItems, response.CinemaRevenueItem{
-			CinemaID:      cinemaID,
-			CinemaName:    cinema.Name,
+			CinemaID:      stat.CinemaID,
+			CinemaName:    stat.CinemaName,
 			TicketRevenue: stat.TicketRevenue,
 			ComboRevenue:  stat.ComboRevenue,
 			TicketsSold:   stat.TicketsSold,
 			ShowtimeCount: stat.ShowtimeCount,
-			OccupancyRate: occupancyRate,
+			OccupancyRate: stat.OccupancyRate,
 		})
 	}
 
@@ -261,7 +312,7 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context, req request.S
 		return nil, fault.Wrapf(err, "[%v] failed to get orders", caller)
 	}
 
-	comboStats := make(map[uuid.UUID]*comboStatData)
+	comboStats := make(map[uuid.UUID]*domain.ComboStatistic)
 	var totalRevenue float64
 	var totalQuantitySold int
 
@@ -278,10 +329,21 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context, req request.S
 
 		for _, orderCombo := range orderCombos {
 			if _, exists := comboStats[orderCombo.ComboID]; !exists {
-				comboStats[orderCombo.ComboID] = &comboStatData{
-					ComboID:      orderCombo.ComboID,
-					QuantitySold: 0,
-					TotalRevenue: 0,
+				combo, err := s.comboRepo.FindByID(ctx, orderCombo.ComboID)
+				if err != nil {
+					continue
+				}
+
+				comboStats[orderCombo.ComboID] = &domain.ComboStatistic{
+					ComboID:           orderCombo.ComboID,
+					ComboName:         combo.Name,
+					ComboDescription:  combo.Description,
+					ComboPrice:        combo.Price,
+					QuantitySold:      0,
+					TotalRevenue:      0,
+					PercentageOfTotal: 0,
+					StartDate:         req.StartDate,
+					EndDate:           req.EndDate,
 				}
 			}
 
@@ -296,26 +358,20 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context, req request.S
 
 	// Chuyển đổi sang response format
 	var comboItems []response.ComboStatisticItem
-	for comboID, stat := range comboStats {
-		combo, err := s.comboRepo.FindByID(ctx, comboID)
-		if err != nil {
-			continue
-		}
-
+	for _, stat := range comboStats {
 		// Tính phần trăm tổng doanh thu
-		percentageOfTotal := float64(0)
 		if totalRevenue > 0 {
-			percentageOfTotal = (stat.TotalRevenue / totalRevenue) * 100
+			stat.PercentageOfTotal = (stat.TotalRevenue / totalRevenue) * 100
 		}
 
 		comboItems = append(comboItems, response.ComboStatisticItem{
-			ID:                comboID,
-			Name:              combo.Name,
-			Description:       combo.Description,
-			Price:             combo.Price,
+			ID:                stat.ComboID,
+			Name:              stat.ComboName,
+			Description:       stat.ComboDescription,
+			Price:             stat.ComboPrice,
 			Quantity:          stat.QuantitySold,
 			Revenue:           stat.TotalRevenue,
-			PercentageOfTotal: percentageOfTotal,
+			PercentageOfTotal: stat.PercentageOfTotal,
 		})
 	}
 
@@ -334,7 +390,7 @@ func (s *StatisticService) GetComboStatistics(ctx context.Context, req request.S
 func (s *StatisticService) calculateMovieOccupancyRate(ctx context.Context, movieID uuid.UUID, startDate, endDate time.Time, ticketsSold int) float64 {
 	// Lấy tất cả showtimes của movie trong khoảng thời gian
 	showtimes, err := s.showtimeRepo.GetByMovieIDAndDateRange(ctx, movieID, startDate, endDate)
-	if err != nil {
+	if err != nil || len(showtimes) == 0 {
 		return 0
 	}
 
@@ -351,13 +407,20 @@ func (s *StatisticService) calculateMovieOccupancyRate(ctx context.Context, movi
 		return 0
 	}
 
-	return float64(ticketsSold) / float64(totalCapacity) * 100
+	occupancyRate := float64(ticketsSold) / float64(totalCapacity) * 100
+
+	// Đảm bảo tỷ lệ không vượt quá 100% (có thể do lỗi dữ liệu)
+	if occupancyRate > 100 {
+		occupancyRate = 100
+	}
+
+	return occupancyRate
 }
 
 func (s *StatisticService) calculateCinemaOccupancyRate(ctx context.Context, cinemaID uuid.UUID, startDate, endDate time.Time, ticketsSold int) float64 {
 	// Lấy tất cả rooms của cinema
 	rooms, err := s.roomRepo.GetListByCinemaId(ctx, cinemaID)
-	if err != nil {
+	if err != nil || len(rooms) == 0 {
 		return 0
 	}
 
@@ -375,29 +438,12 @@ func (s *StatisticService) calculateCinemaOccupancyRate(ctx context.Context, cin
 		return 0
 	}
 
-	return float64(ticketsSold) / float64(totalCapacity) * 100
-}
+	occupancyRate := float64(ticketsSold) / float64(totalCapacity) * 100
 
-// Helper structs
-type movieStatData struct {
-	MovieID       uuid.UUID
-	TicketsSold   int
-	TotalRevenue  float64
-	ShowtimeCount int
-	ShowtimeIDs   map[uuid.UUID]bool
-}
+	// Đảm bảo tỷ lệ không vượt quá 100% (có thể do lỗi dữ liệu)
+	if occupancyRate > 100 {
+		occupancyRate = 100
+	}
 
-type cinemaStatData struct {
-	CinemaID      uuid.UUID
-	TicketRevenue float64
-	ComboRevenue  float64
-	TicketsSold   int
-	ShowtimeCount int
-	ShowtimeIDs   map[uuid.UUID]bool
-}
-
-type comboStatData struct {
-	ComboID      uuid.UUID
-	QuantitySold int
-	TotalRevenue float64
+	return occupancyRate
 }
